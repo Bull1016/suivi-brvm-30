@@ -6,7 +6,7 @@
 
 ## 🚀 Fonctionnalités Clés
 
-- 📊 **Suivi en temps réel de l'indice BRVM 30** : Récupération automatique et scraping via Regex ultra-fiable des cours de bourse, variations et volumes depuis Sika Finance.
+- 📊 **Suivi en temps réel de l'indice BRVM 30** : Récupération automatique et scraping via Regex ultra-fiable des cours de bourse et variations depuis Sika Finance.
 - 💰 **Analyseur de Dividendes intelligent** :
   - Calcul dynamique de la régularité des versements sur un cycle glissant de 5 ans (`année actuelle - 1`).
   - Attribution automatique d'un score de régularité (de `0/5` à `5/5`).
@@ -47,6 +47,7 @@ Créez un fichier `.env` à la racine du projet en vous basant sur `.env.example
 PORT=5000
 GEMINI_API_KEY=votre_cle_api_gemini_ici
 BRVM_30_URL=https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf
+# APP_URL=http://localhost:5000  # Optionnel : utilisé par AI Studio pour les déploiements Cloud Run
 ```
 
 ### Étape 3 : Lancer l'application en mode développement
