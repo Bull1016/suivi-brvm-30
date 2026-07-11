@@ -1,0 +1,6 @@
+{
+  "name": "Suivi BRVM 30",
+  "description": "Application complète de suivi des actions du BRVM 30, avec prix en temps réel de Sika Finance, calcul de dividende sur 5 ans et tri interactif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
