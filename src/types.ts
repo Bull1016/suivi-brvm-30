@@ -17,8 +17,8 @@ export interface StockData {
   low: number;
   variation: number;
   dividends: DividendHistory[];
-  streak: number; // consecutive years of dividends paid starting from 2025 backwards
-  latestDividend: number; // dividend for 2025 (currentYear - 1)
+  streak: number; // consecutive years of dividends paid starting from lastYear (currentYear - 1) backwards
+  latestDividend: number; // dividend for lastYear (currentYear - 1)
   lastUpdated: string;
   source: "scraped" | "fallback";
 }

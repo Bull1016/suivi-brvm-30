@@ -529,11 +529,15 @@ const DEFAULT_BRVM_30_STOCKS = [
 // Calculate streak and latest dividend details according to specified rules
 function processStockDividends(stock: any) {
   const dividends: DividendHistory[] = stock.dividends;
-  // We check starting from 2025 and going backwards: 2025, 2024, 2023, 2022, 2021
+  const currentYear = new Date().getFullYear();
+  const lastYear = currentYear - 1;
+  const startYear = lastYear - 4;
+
+  // We check starting from lastYear and going backwards
   const sorted = [...dividends].sort((a, b) => b.year - a.year);
   let consecutiveYears = 0;
   for (const div of sorted) {
-    if (div.year <= 2025 && div.year >= 2021) {
+    if (div.year <= lastYear && div.year >= startYear) {
       if (div.paid) {
         consecutiveYears++;
       } else {
@@ -543,15 +547,13 @@ function processStockDividends(stock: any) {
   }
 
   // Display rules:
-  // "si on est en 2026 et dividende versées en 2025, 2024, 2023, afficher 3/5. Par contre si dividende versées en 2024, 2023 afficher 0/5"
-  // So:
-  // If consecutive years starting from 2025 backwards is >= 3, then streak is consecutiveYears.
+  // If consecutive years starting from lastYear backwards is >= 3, then streak is consecutiveYears.
   // Else, reported streak is 0.
   const streak = consecutiveYears >= 3 ? consecutiveYears : 0;
 
-  // Amount of the last dividend paid (currentYear - 1) = 2025
-  const div2025 = dividends.find(d => d.year === 2025);
-  const latestDividend = div2025 && div2025.paid ? div2025.amount : 0;
+  // Amount of the last dividend paid (currentYear - 1)
+  const lastYearDiv = dividends.find(d => d.year === lastYear);
+  const latestDividend = lastYearDiv && lastYearDiv.paid ? lastYearDiv.amount : 0;
 
   return {
     ...stock,
@@ -749,7 +751,8 @@ async function syncAllDividendsInBackground() {
         const html = await res.text();
         const parsedDividends = parseDividendsFromHtml(html);
         if (parsedDividends.length > 0) {
-          const targetYears = [2025, 2024, 2023, 2022, 2021];
+          const lastYear = new Date().getFullYear() - 1;
+          const targetYears = Array.from({ length: 5 }, (_, i) => lastYear - i);
           const updatedDividends = targetYears.map((year) => {
             const found = parsedDividends.find((d) => d.year === year);
             return found ? { year, amount: found.amount, paid: found.paid } : { year, amount: 0, paid: false };
@@ -864,7 +867,8 @@ app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
     const parsedDividends = parseDividendsFromHtml(html);
 
     if (parsedDividends.length > 0) {
-      const targetYears = [2025, 2024, 2023, 2022, 2021];
+      const lastYear = new Date().getFullYear() - 1;
+      const targetYears = Array.from({ length: 5 }, (_, i) => lastYear - i);
       const updatedDividends = targetYears.map((year) => {
         const found = parsedDividends.find((newD: any) => newD.year === year);
         return found ? { year, amount: found.amount, paid: found.paid } : { year, amount: 0, paid: false };

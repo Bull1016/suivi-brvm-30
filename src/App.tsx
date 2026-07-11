@@ -24,6 +24,8 @@ import { motion, AnimatePresence } from "motion/react";
 import { StockData, BRVMResponse, DividendHistory } from "./types";
 
 export default function App() {
+  const lastYear = new Date().getFullYear() - 1;
+
   // State variables
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [lastSync, setLastSync] = useState<string>("");
@@ -768,13 +770,13 @@ export default function App() {
               <p className="flex items-start space-x-2">
                 <span className="w-1.5 h-1.5 bg-[#141414] rotate-45 mt-1.5 flex-shrink-0" />
                 <span>
-                  <strong className="text-[#141414] font-black">Badge Vert "D" (Score ≥ 3/5) :</strong> Attribué uniquement aux entreprises ayant versé des dividendes de manière ininterrompue depuis au moins 3 ans en partant du dernier exercice clos (2025).
+                  <strong className="text-[#141414] font-black">Badge Vert "D" (Score ≥ 3/5) :</strong> Attribué uniquement aux entreprises ayant versé des dividendes de manière ininterrompue depuis au moins 3 ans en partant du dernier exercice clos ({lastYear}).
                 </span>
               </p>
               <p className="flex items-start space-x-2">
                 <span className="w-1.5 h-1.5 bg-[#141414] rotate-45 mt-1.5 flex-shrink-0" />
                 <span>
-                  <strong className="text-[#141414] font-black">Exemple de score 3/5 :</strong> Si des dividendes sont payés de manière continue en <strong className="text-[#141414] font-black">2025, 2024 et 2023</strong>, l'entreprise se qualifie avec la mention <strong className="text-[#141414] font-black">3/5</strong>.
+                  <strong className="text-[#141414] font-black">Exemple de score 3/5 :</strong> Si des dividendes sont payés de manière continue en <strong className="text-[#141414] font-black">{lastYear}, {lastYear - 1} et {lastYear - 2}</strong>, l'entreprise se qualifie avec la mention <strong className="text-[#141414] font-black">3/5</strong>.
                 </span>
               </p>
             </div>
@@ -782,13 +784,13 @@ export default function App() {
               <p className="flex items-start space-x-2">
                 <span className="w-1.5 h-1.5 bg-amber-600 rotate-45 mt-1.5 flex-shrink-0" />
                 <span>
-                  <strong className="text-[#141414] font-black">Mention "0/5" (Non Éligible) :</strong> Attribuée si le cycle de versement consécutif est inférieur à 3 ans, ou s'il est rompu pour l'année 2025.
+                  <strong className="text-[#141414] font-black">Mention "0/5" (Non Éligible) :</strong> Attribuée si le cycle de versement consécutif est inférieur à 3 ans, ou s'il est rompu pour l'année {lastYear}.
                 </span>
               </p>
               <p className="flex items-start space-x-2">
                 <span className="w-1.5 h-1.5 bg-amber-600 rotate-45 mt-1.5 flex-shrink-0" />
                 <span>
-                  <strong className="text-[#141414] font-black">Exemple de score 0/5 :</strong> Si l'entreprise verse des dividendes en 2024, 2023, mais que le versement pour <strong className="text-[#141414] font-black">2025 est manquant</strong>, le score retombe à <strong className="text-[#141414] font-black">0/5</strong>.
+                  <strong className="text-[#141414] font-black">Exemple de score 0/5 :</strong> Si l'entreprise verse des dividendes en {lastYear - 1}, {lastYear - 2}, mais que le versement pour <strong className="text-[#141414] font-black">{lastYear} est manquant</strong>, le score retombe à <strong className="text-[#141414] font-black">0/5</strong>.
                 </span>
               </p>
             </div>
@@ -888,7 +890,7 @@ export default function App() {
                       {formatPrice(selectedStock.latestDividend)}
                     </span>
                     <span className="text-[9px] text-[#141414]/50 block mt-1.5 uppercase font-semibold">
-                      (Exercice clos 2025)
+                      (Exercice clos {lastYear})
                     </span>
                   </div>
                 </div>
@@ -925,9 +927,9 @@ export default function App() {
                     <p className="text-xs mt-1 leading-relaxed">
                       {selectedStock.streak >= 3 
                         ? `Cette entreprise verse des dividendes de manière régulière depuis ${selectedStock.streak} ans consécutifs.`
-                        : selectedStock.dividends.find(d => d.year === 2025)?.paid === false
-                        ? "Cette entreprise n'est pas éligible car elle n'a pas versé de dividendes en 2025 (année de référence)."
-                        : "Cette entreprise n'est pas éligible car son cycle continu de versement consécutif à partir de 2025 est inférieur à 3 ans."
+                        : selectedStock.dividends.find(d => d.year === lastYear)?.paid === false
+                        ? `Cette entreprise n'est pas éligible car elle n'a pas versé de dividendes en ${lastYear} (année de référence).`
+                        : `Cette entreprise n'est pas éligible car son cycle continu de versement consécutif à partir de ${lastYear} est inférieur à 3 ans.`
                       }
                     </p>
                   </div>
