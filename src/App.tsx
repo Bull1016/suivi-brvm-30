@@ -350,7 +350,7 @@ export default function App() {
               <div className="flex items-center space-x-3 mb-2">
                 <span className="bg-emerald-100 text-[#141414] text-[10px] font-bold uppercase tracking-wider px-3 py-1 border border-[#141414] flex items-center space-x-1 font-mono">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Sika Finance Live</span>
+                  <span>Source : Sika Finance</span>
                 </span>
                 <span className="text-xs text-[#141414]/60 font-mono">2026-07-10 (UTC)</span>
               </div>
