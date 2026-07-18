@@ -5,6 +5,7 @@ import {
   TrendingUp,
   TrendingDown,
   FileText,
+  FileDown,
   ChevronUp,
   ChevronDown,
   ChevronsUpDown,
@@ -49,6 +50,17 @@ export default function App() {
   const [companyDescription, setCompanyDescription] = useState<string | null>(null);
   const [isFetchingDescription, setIsFetchingDescription] = useState<boolean>(false);
 
+  // Bulletins feature states
+  const [activeTab, setActiveTab] = useState<"STOCKS" | "BULLETINS">("STOCKS");
+  const [bulletins, setBulletins] = useState<{ dateStr: string; dateCode: string; url: string }[]>([]);
+  const [isLoadingBulletins, setIsLoadingBulletins] = useState<boolean>(false);
+  const [selectedBulletin, setSelectedBulletin] = useState<{ dateStr: string; dateCode: string; url: string } | null>(null);
+  const [bulletinAnalysis, setBulletinAnalysis] = useState<string | null>(null);
+  const [bulletinSources, setBulletinSources] = useState<{ title: string; uri: string }[]>([]);
+  const [isAnalyzingBulletin, setIsAnalyzingBulletin] = useState<boolean>(false);
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [bulletinLoadingStep, setBulletinLoadingStep] = useState<number>(0);
+
   useEffect(() => {
     if (selectedStock) {
       fetchCompanyDescription(selectedStock.symbol, selectedStock.country);
@@ -73,6 +85,75 @@ export default function App() {
       setCompanyDescription("Erreur réseau lors de la récupération de la description.");
     } finally {
       setIsFetchingDescription(false);
+    }
+  };
+
+  // Bulletins feature effects and handlers
+  useEffect(() => {
+    if (activeTab === "BULLETINS" && bulletins.length === 0) {
+      fetchBulletins();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (selectedBulletin) {
+      setBulletinAnalysis(null);
+      setBulletinSources([]);
+      setAnalysisError(null);
+    }
+  }, [selectedBulletin?.dateCode]);
+
+  const fetchBulletins = async () => {
+    setIsLoadingBulletins(true);
+    try {
+      const res = await fetch("/api/brvm/bulletins");
+      const data = await res.json();
+      if (data.success) {
+        setBulletins(data.bulletins);
+        if (data.bulletins.length > 0 && !selectedBulletin) {
+          setSelectedBulletin(data.bulletins[0]);
+        }
+      } else {
+        showStatus("Impossible de charger les bulletins de la cote.", "error");
+      }
+    } catch (e) {
+      console.error(e);
+      showStatus("Erreur lors de la récupération des bulletins.", "error");
+    } finally {
+      setIsLoadingBulletins(false);
+    }
+  };
+
+  const runBulletinAnalysis = async (bulletin: { dateStr: string; dateCode: string; url: string }) => {
+    if (isAnalyzingBulletin) return;
+    setIsAnalyzingBulletin(true);
+    setBulletinAnalysis(null);
+    setBulletinSources([]);
+    setAnalysisError(null);
+    setBulletinLoadingStep(0);
+
+    // Dynamic professional financial progress messages
+    const stepInterval = setInterval(() => {
+      setBulletinLoadingStep((prev) => (prev < 4 ? prev + 1 : prev));
+    }, 3500);
+
+    try {
+      const res = await fetch(`/api/brvm/analyze-bulletin/${bulletin.dateCode}?url=${encodeURIComponent(bulletin.url)}`);
+      const data = await res.json();
+      clearInterval(stepInterval);
+
+      if (data.success) {
+        setBulletinAnalysis(data.analysis);
+        setBulletinSources(data.sources || []);
+      } else {
+        setAnalysisError(data.message || "Erreur lors de la génération de l'analyse.");
+      }
+    } catch (e) {
+      clearInterval(stepInterval);
+      console.error(e);
+      setAnalysisError("Erreur de communication avec le serveur d'analyse.");
+    } finally {
+      setIsAnalyzingBulletin(false);
     }
   };
 
@@ -402,7 +483,34 @@ export default function App() {
           </div>
         </header>
 
-        {/* Bento Metrics Section */}
+        {/* Navigation Switcher */}
+        <div className="flex border-b-2 border-[#141414] mb-8 font-mono font-bold text-xs uppercase tracking-wider">
+          <button
+            onClick={() => setActiveTab("STOCKS")}
+            className={`px-6 py-3.5 border-t-2 border-l-2 border-r-2 border-[#141414] transition-all duration-200 focus:outline-none ${
+              activeTab === "STOCKS"
+                ? "bg-white text-[#141414] border-b-2 border-b-white translate-y-[2px]"
+                : "bg-[#E4E3E0]/40 text-[#141414]/60 hover:text-[#141414] hover:bg-[#E4E3E0]/70"
+            }`}
+          >
+            📊 Suivi des Cotations
+          </button>
+          <button
+            onClick={() => setActiveTab("BULLETINS")}
+            className={`px-6 py-3.5 border-t-2 border-l-2 border-r-2 border-[#141414] ml-2 transition-all duration-200 focus:outline-none flex items-center space-x-2 relative ${
+              activeTab === "BULLETINS"
+                ? "bg-white text-[#141414] border-b-2 border-b-white translate-y-[2px]"
+                : "bg-[#E4E3E0]/40 text-[#141414]/60 hover:text-[#141414] hover:bg-[#E4E3E0]/70"
+            }`}
+          >
+            <span>📰 Bulletins de la Cote (BOC)</span>
+            <span className="bg-rose-500 text-white font-sans text-[9px] font-bold px-1.5 py-0.5 animate-pulse">NOUVEAU</span>
+          </button>
+        </div>
+
+        {activeTab === "STOCKS" ? (
+          <>
+            {/* Bento Metrics Section */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Card 1: Stocks count */}
           <div className="bg-white border-2 border-[#141414] rounded-none p-6 shadow-[4px_4px_0px_#141414] flex items-center justify-between">
@@ -796,7 +904,259 @@ export default function App() {
             </div>
           </div>
         </section>
+      </>
+    ) : (
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 animate-fade-in">
+        {/* Left Column: list of bulletins (col-span-4) */}
+        <div className="lg:col-span-4 space-y-4">
+          <div className="bg-white border-2 border-[#141414] rounded-none p-5 shadow-[4px_4px_0px_#141414]">
+            <h3 className="text-sm font-black uppercase tracking-wider text-[#141414] mb-3 font-mono flex items-center justify-between">
+              <span>Bulletins Récents (BOC)</span>
+              {isLoadingBulletins && <RefreshCw className="w-3.5 h-3.5 animate-spin text-amber-600" />}
+            </h3>
+            <p className="text-[#141414]/70 text-[11px] font-mono leading-relaxed mb-4">
+              Sélectionnez un bulletin officiel publié par la BRVM pour lancer l'analyse de séance par l'IA.
+            </p>
+
+            <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
+              {isLoadingBulletins && bulletins.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 space-y-3 font-mono border-2 border-dashed border-[#141414]/20 bg-slate-50">
+                  <RefreshCw className="w-6 h-6 animate-spin text-[#141414]/60" />
+                  <span className="text-xs text-[#141414]/60">Scraping du portail brvm.org...</span>
+                </div>
+              ) : bulletins.length === 0 ? (
+                <div className="text-center py-12 text-[#141414]/60 font-mono text-xs border-2 border-dashed border-[#141414]/20 bg-slate-50">
+                  Aucun bulletin trouvé sur la BRVM.
+                </div>
+              ) : (
+                bulletins.map((bulletin) => {
+                  const isSelected = selectedBulletin?.dateCode === bulletin.dateCode;
+                  return (
+                    <div
+                      key={bulletin.dateCode}
+                      onClick={() => setSelectedBulletin(bulletin)}
+                      className={`p-3.5 border-2 cursor-pointer transition-all ${
+                        isSelected
+                          ? "bg-[#141414] text-[#E4E3E0] border-[#141414] shadow-[3px_3px_0px_rgba(0,0,0,0.15)]"
+                          : "bg-white hover:bg-slate-50 text-[#141414] border-[#141414] shadow-[2px_2px_0px_#141414]"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center space-x-1.5 mb-1.5">
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 border ${
+                              isSelected ? "bg-[#E4E3E0]/20 border-[#E4E3E0]/30 text-white" : "bg-slate-100 border-[#141414]/20 text-[#141414]"
+                            } font-mono`}>
+                              PDF
+                            </span>
+                            <span className={`text-[9px] font-mono ${isSelected ? "text-slate-400" : "text-slate-500"}`}>
+                              BOC_{bulletin.dateCode}
+                            </span>
+                          </div>
+                          <h4 className="text-xs font-black tracking-tight leading-tight uppercase font-sans">
+                            {bulletin.dateStr}
+                          </h4>
+                        </div>
+                        <a
+                          href={bulletin.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className={`p-1.5 border hover:opacity-80 rounded-none transition-all ${
+                            isSelected ? "border-[#E4E3E0]/30 hover:bg-[#E4E3E0]/15 text-white" : "border-[#141414]/20 hover:bg-slate-100 text-[#141414]"
+                          }`}
+                          title="Télécharger le PDF d'origine"
+                        >
+                          <FileDown className="w-3.5 h-3.5" />
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <button
+              onClick={fetchBulletins}
+              disabled={isLoadingBulletins}
+              className="w-full mt-4 bg-white hover:bg-slate-50 text-[#141414] text-[10px] font-bold uppercase tracking-wider py-2.5 px-4 border-2 border-[#141414] shadow-[2px_2px_0px_#141414] flex items-center justify-center space-x-1.5 font-mono"
+            >
+              <RefreshCw className={`w-3 h-3 ${isLoadingBulletins ? "animate-spin" : ""}`} />
+              <span>Recharger la liste</span>
+            </button>
+          </div>
+
+          {/* Informational Bento Card about Bulletins */}
+          <div className="bg-[#141414] text-[#E4E3E0] border-2 border-[#141414] p-5 shadow-[4px_4px_0px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center space-x-2 mb-3">
+              <TrendingUp className="w-5 h-5 text-amber-400" />
+              <h4 className="text-xs font-black uppercase tracking-wider font-mono text-white">Pourquoi analyser le BOC ?</h4>
+            </div>
+            <ul className="space-y-3 text-[11px] font-mono leading-relaxed text-[#E4E3E0]/80">
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-400 mt-0.5 font-bold">»</span>
+                <span><strong className="text-white">Indices sectoriels :</strong> Suivez les forces motrices des secteurs (Finance, Services Publics, etc.) plutôt que de simples actions isolées.</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-400 mt-0.5 font-bold">»</span>
+                <span><strong className="text-white">Marché Obligataire :</strong> Obtenez les taux réels et rendements des emprunts d'État souverains.</span>
+              </li>
+              <li className="flex items-start space-x-2">
+                <span className="text-amber-400 mt-0.5 font-bold">»</span>
+                <span><strong className="text-white">Opérations de Blocs :</strong> Repérez les transferts de parts stratégiques par les grands institutionnels.</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Right Column: Bulletin Analysis display (col-span-8) */}
+        <div className="lg:col-span-8">
+          {selectedBulletin ? (
+            <div className="bg-white border-2 border-[#141414] rounded-none p-6 shadow-[4px_4px_0px_#141414] min-h-[550px] flex flex-col justify-between animate-fade-in">
+              <div>
+                {/* Header of analysis card */}
+                <div className="border-b-2 border-[#141414] pb-4 mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <span className="bg-amber-100 text-[#141414] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#141414] font-mono">
+                        Séance du Jour
+                      </span>
+                      <span className="text-[10px] text-[#141414]/60 font-mono">BOC_{selectedBulletin.dateCode}</span>
+                    </div>
+                    <h2 className="text-xl font-black text-[#141414] uppercase tracking-tight font-sans italic">
+                      {selectedBulletin.dateStr}
+                    </h2>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={selectedBulletin.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center space-x-1.5 bg-[#E4E3E0]/30 hover:bg-[#E4E3E0]/50 text-[#141414] text-[10px] font-bold uppercase tracking-wider py-2 px-3 border border-[#141414] font-mono"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-rose-600" />
+                      <span>PDF d'Origine</span>
+                    </a>
+
+                    {!bulletinAnalysis && !isAnalyzingBulletin && (
+                      <button
+                        onClick={() => runBulletinAnalysis(selectedBulletin)}
+                        className="inline-flex items-center space-x-1.5 bg-[#141414] hover:bg-black text-white text-[10px] font-bold uppercase tracking-wider py-2 px-4 border border-[#141414] font-mono shadow-[2px_2px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Lancer l'analyse IA</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Analysis Content */}
+                {isAnalyzingBulletin ? (
+                  <div className="flex flex-col items-center justify-center py-20 px-4 space-y-6">
+                    <div className="relative">
+                      <div className="w-16 h-16 border-4 border-[#141414] border-t-amber-500 rounded-full animate-spin" />
+                      <Sparkles className="w-6 h-6 text-amber-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+                    </div>
+                    <div className="text-center space-y-2 max-w-md">
+                      <h4 className="text-xs font-black uppercase font-mono tracking-wider text-[#141414]">
+                        Analyse en cours avec Gemini
+                      </h4>
+                      <p className="text-[11px] font-mono text-amber-700 font-bold bg-amber-50 border border-amber-200 px-4 py-2 transition-all">
+                        {bulletinLoadingStep === 0 && "🔍 Scraping en cours du Bulletin Officiel de la Cote..."}
+                        {bulletinLoadingStep === 1 && "📈 Analyse des indices BRVM Composite, Prestige et BRVM 30..."}
+                        {bulletinLoadingStep === 2 && "📊 Extraction de la capitalisation globale et volumes d'échanges..."}
+                        {bulletinLoadingStep === 3 && "💸 Identification des détachements de dividendes & émissions d'obligations..."}
+                        {bulletinLoadingStep >= 4 && "⚡ Synthèse du rapport financier global..."}
+                      </p>
+                      <p className="text-[10px] text-[#141414]/50 leading-relaxed font-mono">
+                        Grâce au Google Grounding, l'IA effectue des recherches en temps réel pour corroborer et enrichir les informations officielles du bulletin du {selectedBulletin.dateStr}.
+                      </p>
+                    </div>
+                  </div>
+                ) : analysisError ? (
+                  <div className="bg-rose-50 border-2 border-rose-300 p-5 rounded-none font-mono text-xs text-rose-800 space-y-3">
+                    <div className="font-bold uppercase tracking-wider flex items-center space-x-1.5">
+                      <XCircle className="w-4 h-4 text-rose-600" />
+                      <span>Une erreur est survenue lors de l'analyse</span>
+                    </div>
+                    <p>{analysisError}</p>
+                    <button
+                      onClick={() => runBulletinAnalysis(selectedBulletin)}
+                      className="bg-white border border-rose-400 px-3 py-1.5 text-[10px] font-bold text-rose-900 uppercase tracking-wider hover:bg-rose-100 transition-all"
+                    >
+                      Réessayer l'analyse
+                    </button>
+                  </div>
+                ) : bulletinAnalysis ? (
+                  <div className="space-y-6">
+                    <div className="prose prose-sm max-w-none text-[#141414]">
+                      <div className="text-[12px] font-sans leading-relaxed whitespace-pre-line text-[#141414]/90 bg-slate-50 border-2 border-[#141414] p-5 shadow-[3px_3px_0px_#141414] rounded-none">
+                        {bulletinAnalysis}
+                      </div>
+                    </div>
+
+                    {/* Grounding Sources */}
+                    {bulletinSources.length > 0 && (
+                      <div className="border-t border-[#141414]/10 pt-4 mt-6">
+                        <h4 className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mb-2.5 font-mono flex items-center space-x-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                          <span>Sources vérifiées et croisées par l'IA :</span>
+                        </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {bulletinSources.map((source, idx) => (
+                            <a
+                              key={idx}
+                              href={source.uri}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center space-x-1 bg-white hover:bg-slate-50 text-[#141414] border border-[#141414] px-2.5 py-1 text-[10px] font-mono tracking-tight"
+                            >
+                              <span className="w-1 h-1 bg-[#141414] rounded-full" />
+                              <span className="truncate max-w-[200px]">{source.title}</span>
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-24 space-y-4 border-2 border-dashed border-[#141414]/10 bg-slate-50">
+                    <Sparkles className="w-10 h-10 text-amber-500" />
+                    <div className="text-center space-y-1.5">
+                      <h4 className="text-xs font-black uppercase font-mono text-[#141414]">
+                        Aucune analyse générée pour cette séance
+                      </h4>
+                      <p className="text-[11px] text-[#141414]/60 max-w-sm mx-auto font-mono leading-relaxed">
+                        Cliquez sur le bouton ci-dessous pour démarrer l'agent d'analyse financière intelligent avec Gemini.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => runBulletinAnalysis(selectedBulletin)}
+                      className="inline-flex items-center space-x-1.5 bg-[#141414] hover:bg-black text-[#E4E3E0] text-[10px] font-bold uppercase tracking-wider py-2.5 px-5 border-2 border-[#141414] shadow-[3px_3px_0px_#141414] font-mono active:translate-x-0.5 active:translate-y-0.5 transition-all"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Démarrer l'analyse de séance</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Disclaimer banner */}
+              <div className="mt-8 pt-4 border-t border-[#141414]/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-[9px] font-mono text-[#141414]/50">
+                <span>Avertissement : Les analyses financières IA sont des synthèses automatisées et ne constituent pas des conseils d'investissement.</span>
+                <span className="font-bold text-[#141414]/70">Antigravity Trading Agent 2.5</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-slate-100 border-2 border-dashed border-[#141414]/20 rounded-none h-full flex flex-col items-center justify-center py-32 text-[#141414]/60 font-mono text-xs">
+              <span>Sélectionnez un bulletin dans la colonne de gauche pour l'analyser.</span>
+            </div>
+          )}
+        </div>
       </div>
+    )}
+  </div>
 
       {/* Sidebar Detail Drawer */}
       <AnimatePresence>
