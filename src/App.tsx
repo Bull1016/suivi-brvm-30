@@ -19,10 +19,67 @@ import {
   Building2,
   CheckCircle2,
   XCircle,
-  HelpCircle
+  HelpCircle,
+  ExternalLink,
+  Layers,
+  SlidersHorizontal,
+  Tag
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { StockData, BRVMResponse, DividendHistory } from "./types";
+
+// Official BRVM Sector Config (linked to https://www.brvm.org/fr/cours-actions/0)
+const SECTOR_CONFIG: Record<string, { id: number; url: string; badgeBg: string; textHex: string; icon: string }> = {
+  "Consommation de Base": {
+    id: 194,
+    url: "https://www.brvm.org/fr/cours-actions/194",
+    badgeBg: "bg-emerald-100 text-emerald-900 border-emerald-700",
+    textHex: "#065f46",
+    icon: "🌾"
+  },
+  "Consommation Discrétionnaire": {
+    id: 195,
+    url: "https://www.brvm.org/fr/cours-actions/195",
+    badgeBg: "bg-purple-100 text-purple-900 border-purple-700",
+    textHex: "#581c87",
+    icon: "🛍️"
+  },
+  "Énergie": {
+    id: 196,
+    url: "https://www.brvm.org/fr/cours-actions/196",
+    badgeBg: "bg-amber-100 text-amber-900 border-amber-700",
+    textHex: "#78350f",
+    icon: "⚡"
+  },
+  "Industriels": {
+    id: 197,
+    url: "https://www.brvm.org/fr/cours-actions/197",
+    badgeBg: "bg-stone-200 text-stone-900 border-stone-700",
+    textHex: "#292524",
+    icon: "🏭"
+  },
+  "Services Financiers": {
+    id: 198,
+    url: "https://www.brvm.org/fr/cours-actions/198",
+    badgeBg: "bg-blue-100 text-blue-900 border-blue-700",
+    textHex: "#1e3a8a",
+    icon: "🏦"
+  },
+  "Services Publics": {
+    id: 199,
+    url: "https://www.brvm.org/fr/cours-actions/199",
+    badgeBg: "bg-teal-100 text-teal-900 border-teal-700",
+    textHex: "#134e4a",
+    icon: "💧"
+  },
+  "Télécommunications": {
+    id: 200,
+    url: "https://www.brvm.org/fr/cours-actions/200",
+    badgeBg: "bg-rose-100 text-rose-900 border-rose-700",
+    textHex: "#881337",
+    icon: "📡"
+  }
+};
 
 export default function App() {
   const lastYear = new Date().getFullYear() - 1;
@@ -38,6 +95,10 @@ export default function App() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [selectedCountry, setSelectedCountry] = useState<string>("ALL");
   const [dividendFilter, setDividendFilter] = useState<"ALL" | "ELIGIBLE" | "INELIGIBLE">("ALL");
+  const [selectedSector, setSelectedSector] = useState<string>("ALL");
+  const [minPrice, setMinPrice] = useState<string>("");
+  const [maxPrice, setMaxPrice] = useState<string>("");
+  const [pricePreset, setPricePreset] = useState<string>("ALL");
   
   // Sorting states
   const [sortField, setSortField] = useState<keyof StockData | "">("variation");
@@ -274,11 +335,51 @@ export default function App() {
     ne: { name: "Niger", flag: "🇳🇪" }
   };
 
+  // Fallback sector mapping if backend response hasn't updated yet
+  const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = {
+    SNTS: "Télécommunications",
+    SGBC: "Services Financiers",
+    CBIB: "Services Financiers",
+    CBIBF: "Services Financiers",
+    ETIT: "Services Financiers",
+    BOAB: "Services Financiers",
+    BOABF: "Services Financiers",
+    BOAC: "Services Financiers",
+    BOAN: "Services Financiers",
+    BOAS: "Services Financiers",
+    BOAM: "Services Financiers",
+    ONTB: "Télécommunications",
+    ONTBF: "Télécommunications",
+    SIBC: "Services Financiers",
+    ECOC: "Services Financiers",
+    NSBC: "Services Financiers",
+    PALC: "Consommation de Base",
+    TTLC: "Énergie",
+    TTLS: "Énergie",
+    CIEC: "Services Publics",
+    SDCC: "Services Publics",
+    SOGC: "Consommation de Base",
+    SPHC: "Consommation de Base",
+    NTLC: "Consommation de Base",
+    BICC: "Services Financiers",
+    CFAC: "Consommation Discrétionnaire",
+    BNBC: "Consommation Discrétionnaire",
+    SDVC: "Industriels",
+    SHEC: "Énergie",
+    ABJC: "Consommation Discrétionnaire",
+    SLBC: "Consommation de Base",
+    FTSC: "Industriels",
+    ORGT: "Services Financiers"
+  };
+
   // Memoized lists and stats to avoid unnecessary recalculations
   const processedStocks = useMemo(() => {
     return stocks.map(s => {
-      // Return calculated properties
-      return s;
+      const sector = s.sector || DEFAULT_SYMBOL_SECTOR_FALLBACK[s.symbol] || "Services Financiers";
+      return {
+        ...s,
+        sector
+      };
     });
   }, [stocks]);
 
@@ -306,17 +407,36 @@ export default function App() {
     }
   };
 
+  // Handle price range preset buttons
+  const applyPricePreset = (preset: string) => {
+    setPricePreset(preset);
+    if (preset === "ALL") {
+      setMinPrice("");
+      setMaxPrice("");
+    } else if (preset === "UNDER_2500") {
+      setMinPrice("");
+      setMaxPrice("2500");
+    } else if (preset === "2500_10000") {
+      setMinPrice("2500");
+      setMaxPrice("10000");
+    } else if (preset === "OVER_10000") {
+      setMinPrice("10000");
+      setMaxPrice("");
+    }
+  };
+
   // Filtered and sorted list of stocks
   const filteredAndSortedStocks = useMemo(() => {
     let result = [...processedStocks];
 
-    // Search filter
+    // Search filter (Symbol, Name, or Sector)
     if (searchTerm.trim() !== "") {
       const lowerSearch = searchTerm.toLowerCase();
       result = result.filter(
         s =>
           s.symbol.toLowerCase().includes(lowerSearch) ||
-          s.name.toLowerCase().includes(lowerSearch)
+          s.name.toLowerCase().includes(lowerSearch) ||
+          (s.sector && s.sector.toLowerCase().includes(lowerSearch))
       );
     }
 
@@ -332,11 +452,27 @@ export default function App() {
       result = result.filter(s => s.streak < 3);
     }
 
+    // Sector filter
+    if (selectedSector !== "ALL") {
+      result = result.filter(s => s.sector === selectedSector);
+    }
+
+    // Price range filter (min & max)
+    if (minPrice !== "" && !isNaN(Number(minPrice))) {
+      result = result.filter(s => s.currentPrice >= Number(minPrice));
+    }
+    if (maxPrice !== "" && !isNaN(Number(maxPrice))) {
+      result = result.filter(s => s.currentPrice <= Number(maxPrice));
+    }
+
     // Sorting logic
     if (sortField !== "") {
       result.sort((a, b) => {
-        let valA = a[sortField];
-        let valB = b[sortField];
+        let valA = a[sortField as keyof StockData];
+        let valB = b[sortField as keyof StockData];
+
+        if (valA === undefined || valA === null) return 1;
+        if (valB === undefined || valB === null) return -1;
 
         // Handle string comparison
         if (typeof valA === "string" && typeof valB === "string") {
@@ -355,9 +491,9 @@ export default function App() {
     }
 
     return result;
-  }, [processedStocks, searchTerm, selectedCountry, dividendFilter, sortField, sortDirection]);
+  }, [processedStocks, searchTerm, selectedCountry, dividendFilter, selectedSector, minPrice, maxPrice, sortField, sortDirection]);
 
-  // Dynamic counts for country badges (considers active search and dividend filters)
+  // Dynamic counts for country & sector badges
   const stocksFilteredByOthers = useMemo(() => {
     let result = [...processedStocks];
 
@@ -367,7 +503,8 @@ export default function App() {
       result = result.filter(
         s =>
           s.symbol.toLowerCase().includes(lowerSearch) ||
-          s.name.toLowerCase().includes(lowerSearch)
+          s.name.toLowerCase().includes(lowerSearch) ||
+          (s.sector && s.sector.toLowerCase().includes(lowerSearch))
       );
     }
 
@@ -378,8 +515,16 @@ export default function App() {
       result = result.filter(s => s.streak < 3);
     }
 
+    // Price range filter
+    if (minPrice !== "" && !isNaN(Number(minPrice))) {
+      result = result.filter(s => s.currentPrice >= Number(minPrice));
+    }
+    if (maxPrice !== "" && !isNaN(Number(maxPrice))) {
+      result = result.filter(s => s.currentPrice <= Number(maxPrice));
+    }
+
     return result;
-  }, [processedStocks, searchTerm, dividendFilter]);
+  }, [processedStocks, searchTerm, dividendFilter, minPrice, maxPrice]);
 
   // Formatter helpers
   const formatPrice = (price: number) => {
@@ -558,8 +703,8 @@ export default function App() {
           </div>
         </section>
 
-        {/* Toolbar: Search, Country Filters, and Legend */}
-        <section className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-6 shadow-[4px_4px_0px_#141414] mb-8">
+        {/* Toolbar: Search, Dividend, Price Range and Sector Filters */}
+        <section className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-6 shadow-[4px_4px_0px_#141414] mb-8 space-y-5">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             
             {/* Search Input */}
@@ -567,7 +712,7 @@ export default function App() {
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#141414]" />
               <input
                 type="text"
-                placeholder="Rechercher par symbole ou nom..."
+                placeholder="Rechercher par symbole, nom ou secteur..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-0 rounded-none py-2.5 pl-11 pr-4 text-xs font-mono text-[#141414] placeholder-[#141414]/50 outline-none transition-all duration-200"
@@ -620,8 +765,156 @@ export default function App() {
             </div>
           </div>
 
+          {/* Price Range Filter (Range Price) */}
+          <div className="pt-4 border-t border-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono flex items-center space-x-1">
+                <SlidersHorizontal className="w-3.5 h-3.5 text-[#141414]" />
+                <span>Plage de Prix (FCFA) :</span>
+              </span>
+
+              <button
+                onClick={() => applyPricePreset("ALL")}
+                className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+                  pricePreset === "ALL" && !minPrice && !maxPrice
+                    ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
+                    : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+                }`}
+              >
+                Tous les prix
+              </button>
+              <button
+                onClick={() => applyPricePreset("UNDER_2500")}
+                className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+                  pricePreset === "UNDER_2500"
+                    ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
+                    : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+                }`}
+              >
+                &lt; 2 500 F
+              </button>
+              <button
+                onClick={() => applyPricePreset("2500_10000")}
+                className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+                  pricePreset === "2500_10000"
+                    ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
+                    : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+                }`}
+              >
+                2 500 F – 10 000 F
+              </button>
+              <button
+                onClick={() => applyPricePreset("OVER_10000")}
+                className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+                  pricePreset === "OVER_10000"
+                    ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
+                    : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+                }`}
+              >
+                &gt; 10 000 F
+              </button>
+            </div>
+
+            {/* Custom Min / Max Inputs */}
+            <div className="flex items-center space-x-2 text-xs font-mono">
+              <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
+                <span className="text-[10px] text-[#141414]/50 uppercase font-bold">Min:</span>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={minPrice}
+                  onChange={(e) => {
+                    setMinPrice(e.target.value);
+                    setPricePreset("CUSTOM");
+                  }}
+                  className="w-20 bg-transparent text-xs font-bold text-[#141414] outline-none font-mono"
+                />
+                <span className="text-[10px] text-[#141414]/50">F</span>
+              </div>
+
+              <span className="text-[#141414]/60 font-bold">-</span>
+
+              <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
+                <span className="text-[10px] text-[#141414]/50 uppercase font-bold">Max:</span>
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={maxPrice}
+                  onChange={(e) => {
+                    setMaxPrice(e.target.value);
+                    setPricePreset("CUSTOM");
+                  }}
+                  className="w-24 bg-transparent text-xs font-bold text-[#141414] outline-none font-mono"
+                />
+                <span className="text-[10px] text-[#141414]/50">F</span>
+              </div>
+
+              {(minPrice || maxPrice) && (
+                <button
+                  onClick={() => {
+                    setMinPrice("");
+                    setMaxPrice("");
+                    setPricePreset("ALL");
+                  }}
+                  className="p-1 text-rose-600 hover:text-rose-800"
+                  title="Réinitialiser la plage de prix"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Sector Filters (Secteurs BRVM) */}
+          <div className="pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
+            <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono flex items-center space-x-1">
+              <Layers className="w-3.5 h-3.5 text-[#141414]" />
+              <span>Secteurs BRVM :</span>
+            </span>
+
+            <button
+              onClick={() => setSelectedSector("ALL")}
+              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 ${
+                selectedSector === "ALL"
+                  ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
+                  : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+              }`}
+            >
+              <span>🏬 Tous les secteurs</span>
+              <span className={`text-[9px] font-mono border rounded-none px-1.5 py-0.5 ml-1 ${
+                selectedSector === "ALL"
+                  ? "bg-emerald-500/20 text-[#E4E3E0] border-[#E4E3E0]/30"
+                  : "bg-[#141414]/10 text-[#141414] border-[#141414]/20"
+              }`}>{stocksFilteredByOthers.length}</span>
+            </button>
+
+            {Object.entries(SECTOR_CONFIG).map(([sectorName, cfg]) => {
+              const countOfSector = stocksFilteredByOthers.filter(s => s.sector === sectorName).length;
+              const isSelected = selectedSector === sectorName;
+              return (
+                <button
+                  key={sectorName}
+                  onClick={() => setSelectedSector(sectorName)}
+                  className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 ${
+                    isSelected
+                      ? "bg-[#141414] text-[#E4E3E0] border-[#141414] shadow-[2px_2px_0px_rgba(0,0,0,0.15)]"
+                      : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
+                  }`}
+                >
+                  <span>{cfg.icon}</span>
+                  <span>{sectorName}</span>
+                  <span className={`text-[9px] font-mono border rounded-none px-1.5 py-0.5 ml-0.5 ${
+                    isSelected ? "bg-white/20 text-white border-white/30" : "bg-[#141414]/10 text-[#141414] border-[#141414]/20"
+                  }`}>
+                    {countOfSector}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
           {/* Country Badges Filters */}
-          <div className="mt-5 pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
+          <div className="pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
             <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono">Pays :</span>
             <button
               onClick={() => setSelectedCountry("ALL")}
@@ -688,6 +981,16 @@ export default function App() {
                     <div className="flex items-center space-x-1">
                       <span>Entreprise</span>
                       {sortField === "name" ? (
+                        sortDirection === "asc" ? <ChevronUp className="w-3.5 h-3.5 text-emerald-400" /> : <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      ) : (
+                        <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                      )}
+                    </div>
+                  </th>
+                  <th className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors" onClick={() => handleSort("sector")}>
+                    <div className="flex items-center space-x-1">
+                      <span>Secteur BRVM</span>
+                      {sortField === "sector" ? (
                         sortDirection === "asc" ? <ChevronUp className="w-3.5 h-3.5 text-emerald-400" /> : <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
                       ) : (
                         <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
@@ -791,6 +1094,28 @@ export default function App() {
                             </div>
                           </td>
 
+                          {/* Sector Column */}
+                          <td className="py-3 px-6">
+                            {stock.sector && SECTOR_CONFIG[stock.sector] ? (
+                              <a
+                                href={SECTOR_CONFIG[stock.sector].url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className={`inline-flex items-center space-x-1 px-2.5 py-1 text-[10px] font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all ${SECTOR_CONFIG[stock.sector].badgeBg}`}
+                                title={`Voir la page officielle BRVM: ${stock.sector}`}
+                              >
+                                <span>{SECTOR_CONFIG[stock.sector].icon}</span>
+                                <span>{stock.sector}</span>
+                                <ExternalLink className="w-2.5 h-2.5 ml-1 opacity-60" />
+                              </a>
+                            ) : (
+                              <span className="text-[10px] text-[#141414]/50 font-mono italic">
+                                {stock.sector || "Non spécifié"}
+                              </span>
+                            )}
+                          </td>
+
                           {/* Country Column */}
                           <td className="py-3 px-6 text-[#141414]/70 font-bold text-xs uppercase">
                             <div className="flex items-center space-x-1.5">
@@ -856,7 +1181,7 @@ export default function App() {
                     })
                   ) : (
                     <tr>
-                      <td colSpan={8} className="py-12 text-center text-[#141414]/50 font-bold uppercase tracking-wider font-sans">
+                      <td colSpan={9} className="py-12 text-center text-[#141414]/50 font-bold uppercase tracking-wider font-sans">
                         Aucun résultat ne correspond à vos filtres.
                       </td>
                     </tr>
@@ -1186,13 +1511,26 @@ export default function App() {
                     <Building2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-1">
                       <span className="text-xs bg-[#141414] text-[#E4E3E0] px-2 py-0.5 rounded-none font-mono font-bold">
                         {selectedStock.symbol}
                       </span>
                       <span>{countriesMap[selectedStock.country]?.flag}</span>
+                      {selectedStock.sector && SECTOR_CONFIG[selectedStock.sector] && (
+                        <a
+                          href={SECTOR_CONFIG[selectedStock.sector].url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`inline-flex items-center space-x-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all ${SECTOR_CONFIG[selectedStock.sector].badgeBg}`}
+                          title={`Voir la page officielle du secteur BRVM: ${selectedStock.sector}`}
+                        >
+                          <span>{SECTOR_CONFIG[selectedStock.sector].icon}</span>
+                          <span>{selectedStock.sector}</span>
+                          <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-60" />
+                        </a>
+                      )}
                     </div>
-                    <h2 className="text-base font-black text-[#141414] mt-0.5 leading-tight font-sans uppercase">{selectedStock.name}</h2>
+                    <h2 className="text-base font-black text-[#141414] mt-1 leading-tight font-sans uppercase">{selectedStock.name}</h2>
                   </div>
                 </div>
                 <button

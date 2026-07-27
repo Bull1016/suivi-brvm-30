@@ -42,6 +42,55 @@ interface DividendHistory {
   paid: boolean;
 }
 
+// BRVM Sector categorization definitions
+const BRVM_SECTORS: Record<number, string> = {
+  194: "Consommation de Base",
+  195: "Consommation Discrétionnaire",
+  196: "Énergie",
+  197: "Industriels",
+  198: "Services Financiers",
+  199: "Services Publics",
+  200: "Télécommunications"
+};
+
+const DEFAULT_SYMBOL_SECTOR_MAP: Record<string, string> = {
+  SNTS: "Télécommunications",
+  SGBC: "Services Financiers",
+  CBIB: "Services Financiers",
+  CBIBF: "Services Financiers",
+  ETIT: "Services Financiers",
+  BOAB: "Services Financiers",
+  BOABF: "Services Financiers",
+  BOAC: "Services Financiers",
+  BOAN: "Services Financiers",
+  BOAS: "Services Financiers",
+  BOAM: "Services Financiers",
+  ONTB: "Télécommunications",
+  ONTBF: "Télécommunications",
+  SIBC: "Services Financiers",
+  ECOC: "Services Financiers",
+  NSBC: "Services Financiers",
+  PALC: "Consommation de Base",
+  TTLC: "Énergie",
+  TTLS: "Énergie",
+  CIEC: "Services Publics",
+  SDCC: "Services Publics",
+  SOGC: "Consommation de Base",
+  SPHC: "Consommation de Base",
+  NTLC: "Consommation de Base",
+  BICC: "Services Financiers",
+  CFAC: "Consommation Discrétionnaire",
+  BNBC: "Consommation Discrétionnaire",
+  SDVC: "Industriels",
+  SHEC: "Énergie",
+  ABJC: "Consommation Discrétionnaire",
+  SLBC: "Consommation de Base",
+  FTSC: "Industriels",
+  ORGT: "Services Financiers"
+};
+
+let dynamicSectorMap: Record<string, string> = { ...DEFAULT_SYMBOL_SECTOR_MAP };
+
 // Master Fallback Dataset of the BRVM 30 stocks
 const DEFAULT_BRVM_30_STOCKS = [
   {
@@ -555,13 +604,60 @@ function processStockDividends(stock: any) {
   const lastYearDiv = dividends.find(d => d.year === lastYear);
   const latestDividend = lastYearDiv && lastYearDiv.paid ? lastYearDiv.amount : 0;
 
+  const sector = stock.sector || dynamicSectorMap[stock.symbol] || DEFAULT_SYMBOL_SECTOR_MAP[stock.symbol] || "Services Financiers";
+
   return {
     ...stock,
+    sector,
     streak,
     latestDividend,
     lastUpdated: new Date().toISOString(),
     source: stock.source || "fallback"
   };
+}
+
+async function fetchBRVMSectors() {
+  console.log("Fetching live BRVM sector categorization...");
+  const sectorIds = [194, 195, 196, 197, 198, 199, 200];
+  const newMap: Record<string, string> = { ...DEFAULT_SYMBOL_SECTOR_MAP };
+
+  for (const id of sectorIds) {
+    try {
+      const res = await fetch(`https://www.brvm.org/fr/cours-actions/${id}`, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36"
+        }
+      });
+      if (!res.ok) continue;
+      const html = await res.text();
+      const sectorName = BRVM_SECTORS[id];
+      const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
+      const stockTable = tables.find(t => t.includes("Symbole") && t.includes("Nom"));
+      if (stockTable) {
+        const trMatches = stockTable.match(/<tr[\s\S]*?<\/tr>/gi) || [];
+        for (const tr of trMatches) {
+          if (tr.includes("<th")) continue;
+          const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
+          if (tdMatches.length >= 2) {
+            const symText = tdMatches[0].replace(/<[^>]*>/g, "").trim();
+            const symMatch = symText.match(/^([A-Z0-9]{3,6})\b/);
+            if (symMatch) {
+              const sym = symMatch[1];
+              newMap[sym] = sectorName;
+              if (sym === "ONTBF") newMap["ONTB"] = sectorName;
+              if (sym === "CBIBF") newMap["CBIB"] = sectorName;
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error(`Failed to fetch sector ${id}:`, e);
+    }
+  }
+
+  dynamicSectorMap = newMap;
+  memoryStocks = memoryStocks.map((s) => processStockDividends(s));
+  console.log("BRVM sector map updated successfully.");
 }
 
 // Prepare baseline data
@@ -796,7 +892,8 @@ if (fs.existsSync(STOCKS_CACHE_FILE)) {
   }
 }
 
-// Perform initial boot sync asynchronously to load fresh prices and dividends right away
+// Perform initial boot sync asynchronously to load fresh prices, sectors and dividends right away
+fetchBRVMSectors();
 performScrapeAndSync().then(() => {
   console.log("Initial startup quotation sync completed successfully.");
   // Follow up by synchronizing all dividend history in the background to guarantee accuracy
@@ -806,6 +903,7 @@ performScrapeAndSync().then(() => {
 // Background auto-refresh every 5 minutes
 setInterval(() => {
   console.log("Background auto-updating stocks (every 5 mins)...");
+  fetchBRVMSectors();
   performScrapeAndSync();
 }, 5 * 60 * 1000);
 

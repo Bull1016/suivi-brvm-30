@@ -12,6 +12,7 @@ export interface StockData {
   name: string;
   symbol: string;
   country: string;
+  sector: string;
   currentPrice: number;
   high: number;
   low: number;
