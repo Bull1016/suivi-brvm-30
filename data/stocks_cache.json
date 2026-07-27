@@ -37,8 +37,9 @@
       ],
       "streak": 5,
       "latestDividend": 1740,
-      "lastUpdated": "2026-07-27T00:40:45.597Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Télécommunications"
     },
     {
       "name": "Société Générale Côte d'Ivoire",
@@ -77,8 +78,9 @@
       ],
       "streak": 5,
       "latestDividend": 2293.28,
-      "lastUpdated": "2026-07-27T00:40:45.618Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Coris Bank International",
@@ -117,8 +119,9 @@
       ],
       "streak": 5,
       "latestDividend": 900,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "fallback",
+      "sector": "Services Financiers"
     },
     {
       "name": "Ecobank Transnational Inc.",
@@ -157,8 +160,9 @@
       ],
       "streak": 0,
       "latestDividend": 0.92,
-      "lastUpdated": "2026-07-27T00:40:45.618Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Bénin",
@@ -197,8 +201,9 @@
       ],
       "streak": 5,
       "latestDividend": 585,
-      "lastUpdated": "2026-07-27T00:40:45.621Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Burkina Faso",
@@ -237,8 +242,9 @@
       ],
       "streak": 5,
       "latestDividend": 397,
-      "lastUpdated": "2026-07-27T00:40:45.621Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Côte d'Ivoire",
@@ -277,8 +283,9 @@
       ],
       "streak": 5,
       "latestDividend": 594.5,
-      "lastUpdated": "2026-07-27T00:40:45.621Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Niger",
@@ -317,8 +324,9 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-27T00:40:45.624Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Sénégal",
@@ -357,8 +365,9 @@
       ],
       "streak": 5,
       "latestDividend": 450,
-      "lastUpdated": "2026-07-27T00:40:45.624Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Mali",
@@ -397,8 +406,9 @@
       ],
       "streak": 3,
       "latestDividend": 305.04,
-      "lastUpdated": "2026-07-27T00:40:45.624Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Onatel Burkina Faso",
@@ -437,8 +447,9 @@
       ],
       "streak": 5,
       "latestDividend": 380,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "fallback",
+      "sector": "Télécommunications"
     },
     {
       "name": "Société Ivoirienne de Banque",
@@ -477,8 +488,9 @@
       ],
       "streak": 5,
       "latestDividend": 374,
-      "lastUpdated": "2026-07-27T00:40:45.624Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Ecobank Côte d'Ivoire",
@@ -517,8 +529,9 @@
       ],
       "streak": 5,
       "latestDividend": 781,
-      "lastUpdated": "2026-07-27T00:40:45.624Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:38.993Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "NSIA Banque Côte d'Ivoire",
@@ -557,8 +570,9 @@
       ],
       "streak": 4,
       "latestDividend": 675.98,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:39.674Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Palm Côte d'Ivoire",
@@ -597,8 +611,9 @@
       ],
       "streak": 5,
       "latestDividend": 441.4,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:40.370Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Total Côte d'Ivoire",
@@ -637,8 +652,9 @@
       ],
       "streak": 5,
       "latestDividend": 140,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:41.063Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Total Sénégal",
@@ -677,8 +693,9 @@
       ],
       "streak": 5,
       "latestDividend": 176.65,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:41.755Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Compagnie Ivoirienne d'Electricité",
@@ -717,8 +734,9 @@
       ],
       "streak": 5,
       "latestDividend": 205.92,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:42.440Z",
+      "source": "scraped",
+      "sector": "Services Publics"
     },
     {
       "name": "SODECI Côte d'Ivoire",
@@ -757,8 +775,9 @@
       ],
       "streak": 5,
       "latestDividend": 462,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:43.221Z",
+      "source": "scraped",
+      "sector": "Services Publics"
     },
     {
       "name": "Société des Caoutchoucs de Grand-Béréby",
@@ -797,8 +816,9 @@
       ],
       "streak": 5,
       "latestDividend": 501.6,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:43.911Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Société Africaine de Plantations d'Hévéas",
@@ -837,8 +857,9 @@
       ],
       "streak": 5,
       "latestDividend": 430.32,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:44.593Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Nestlé Côte d'Ivoire",
@@ -877,8 +898,9 @@
       ],
       "streak": 5,
       "latestDividend": 369.6,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:45.290Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "BICICI Côte d'Ivoire",
@@ -917,8 +939,9 @@
       ],
       "streak": 5,
       "latestDividend": 1157.2,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:45.974Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "CFAO Motors Côte d'Ivoire",
@@ -957,8 +980,9 @@
       ],
       "streak": 5,
       "latestDividend": 55.44,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:46.666Z",
+      "source": "scraped",
+      "sector": "Consommation Discrétionnaire"
     },
     {
       "name": "Bernabé Côte d'Ivoire",
@@ -997,8 +1021,9 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:47.350Z",
+      "source": "scraped",
+      "sector": "Consommation Discrétionnaire"
     },
     {
       "name": "Africa Global Logistics CI (ex-Bolloré)",
@@ -1037,8 +1062,9 @@
       ],
       "streak": 5,
       "latestDividend": 200,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-27T13:57:38.712Z",
+      "source": "fallback",
+      "sector": "Industriels"
     },
     {
       "name": "Servair Abidjan",
@@ -1077,8 +1103,9 @@
       ],
       "streak": 5,
       "latestDividend": 85.07,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:48.735Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Solibra Côte d'Ivoire",
@@ -1117,8 +1144,9 @@
       ],
       "streak": 3,
       "latestDividend": 1871.76,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:49.422Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Filtisac Côte d'Ivoire",
@@ -1157,8 +1185,9 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:50.110Z",
+      "source": "scraped",
+      "sector": "Industriels"
     },
     {
       "name": "Oragroup Togo",
@@ -1197,8 +1226,9 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-27T00:40:45.627Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-27T13:57:50.799Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     }
   ],
   "lastSyncTime": "2026-07-27T00:40:45.627Z"
