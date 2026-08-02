@@ -4,10 +4,10 @@
       "name": "Sonatel Sénégal",
       "symbol": "SNTS",
       "country": "sn",
-      "currentPrice": 30900,
-      "high": 31000,
-      "low": 30900,
-      "variation": -0.32,
+      "currentPrice": 31005,
+      "high": 31010,
+      "low": 31005,
+      "variation": -0.02,
       "dividends": [
         {
           "year": 2025,
@@ -37,17 +37,18 @@
       ],
       "streak": 5,
       "latestDividend": 1740,
-      "lastUpdated": "2026-07-11T00:46:20.417Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Télécommunications"
     },
     {
       "name": "Société Générale Côte d'Ivoire",
       "symbol": "SGBC",
       "country": "ci",
-      "currentPrice": 39000,
-      "high": 39000,
-      "low": 39000,
-      "variation": 0,
+      "currentPrice": 37950,
+      "high": 38200,
+      "low": 37950,
+      "variation": -0.39,
       "dividends": [
         {
           "year": 2025,
@@ -77,8 +78,9 @@
       ],
       "streak": 5,
       "latestDividend": 2293.28,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Coris Bank International",
@@ -117,17 +119,18 @@
       ],
       "streak": 5,
       "latestDividend": 900,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "source": "fallback",
+      "sector": "Services Financiers"
     },
     {
       "name": "Ecobank Transnational Inc.",
       "symbol": "ETIT",
       "country": "tg",
-      "currentPrice": 64,
-      "high": 64,
-      "low": 64,
-      "variation": 6.67,
+      "currentPrice": 69,
+      "high": 74,
+      "low": 69,
+      "variation": -6.76,
       "dividends": [
         {
           "year": 2025,
@@ -157,17 +160,18 @@
       ],
       "streak": 0,
       "latestDividend": 0.92,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Bénin",
       "symbol": "BOAB",
       "country": "bj",
-      "currentPrice": 8750,
-      "high": 8800,
-      "low": 8750,
-      "variation": -0.57,
+      "currentPrice": 8520,
+      "high": 8545,
+      "low": 8520,
+      "variation": -0.29,
       "dividends": [
         {
           "year": 2025,
@@ -197,17 +201,18 @@
       ],
       "streak": 5,
       "latestDividend": 585,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Burkina Faso",
       "symbol": "BOABF",
       "country": "bf",
-      "currentPrice": 6050,
-      "high": 6050,
-      "low": 5970,
-      "variation": 1.34,
+      "currentPrice": 7145,
+      "high": 7145,
+      "low": 6905,
+      "variation": 3.55,
       "dividends": [
         {
           "year": 2025,
@@ -237,17 +242,18 @@
       ],
       "streak": 5,
       "latestDividend": 397,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Côte d'Ivoire",
       "symbol": "BOAC",
       "country": "ci",
-      "currentPrice": 9500,
-      "high": 9500,
-      "low": 9485,
-      "variation": 0.8,
+      "currentPrice": 10895,
+      "high": 10895,
+      "low": 10800,
+      "variation": 0.93,
       "dividends": [
         {
           "year": 2025,
@@ -277,17 +283,18 @@
       ],
       "streak": 5,
       "latestDividend": 594.5,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Niger",
       "symbol": "BOAN",
       "country": "ne",
-      "currentPrice": 4790,
-      "high": 4790,
-      "low": 4500,
-      "variation": 6.44,
+      "currentPrice": 5400,
+      "high": 5400,
+      "low": 5205,
+      "variation": 2.86,
       "dividends": [
         {
           "year": 2025,
@@ -317,17 +324,18 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Sénégal",
       "symbol": "BOAS",
       "country": "sn",
-      "currentPrice": 7300,
-      "high": 7300,
-      "low": 7300,
-      "variation": 0,
+      "currentPrice": 7945,
+      "high": 7945,
+      "low": 7900,
+      "variation": 0.57,
       "dividends": [
         {
           "year": 2025,
@@ -357,17 +365,18 @@
       ],
       "streak": 5,
       "latestDividend": 450,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Bank Of Africa Mali",
       "symbol": "BOAM",
       "country": "ml",
-      "currentPrice": 5450,
-      "high": 5450,
-      "low": 5400,
-      "variation": 0.46,
+      "currentPrice": 5630,
+      "high": 5630,
+      "low": 5350,
+      "variation": 5.23,
       "dividends": [
         {
           "year": 2025,
@@ -397,8 +406,9 @@
       ],
       "streak": 3,
       "latestDividend": 305.04,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Onatel Burkina Faso",
@@ -437,17 +447,18 @@
       ],
       "streak": 5,
       "latestDividend": 380,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "source": "fallback",
+      "sector": "Télécommunications"
     },
     {
       "name": "Société Ivoirienne de Banque",
       "symbol": "SIBC",
       "country": "ci",
-      "currentPrice": 8950,
-      "high": 9000,
-      "low": 8950,
-      "variation": -0.56,
+      "currentPrice": 9100,
+      "high": 9100,
+      "low": 9100,
+      "variation": 0,
       "dividends": [
         {
           "year": 2025,
@@ -477,17 +488,18 @@
       ],
       "streak": 5,
       "latestDividend": 374,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Ecobank Côte d'Ivoire",
       "symbol": "ECOC",
       "country": "ci",
-      "currentPrice": 16795,
-      "high": 16795,
-      "low": 16700,
-      "variation": 0.57,
+      "currentPrice": 16245,
+      "high": 16245,
+      "low": 16245,
+      "variation": 0.03,
       "dividends": [
         {
           "year": 2025,
@@ -517,17 +529,18 @@
       ],
       "streak": 5,
       "latestDividend": 781,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "NSIA Banque Côte d'Ivoire",
       "symbol": "NSBC",
       "country": "ci",
-      "currentPrice": 21695,
-      "high": 21695,
-      "low": 21695,
-      "variation": -0.02,
+      "currentPrice": 23390,
+      "high": 23390,
+      "low": 23015,
+      "variation": 0,
       "dividends": [
         {
           "year": 2025,
@@ -557,17 +570,18 @@
       ],
       "streak": 4,
       "latestDividend": 675.98,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "Palm Côte d'Ivoire",
       "symbol": "PALC",
       "country": "ci",
-      "currentPrice": 8820,
-      "high": 8820,
-      "low": 8800,
-      "variation": 0.23,
+      "currentPrice": 8800,
+      "high": 8800,
+      "low": 8670,
+      "variation": 1.62,
       "dividends": [
         {
           "year": 2025,
@@ -597,17 +611,18 @@
       ],
       "streak": 5,
       "latestDividend": 441.4,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Total Côte d'Ivoire",
       "symbol": "TTLC",
       "country": "ci",
-      "currentPrice": 2800,
-      "high": 2920,
-      "low": 2800,
-      "variation": -4.11,
+      "currentPrice": 3000,
+      "high": 3000,
+      "low": 2990,
+      "variation": 0.33,
       "dividends": [
         {
           "year": 2025,
@@ -637,22 +652,23 @@
       ],
       "streak": 5,
       "latestDividend": 140,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Total Sénégal",
       "symbol": "TTLS",
       "country": "sn",
-      "currentPrice": 4260,
-      "high": 4260,
-      "low": 4250,
-      "variation": 0.24,
+      "currentPrice": 3650,
+      "high": 3650,
+      "low": 3650,
+      "variation": -1.35,
       "dividends": [
         {
           "year": 2025,
-          "amount": 0,
-          "paid": false
+          "amount": 176.65,
+          "paid": true
         },
         {
           "year": 2024,
@@ -675,19 +691,20 @@
           "paid": true
         }
       ],
-      "streak": 0,
-      "latestDividend": 0,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "streak": 5,
+      "latestDividend": 176.65,
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Compagnie Ivoirienne d'Electricité",
       "symbol": "CIEC",
       "country": "ci",
-      "currentPrice": 5340,
-      "high": 5340,
-      "low": 5325,
-      "variation": 0.28,
+      "currentPrice": 5375,
+      "high": 5375,
+      "low": 5200,
+      "variation": 3.37,
       "dividends": [
         {
           "year": 2025,
@@ -717,17 +734,18 @@
       ],
       "streak": 5,
       "latestDividend": 205.92,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Services Publics"
     },
     {
       "name": "SODECI Côte d'Ivoire",
       "symbol": "SDCC",
       "country": "ci",
-      "currentPrice": 12115,
-      "high": 12115,
-      "low": 12000,
-      "variation": 0.96,
+      "currentPrice": 11930,
+      "high": 11940,
+      "low": 11930,
+      "variation": -0.08,
       "dividends": [
         {
           "year": 2025,
@@ -757,17 +775,18 @@
       ],
       "streak": 5,
       "latestDividend": 462,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Services Publics"
     },
     {
       "name": "Société des Caoutchoucs de Grand-Béréby",
       "symbol": "SOGC",
       "country": "ci",
-      "currentPrice": 8360,
-      "high": 8565,
-      "low": 8360,
-      "variation": -2.79,
+      "currentPrice": 8380,
+      "high": 8380,
+      "low": 8300,
+      "variation": 3.46,
       "dividends": [
         {
           "year": 2025,
@@ -797,17 +816,18 @@
       ],
       "streak": 5,
       "latestDividend": 501.6,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Société Africaine de Plantations d'Hévéas",
       "symbol": "SPHC",
       "country": "ci",
-      "currentPrice": 7550,
-      "high": 7850,
-      "low": 7550,
-      "variation": -3.82,
+      "currentPrice": 7500,
+      "high": 7500,
+      "low": 7450,
+      "variation": 1.35,
       "dividends": [
         {
           "year": 2025,
@@ -837,17 +857,18 @@
       ],
       "streak": 5,
       "latestDividend": 430.32,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Nestlé Côte d'Ivoire",
       "symbol": "NTLC",
       "country": "ci",
-      "currentPrice": 16250,
-      "high": 16395,
-      "low": 16250,
-      "variation": -0.88,
+      "currentPrice": 16550,
+      "high": 16550,
+      "low": 16495,
+      "variation": 0.36,
       "dividends": [
         {
           "year": 2025,
@@ -877,17 +898,18 @@
       ],
       "streak": 5,
       "latestDividend": 369.6,
-      "lastUpdated": "2026-07-11T00:46:20.418Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "BICICI Côte d'Ivoire",
       "symbol": "BICC",
       "country": "ci",
-      "currentPrice": 28800,
-      "high": 28800,
-      "low": 28360,
-      "variation": 1.59,
+      "currentPrice": 28880,
+      "high": 28880,
+      "low": 28700,
+      "variation": 0.63,
       "dividends": [
         {
           "year": 2025,
@@ -917,17 +939,18 @@
       ],
       "streak": 5,
       "latestDividend": 1157.2,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     },
     {
       "name": "CFAO Motors Côte d'Ivoire",
       "symbol": "CFAC",
       "country": "ci",
-      "currentPrice": 1575,
-      "high": 1575,
-      "low": 1575,
-      "variation": 0,
+      "currentPrice": 1660,
+      "high": 1670,
+      "low": 1660,
+      "variation": -0.6,
       "dividends": [
         {
           "year": 2025,
@@ -957,17 +980,18 @@
       ],
       "streak": 5,
       "latestDividend": 55.44,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Consommation Discrétionnaire"
     },
     {
       "name": "Bernabé Côte d'Ivoire",
       "symbol": "BNBC",
       "country": "ci",
-      "currentPrice": 1755,
-      "high": 1755,
-      "low": 1750,
-      "variation": -2.77,
+      "currentPrice": 1875,
+      "high": 1900,
+      "low": 1875,
+      "variation": -1.32,
       "dividends": [
         {
           "year": 2025,
@@ -997,8 +1021,9 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Consommation Discrétionnaire"
     },
     {
       "name": "Africa Global Logistics CI (ex-Bolloré)",
@@ -1037,17 +1062,18 @@
       ],
       "streak": 5,
       "latestDividend": 200,
-      "lastUpdated": "2026-07-11T00:27:44.225Z",
-      "source": "fallback"
+      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "source": "fallback",
+      "sector": "Industriels"
     },
     {
       "name": "Servair Abidjan",
       "symbol": "SHEC",
       "country": "ci",
-      "currentPrice": 2205,
-      "high": 2205,
-      "low": 2200,
-      "variation": 0.23,
+      "currentPrice": 2150,
+      "high": 2150,
+      "low": 2110,
+      "variation": 1.9,
       "dividends": [
         {
           "year": 2025,
@@ -1077,17 +1103,18 @@
       ],
       "streak": 5,
       "latestDividend": 85.07,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Énergie"
     },
     {
       "name": "Solibra Côte d'Ivoire",
       "symbol": "SLBC",
       "country": "ci",
-      "currentPrice": 39910,
-      "high": 40100,
-      "low": 39910,
-      "variation": -0.47,
+      "currentPrice": 39500,
+      "high": 40025,
+      "low": 39500,
+      "variation": 0,
       "dividends": [
         {
           "year": 2025,
@@ -1117,17 +1144,18 @@
       ],
       "streak": 3,
       "latestDividend": 1871.76,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Consommation de Base"
     },
     {
       "name": "Filtisac Côte d'Ivoire",
       "symbol": "FTSC",
       "country": "ci",
-      "currentPrice": 1975,
-      "high": 1995,
-      "low": 1975,
-      "variation": -1.25,
+      "currentPrice": 1950,
+      "high": 1970,
+      "low": 1950,
+      "variation": -1.27,
       "dividends": [
         {
           "year": 2025,
@@ -1157,17 +1185,18 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Industriels"
     },
     {
       "name": "Oragroup Togo",
       "symbol": "ORGT",
       "country": "tg",
-      "currentPrice": 2650,
-      "high": 2670,
-      "low": 2650,
-      "variation": -0.93,
+      "currentPrice": 2750,
+      "high": 2750,
+      "low": 2725,
+      "variation": 1.1,
       "dividends": [
         {
           "year": 2025,
@@ -1197,9 +1226,10 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-11T00:46:20.419Z",
-      "source": "scraped"
+      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "source": "scraped",
+      "sector": "Services Financiers"
     }
   ],
-  "lastSyncTime": "2026-07-11T00:46:20.419Z"
+  "lastSyncTime": "2026-07-28T20:55:26.368Z"
 }
