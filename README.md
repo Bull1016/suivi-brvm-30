@@ -101,10 +101,19 @@ GEMINI_API_KEY=votre_cle_api_gemini_ici
 BRVM_30_URL=https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
+# Avec l'intégration Vercel KV, utilisez plutôt KV_REST_API_URL et KV_REST_API_TOKEN.
+# KV_REST_API_READ_ONLY_TOKEN, KV_URL et REDIS_URL ne sont pas nécessaires ici.
 CRON_SECRET=
 ```
 
 Sans Redis, `npm run dev` fonctionne : l'état reste en mémoire le temps du process Express. Les JSON dans `data/` servent de seed.
+
+L'application utilise `@upstash/redis` via l'API REST et doit pouvoir écrire dans Redis pour synchroniser les cours, dividendes et analyses. Configurez donc **une seule paire** de variables :
+
+- `KV_REST_API_URL` + `KV_REST_API_TOKEN` avec l'intégration Vercel KV ; ou
+- `UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN` avec les noms Upstash historiques.
+
+`KV_REST_API_READ_ONLY_TOKEN` ne doit pas être utilisé : les routes de synchronisation effectuent des écritures. `KV_URL` et `REDIS_URL` sont des URL de connexion Redis classiques, pas les endpoints REST attendus par le client utilisé par ce projet.
 
 ### 3. Lancer en mode développement
 ```bash
@@ -117,7 +126,7 @@ Le serveur Express démarre sur `http://localhost:3000` et gère les API REST + 
 ## Déploiement Vercel
 
 1. Connecter le repo au projet Vercel (framework Vite, output `dist`).
-2. Dans **Storage**, créer **Upstash Redis / KV** et relier le projet (injecte `KV_REST_API_URL` / `KV_REST_API_TOKEN` ou les variables `UPSTASH_*`).
+2. Dans **Storage**, créer **Upstash Redis / KV** et relier le projet. L'intégration injecte généralement `KV_REST_API_URL`, `KV_REST_API_TOKEN`, `KV_REST_API_READ_ONLY_TOKEN`, `KV_URL` et `REDIS_URL` ; le projet utilise uniquement `KV_REST_API_URL` et `KV_REST_API_TOKEN` (ou les variables `UPSTASH_*` historiques).
 3. Ajouter `GEMINI_API_KEY` et `CRON_SECRET` dans **Environment Variables**.
 4. Déployer. Les fichiers `api/**/*.ts` deviennent des fonctions ; le front continue d'appeler `/api/...`.
 
