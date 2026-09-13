@@ -23,9 +23,7 @@ export default function App() {
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [lastSync, setLastSync] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [brvm30Url, setBrvm30Url] = useState<string>(
-    "https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf"
-  );
+  const [brvm30Url, setBrvm30Url] = useState<string>(process.env.BRVM_30_URL);
   const [error, setError] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{
     text: string;
@@ -125,32 +123,25 @@ export default function App() {
   const triggerSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
-    showStatus("Lancement de la synchronisation en arrière-plan...", "info");
+    showStatus("Synchronisation des cotations avec Sika Finance...", "info");
 
     try {
       const res = await fetch("/api/brvm30/sync", { method: "POST" });
       const data = await res.json();
       if (data.success) {
-        showStatus("La synchronisation a démarré avec Sika Finance !", "success");
-        let attempts = 0;
-        const interval = setInterval(async () => {
-          attempts++;
-          const checkRes = await fetch("/api/brvm30/stocks");
-          const checkData = await checkRes.json();
-          if (checkData.success) {
-            setStocks(checkData.stocks);
-            setLastSync(checkData.lastSync);
-
-            if (!checkData.isSyncing || attempts > 15) {
-              clearInterval(interval);
-              setIsSyncing(false);
-              showStatus("Mise à jour des cotations terminée avec succès !", "success");
-            }
+        if (Array.isArray(data.stocks)) {
+          setStocks(data.stocks);
+          if (selectedStock) {
+            const updated = data.stocks.find((s: StockData) => s.symbol === selectedStock.symbol);
+            if (updated) setSelectedStock(updated);
           }
-        }, 2000);
+        }
+        if (data.lastSync) setLastSync(data.lastSync);
+        setIsSyncing(false);
+        showStatus("Mise à jour des cotations terminée avec succès !", "success");
       } else {
         setIsSyncing(false);
-        showStatus(data.message || "Échec de l'initialisation de la synchronisation", "error");
+        showStatus(data.message || "Échec de la synchronisation", "error");
       }
     } catch (err) {
       setIsSyncing(false);
