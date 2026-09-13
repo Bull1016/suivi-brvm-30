@@ -37,7 +37,7 @@
       ],
       "streak": 5,
       "latestDividend": 1740,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.890Z",
       "source": "scraped",
       "sector": "Télécommunications"
     },
@@ -78,7 +78,7 @@
       ],
       "streak": 5,
       "latestDividend": 2293.28,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.915Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -119,7 +119,7 @@
       ],
       "streak": 5,
       "latestDividend": 900,
-      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "lastUpdated": "2026-07-28T23:05:34.334Z",
       "source": "fallback",
       "sector": "Services Financiers"
     },
@@ -160,7 +160,7 @@
       ],
       "streak": 0,
       "latestDividend": 0.92,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.915Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -201,7 +201,7 @@
       ],
       "streak": 5,
       "latestDividend": 585,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.915Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -242,7 +242,7 @@
       ],
       "streak": 5,
       "latestDividend": 397,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -283,7 +283,7 @@
       ],
       "streak": 5,
       "latestDividend": 594.5,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -324,7 +324,7 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -365,7 +365,7 @@
       ],
       "streak": 5,
       "latestDividend": 450,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -406,7 +406,7 @@
       ],
       "streak": 3,
       "latestDividend": 305.04,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -447,7 +447,7 @@
       ],
       "streak": 5,
       "latestDividend": 380,
-      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "lastUpdated": "2026-07-28T23:05:34.334Z",
       "source": "fallback",
       "sector": "Télécommunications"
     },
@@ -488,7 +488,7 @@
       ],
       "streak": 5,
       "latestDividend": 374,
-      "lastUpdated": "2026-07-28T20:55:26.366Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -529,7 +529,7 @@
       ],
       "streak": 5,
       "latestDividend": 781,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -570,7 +570,7 @@
       ],
       "streak": 4,
       "latestDividend": 675.98,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.916Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -611,7 +611,7 @@
       ],
       "streak": 5,
       "latestDividend": 441.4,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.919Z",
       "source": "scraped",
       "sector": "Consommation de Base"
     },
@@ -652,7 +652,7 @@
       ],
       "streak": 5,
       "latestDividend": 140,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.919Z",
       "source": "scraped",
       "sector": "Énergie"
     },
@@ -693,7 +693,7 @@
       ],
       "streak": 5,
       "latestDividend": 176.65,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.919Z",
       "source": "scraped",
       "sector": "Énergie"
     },
@@ -734,7 +734,7 @@
       ],
       "streak": 5,
       "latestDividend": 205.92,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.919Z",
       "source": "scraped",
       "sector": "Services Publics"
     },
@@ -775,7 +775,7 @@
       ],
       "streak": 5,
       "latestDividend": 462,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.919Z",
       "source": "scraped",
       "sector": "Services Publics"
     },
@@ -816,7 +816,7 @@
       ],
       "streak": 5,
       "latestDividend": 501.6,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation de Base"
     },
@@ -857,7 +857,7 @@
       ],
       "streak": 5,
       "latestDividend": 430.32,
-      "lastUpdated": "2026-07-28T20:55:26.367Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation de Base"
     },
@@ -898,7 +898,7 @@
       ],
       "streak": 5,
       "latestDividend": 369.6,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation de Base"
     },
@@ -939,7 +939,7 @@
       ],
       "streak": 5,
       "latestDividend": 1157.2,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Services Financiers"
     },
@@ -980,7 +980,7 @@
       ],
       "streak": 5,
       "latestDividend": 55.44,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation Discrétionnaire"
     },
@@ -1021,7 +1021,7 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation Discrétionnaire"
     },
@@ -1062,7 +1062,7 @@
       ],
       "streak": 5,
       "latestDividend": 200,
-      "lastUpdated": "2026-07-28T20:50:38.067Z",
+      "lastUpdated": "2026-07-28T23:05:34.334Z",
       "source": "fallback",
       "sector": "Industriels"
     },
@@ -1103,7 +1103,7 @@
       ],
       "streak": 5,
       "latestDividend": 85.07,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Énergie"
     },
@@ -1144,7 +1144,7 @@
       ],
       "streak": 3,
       "latestDividend": 1871.76,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Consommation de Base"
     },
@@ -1185,7 +1185,7 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Industriels"
     },
@@ -1226,10 +1226,10 @@
       ],
       "streak": 0,
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T20:55:26.368Z",
+      "lastUpdated": "2026-07-28T23:10:25.920Z",
       "source": "scraped",
       "sector": "Services Financiers"
     }
   ],
-  "lastSyncTime": "2026-07-28T20:55:26.368Z"
+  "lastSyncTime": "2026-07-28T23:10:25.920Z"
 }
