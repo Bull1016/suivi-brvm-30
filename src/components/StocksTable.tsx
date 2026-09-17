@@ -40,145 +40,145 @@ export const StocksTable: React.FC<StocksTableProps> = ({
           <thead>
             <tr className="bg-[#141414] text-[#E4E3E0] text-[10px] font-bold uppercase tracking-wider border-b-2 border-[#141414] font-mono">
               <th
-                className="py-4 px-6 w-32 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 w-32 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("symbol")}
               >
                 <div className="flex items-center space-x-1">
                   <span>Symbole</span>
                   {sortField === "symbol" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("name")}
               >
                 <div className="flex items-center space-x-1">
                   <span>Entreprise</span>
                   {sortField === "name" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("sector")}
               >
                 <div className="flex items-center space-x-1">
                   <span>Secteur BRVM</span>
                   {sortField === "sector" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 text-right w-44 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 text-right w-44 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("currentPrice")}
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Prix actuel</span>
                   {sortField === "currentPrice" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("variation")}
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Variation</span>
                   {sortField === "variation" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell"
+                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("high")}
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Haut</span>
                   {sortField === "high" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell"
+                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("low")}
               >
                 <div className="flex items-center justify-end space-x-1">
                   <span>Bas</span>
                   {sortField === "low" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
 
               <th
-                className="py-4 px-6 text-center w-52 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
+                className="py-4 px-6 text-center w-52 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none"
                 onClick={() => onSort("streak")}
               >
                 <div className="flex items-center justify-center space-x-1">
                   <span>Dividende (D)</span>
                   {sortField === "streak" ? (
                     sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
+                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
                     )
                   ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
+                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
                   )}
                 </div>
               </th>
@@ -200,10 +200,17 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => onSelectStock(stock)}
-                      className={`hover:bg-[#141414]/5 transition-colors duration-150 cursor-pointer ${
+                      className={`hover:bg-[#141414]/5 transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none ${
                         selectedStock?.symbol === stock.symbol ? "bg-[#141414]/10 font-bold" : ""
                       }`}
                       id={`row-${stock.symbol}`}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectStock(stock);
+                        }
+                      }}
                     >
                       {/* Symbol Column */}
                       <td className="py-3 px-6 font-mono font-bold text-slate-900">
@@ -257,7 +264,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       </td>
 
                       {/* Current Price Column */}
-                      <td className="py-3 px-6 text-right font-mono font-black text-sm text-[#141414]">
+                      <td className="py-3 px-6 text-right font-mono font-black text-sm text-[#141414] tabular-nums">
                         {formatPrice(stock.currentPrice)}
                       </td>
 
@@ -278,12 +285,12 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       </td>
 
                       {/* High Session Column */}
-                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell">
+                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell tabular-nums">
                         {formatPrice(stock.high)}
                       </td>
 
                       {/* Low Session Column */}
-                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell">
+                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell tabular-nums">
                         {formatPrice(stock.low)}
                       </td>
 
@@ -297,7 +304,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                                 {stock.streak}/5
                               </span>
                             </span>
-                            <span className="text-[11px] text-[#141414] font-mono font-bold mt-1">
+                            <span className="text-[11px] text-[#141414] font-mono font-bold mt-1 tabular-nums">
                               {formatPrice(stock.latestDividend)}
                             </span>
                           </div>
