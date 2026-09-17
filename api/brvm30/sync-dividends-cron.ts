@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isCronAuthorized } from "../../lib/brvm/http";
-import { syncDividendsBatch } from "../../lib/brvm/service";
+import { isCronAuthorized } from "../../lib/brvm/http.js";
+import { syncDividendsBatch } from "../../lib/brvm/service.js";
 
 /** Synchronizes the next dividend batch when invoked manually or by an authorized cron. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

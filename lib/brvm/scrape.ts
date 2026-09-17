@@ -1,6 +1,6 @@
-import { BRVM_SECTORS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
-import { processStockDividends } from "./process";
-import { SCRAPE_HEADERS, type DividendHistory, type StockData } from "./types";
+import { BRVM_SECTORS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
+import { processStockDividends } from "./process.js";
+import { SCRAPE_HEADERS, type DividendHistory, type StockData } from "./types.js";
 
 /** Fetches a response body while keeping the abort timeout active until it is read. */
 async function fetchHtmlWithTimeout(

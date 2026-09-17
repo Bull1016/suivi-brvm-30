@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { queryParam } from "../../../../lib/brvm/http";
-import { companyDescription } from "../../../../lib/brvm/service";
+import { queryParam } from "../../../../lib/brvm/http.js";
+import { companyDescription } from "../../../../lib/brvm/service.js";
 
 /** Returns a cached, generated, or fallback description for a listed company. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

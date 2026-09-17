@@ -1,5 +1,5 @@
-import { DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
-import type { DividendHistory, StockData } from "./types";
+import { DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
+import type { DividendHistory, StockData } from "./types.js";
 
 /** Derives sector, dividend streak, latest dividend, and metadata for a stock. */
 export function processStockDividends(
