@@ -23,7 +23,7 @@ export default function App() {
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [lastSync, setLastSync] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [brvm30Url, setBrvm30Url] = useState<string>("https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf");
+  const [brvm30Url, setBrvm30Url] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{
     text: string;

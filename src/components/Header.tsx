@@ -42,17 +42,19 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <a
-            href={brvm30Url}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Télécharger la composition PDF du BRVM 30"
-            className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-[#141414] text-xs font-bold uppercase tracking-wider py-3 px-5 rounded-none border-2 border-[#141414] shadow-[3px_3px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
-            id="btn-brvm30-pdf"
-          >
-            <FileText className="w-4 h-4 text-rose-500" aria-hidden="true" />
-            <span>Composition PDF</span>
-          </a>
+          {brvm30Url && (
+            <a
+              href={brvm30Url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Télécharger la composition PDF du BRVM 30"
+              className="inline-flex items-center space-x-2 bg-white hover:bg-slate-50 text-[#141414] text-xs font-bold uppercase tracking-wider py-3 px-5 rounded-none border-2 border-[#141414] shadow-[3px_3px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
+              id="btn-brvm30-pdf"
+            >
+              <FileText className="w-4 h-4 text-rose-500" aria-hidden="true" />
+              <span>Composition PDF</span>
+            </a>
+          )}
 
           <button
             onClick={onTriggerSync}
@@ -65,7 +67,7 @@ export const Header: React.FC<HeaderProps> = ({
             }`}
             id="btn-sync-all"
           >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-blue-900" : "text-white"}`} aria-hidden="true" />
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin motion-reduce:animate-none text-blue-900" : "text-white"}`} aria-hidden="true" />
             <span>{isSyncing ? "Synchronisation…" : "Synchroniser manuellement"}</span>
           </button>
         </div>

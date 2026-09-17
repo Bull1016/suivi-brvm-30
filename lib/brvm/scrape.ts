@@ -2,17 +2,24 @@ import { BRVM_SECTORS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
 import { processStockDividends } from "./process";
 import { SCRAPE_HEADERS, type DividendHistory, type StockData } from "./types";
 
-/** Creates a timeout-aware fetch that aborts after the specified duration. */
-function fetchWithTimeout(url: string, timeoutMs: number = 15000): Promise<Response> {
+/** Fetches a response body while keeping the abort timeout active until it is read. */
+async function fetchHtmlWithTimeout(
+  url: string,
+  timeoutMs: number = 15000
+): Promise<{ response: Response; html: string }> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-  
-  return fetch(url, { 
-    headers: SCRAPE_HEADERS,
-    signal: controller.signal 
-  }).finally(() => {
+
+  try {
+    const response = await fetch(url, {
+      headers: SCRAPE_HEADERS,
+      signal: controller.signal,
+    });
+    const html = await response.text();
+    return { response, html };
+  } finally {
     clearTimeout(timeoutId);
-  });
+  }
 }
 
 export type ScrapedQuote = {
@@ -33,9 +40,10 @@ export async function fetchBRVMSectors(): Promise<Record<string, string>> {
   await Promise.all(
     sectorIds.map(async (id) => {
       try {
-        const res = await fetchWithTimeout(`https://www.brvm.org/fr/cours-actions/${id}`);
-        if (!res.ok) return;
-        const html = await res.text();
+        const { response, html } = await fetchHtmlWithTimeout(
+          `https://www.brvm.org/fr/cours-actions/${id}`
+        );
+        if (!response.ok) return;
         const sectorName = BRVM_SECTORS[id];
         const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
         const stockTable = tables.find((t) => t.includes("Symbole") && t.includes("Nom"));
@@ -115,13 +123,11 @@ export function parseDividendsFromHtml(html: string): DividendHistory[] {
 /** Scrapes current BRVM quotations from the Sika Finance market table. */
 export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
   const sikaUrl = "https://www.sikafinance.com/marches/aaz";
-  const res = await fetchWithTimeout(sikaUrl);
+  const { response, html } = await fetchHtmlWithTimeout(sikaUrl);
 
-  if (!res.ok) {
-    throw new Error(`Sika Finance AAZ returned HTTP status ${res.status}`);
+  if (!response.ok) {
+    throw new Error(`Sika Finance AAZ returned HTTP status ${response.status}`);
   }
-
-  const html = await res.text();
 
   /** Normalizes text extracted from a quotation table cell. */
   const cleanCellText = (text: string) => {
@@ -209,11 +215,10 @@ export function dividendsForRollingWindow(parsed: DividendHistory[]): DividendHi
 /** Scrapes and normalizes dividend history for one listed stock. */
 export async function scrapeStockDividends(symbol: string, country: string): Promise<DividendHistory[]> {
   const url = `https://www.sikafinance.com/marches/cotation_${symbol}.${country}`;
-  const responseHtml = await fetchWithTimeout(url);
-  if (!responseHtml.ok) {
-    throw new Error(`Failed to fetch cotation detail: HTTP ${responseHtml.status}`);
+  const { response, html } = await fetchHtmlWithTimeout(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch cotation detail: HTTP ${response.status}`);
   }
-  const html = await responseHtml.text();
   const parsed = parseDividendsFromHtml(html);
   if (parsed.length === 0) {
     throw new Error("Aucun tableau de dividendes n'a pu être extrait de la page.");

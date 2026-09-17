@@ -34,7 +34,7 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
         }`}
       >
         <span>📰 Bulletins de la Cote (BOC)</span>
-        <span className="bg-rose-500 text-white font-sans text-[9px] font-bold px-1.5 py-0.5 animate-pulse" aria-hidden="true">
+        <span className="bg-rose-500 text-white font-sans text-[9px] font-bold px-1.5 py-0.5 animate-pulse motion-reduce:animate-none" aria-hidden="true">
           NOUVEAU
         </span>
       </button>

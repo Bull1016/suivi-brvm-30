@@ -68,10 +68,11 @@ function loadSeedState(): BrvmState {
     "data/stocks_cache.json"
   );
   if (cached?.stocks && Array.isArray(cached.stocks) && cached.stocks.length > 0) {
-    const lastSync = cached.lastSyncTime || cached.lastSync;
+    const lastSyncTime = typeof cached.lastSyncTime === "string" ? cached.lastSyncTime.trim() : "";
+    const legacyLastSync = typeof cached.lastSync === "string" ? cached.lastSync.trim() : "";
     return {
       stocks: cached.stocks.map((s) => processStockDividends(s)),
-      lastSync: lastSync && lastSync.trim() !== "" ? lastSync : "",
+      lastSync: lastSyncTime || legacyLastSync,
     };
   }
   return {

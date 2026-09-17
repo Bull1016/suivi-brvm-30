@@ -25,7 +25,7 @@ function formatDateCode(raw: string): string | null {
   const day = parseInt(compact.slice(6, 8), 10);
 
   // Validate calendar date ranges
-  if (year < 2000 || year > 2030) return null;
+  if (year < 2000) return null;
   if (month < 1 || month > 12) return null;
   if (day < 1 || day > 31) return null;
 
@@ -56,12 +56,15 @@ function formatDateStr(dateCode: string): string {
 export function validateBulletinUrlForDateCode(url: string, dateCode: string): boolean {
   const validatedCode = formatDateCode(dateCode);
   if (!validatedCode) return false;
-  
-  const urlLower = url.toLowerCase();
-  const codeLower = validatedCode.toLowerCase();
-  
-  // Check if the date code appears in the URL
-  return urlLower.includes(codeLower);
+
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === "https:" &&
+      parsedUrl.hostname === "www.brvm.org" &&
+      parsedUrl.href.includes(validatedCode);
+  } catch {
+    return false;
+  }
 }
 
 /** Scrapes and returns the 30 most recent official BRVM bulletins. */

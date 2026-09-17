@@ -112,7 +112,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                 </h4>
                 {isFetchingDescription ? (
                   <div className="flex items-center space-x-2 text-[#141414]/60 py-2">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                     <span className="font-mono">Chargement de la description officielle…</span>
                   </div>
                 ) : companyDescription ? (
@@ -326,7 +326,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                 }`}
                 id={`btn-sync-div-${selectedStock.symbol}`}
               >
-                <RefreshCw className={`w-4 h-4 ${isUpdatingDividends ? "animate-spin" : ""}`} aria-hidden="true" />
+                <RefreshCw className={`w-4 h-4 ${isUpdatingDividends ? "animate-spin motion-reduce:animate-none" : ""}`} aria-hidden="true" />
                 <span>
                   {isUpdatingDividends
                     ? "Recherche en cours…"
