@@ -8,7 +8,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });
   }
 
-  if (req.method === "GET" && !isCronAuthorized(req)) {
+  if (!isCronAuthorized(req)) {
     return res.status(401).json({ success: false, message: "Non autorisé." });
   }
 

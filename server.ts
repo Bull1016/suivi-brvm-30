@@ -8,7 +8,7 @@ import {
   syncDividendsForSymbol,
   syncQuotations,
 } from "./lib/brvm/service";
-import { scrapeOfficialBulletins } from "./lib/brvm/bulletins";
+import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./lib/brvm/bulletins";
 import { analyzeBulletinWithGemini } from "./lib/brvm/gemini";
 import { getBulletinAnalysis, saveBulletinAnalysis } from "./lib/brvm/store";
 
@@ -29,13 +29,23 @@ app.get("/api/brvm30/stocks", async (_req, res) => {
 });
 
 app.post("/api/brvm30/sync", async (_req, res) => {
-  const result = await syncQuotations();
-  res.status(result.status).json(result.body);
+  try {
+    const result = await syncQuotations();
+    res.status(result.status).json(result.body);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Erreur lors de la synchronisation." });
+  }
 });
 
 app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
-  const result = await syncDividendsForSymbol(req.params.symbol);
-  res.status(result.status).json(result.body);
+  try {
+    const result = await syncDividendsForSymbol(req.params.symbol);
+    res.status(result.status).json(result.body);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Erreur lors de la synchronisation des dividendes." });
+  }
 });
 
 app.get("/api/brvm30/company-description/:symbol/:country", async (req, res) => {
@@ -55,7 +65,7 @@ app.get("/api/brvm/bulletins", async (_req, res) => {
     console.error(error);
     res.status(500).json({
       success: false,
-      message: "Impossible de charger les bulletins de la cote.",
+      message: (error as Error).message || "Impossible de charger les bulletins de la cote.",
     });
   }
 });
@@ -80,6 +90,14 @@ app.get("/api/brvm/analyze-bulletin/:date", async (req, res) => {
         source: "cache",
       });
     }
+
+    if (!validateBulletinUrlForDateCode(url, dateCode)) {
+      return res.status(400).json({
+        success: false,
+        message: "L'URL fournie ne correspond pas à la date du bulletin.",
+      });
+    }
+
     const result = await analyzeBulletinWithGemini(dateCode, url);
     await saveBulletinAnalysis(dateCode, result);
     return res.json({

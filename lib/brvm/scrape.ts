@@ -2,6 +2,19 @@ import { BRVM_SECTORS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
 import { processStockDividends } from "./process";
 import { SCRAPE_HEADERS, type DividendHistory, type StockData } from "./types";
 
+/** Creates a timeout-aware fetch that aborts after the specified duration. */
+function fetchWithTimeout(url: string, timeoutMs: number = 15000): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  
+  return fetch(url, { 
+    headers: SCRAPE_HEADERS,
+    signal: controller.signal 
+  }).finally(() => {
+    clearTimeout(timeoutId);
+  });
+}
+
 export type ScrapedQuote = {
   symbol: string;
   country: string;
@@ -15,13 +28,12 @@ export type ScrapedQuote = {
 export async function fetchBRVMSectors(): Promise<Record<string, string>> {
   const sectorIds = [194, 195, 196, 197, 198, 199, 200];
   const newMap: Record<string, string> = { ...DEFAULT_SYMBOL_SECTOR_MAP };
+  let successfulParses = 0;
 
   await Promise.all(
     sectorIds.map(async (id) => {
       try {
-        const res = await fetch(`https://www.brvm.org/fr/cours-actions/${id}`, {
-          headers: SCRAPE_HEADERS,
-        });
+        const res = await fetchWithTimeout(`https://www.brvm.org/fr/cours-actions/${id}`);
         if (!res.ok) return;
         const html = await res.text();
         const sectorName = BRVM_SECTORS[id];
@@ -41,11 +53,16 @@ export async function fetchBRVMSectors(): Promise<Record<string, string>> {
           if (sym === "ONTBF") newMap["ONTB"] = sectorName;
           if (sym === "CBIBF") newMap["CBIB"] = sectorName;
         }
+        successfulParses++;
       } catch (e) {
         console.error(`Failed to fetch sector ${id}:`, e);
       }
     })
   );
+
+  if (successfulParses === 0) {
+    throw new Error("Aucune page de secteur n'a pu être parsée avec succès.");
+  }
 
   return newMap;
 }
@@ -98,7 +115,7 @@ export function parseDividendsFromHtml(html: string): DividendHistory[] {
 /** Scrapes current BRVM quotations from the Sika Finance market table. */
 export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
   const sikaUrl = "https://www.sikafinance.com/marches/aaz";
-  const res = await fetch(sikaUrl, { headers: SCRAPE_HEADERS });
+  const res = await fetchWithTimeout(sikaUrl);
 
   if (!res.ok) {
     throw new Error(`Sika Finance AAZ returned HTTP status ${res.status}`);
@@ -192,7 +209,7 @@ export function dividendsForRollingWindow(parsed: DividendHistory[]): DividendHi
 /** Scrapes and normalizes dividend history for one listed stock. */
 export async function scrapeStockDividends(symbol: string, country: string): Promise<DividendHistory[]> {
   const url = `https://www.sikafinance.com/marches/cotation_${symbol}.${country}`;
-  const responseHtml = await fetch(url, { headers: SCRAPE_HEADERS });
+  const responseHtml = await fetchWithTimeout(url);
   if (!responseHtml.ok) {
     throw new Error(`Failed to fetch cotation detail: HTTP ${responseHtml.status}`);
   }

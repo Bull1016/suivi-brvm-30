@@ -18,9 +18,7 @@ export function queryParam(value: string | string[] | undefined): string {
 export function isCronAuthorized(req: { method?: string; headers?: HeaderMap }): boolean {
   const secret = process.env.CRON_SECRET;
   const authHeader = headerValue(req.headers, "authorization");
-  const vercelCron = headerValue(req.headers, "x-vercel-cron");
 
   if (secret && authHeader === `Bearer ${secret}`) return true;
-  if (!secret && vercelCron === "1") return true;
   return false;
 }

@@ -74,7 +74,7 @@ Cite uniquement des informations cohérentes avec un BOC BRVM.`;
     model: "gemini-2.5-flash",
     contents: prompt,
     config: {
-      tools: [{ googleSearch: {} }],
+      tools: [{ googleSearch: {} }, { urlContext: { url: pdfUrl } }],
     },
   });
 
