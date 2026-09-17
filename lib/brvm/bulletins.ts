@@ -7,6 +7,7 @@ const BULLETIN_PAGES = [
   "https://www.brvm.org/fr/bulletins",
 ];
 
+/** Resolves a bulletin link against the BRVM website. */
 function absoluteUrl(href: string): string {
   if (href.startsWith("http")) return href;
   if (href.startsWith("//")) return `https:${href}`;
@@ -14,12 +15,14 @@ function absoluteUrl(href: string): string {
   return `https://www.brvm.org/${href}`;
 }
 
+/** Normalizes a candidate bulletin date to its eight-digit code. */
 function formatDateCode(raw: string): string | null {
   const compact = raw.replace(/\D/g, "");
   if (compact.length === 8) return compact;
   return null;
 }
 
+/** Formats an eight-digit bulletin date code for display. */
 function formatDateStr(dateCode: string): string {
   const y = dateCode.slice(0, 4);
   const m = dateCode.slice(4, 6);
@@ -27,6 +30,7 @@ function formatDateStr(dateCode: string): string {
   return `${d}/${m}/${y}`;
 }
 
+/** Scrapes and returns the 30 most recent official BRVM bulletins. */
 export async function scrapeOfficialBulletins(): Promise<BulletinItem[]> {
   const found = new Map<string, BulletinItem>();
 

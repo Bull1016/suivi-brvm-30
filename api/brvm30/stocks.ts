@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { listStocks } from "../../lib/brvm/service";
 
+/** Returns the current BRVM stock state and synchronization metadata. */
 export default async function handler(_req: VercelRequest, res: VercelResponse) {
   try {
     const body = await listStocks();

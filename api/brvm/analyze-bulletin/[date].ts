@@ -3,6 +3,7 @@ import { queryParam } from "../../../lib/brvm/http";
 import { getBulletinAnalysis, saveBulletinAnalysis } from "../../../lib/brvm/store";
 import { analyzeBulletinWithGemini } from "../../../lib/brvm/gemini";
 
+/** Returns a cached or newly generated analysis for the requested BRVM bulletin. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });

@@ -10,6 +10,7 @@ const KEY_SYNCING = "brvm:syncing";
 const KEY_DESCRIPTIONS = "brvm:descriptions";
 const KEY_SECTORS = "brvm:sectors";
 const KEY_DIV_CURSOR = "brvm:div-cursor";
+/** Builds the Redis key for a dated bulletin analysis. */
 const KEY_BULLETIN = (dateCode: string) => `brvm:bulletin:${dateCode}`;
 
 const SYNCING_TTL_SECONDS = 60;
@@ -22,6 +23,7 @@ const memoryBulletins = new Map<string, { analysis: string; sources: { title: st
 
 let redisClient: Redis | null | undefined;
 
+/** Returns the cached Redis client when persistence credentials are configured. */
 function getRedis(): Redis | null {
   if (redisClient !== undefined) return redisClient;
 
@@ -37,10 +39,12 @@ function getRedis(): Redis | null {
   return null;
 }
 
+/** Builds the initial stock collection from repository defaults. */
 function seedStocksFromDefaults(): StockData[] {
   return DEFAULT_BRVM_30_STOCKS.map((s) => processStockDividends(s));
 }
 
+/** Reads and parses a JSON seed file from supported runtime locations. */
 function readJsonFile<T>(relativePath: string): T | null {
   const candidates = [
     path.join(process.cwd(), relativePath),
@@ -58,6 +62,7 @@ function readJsonFile<T>(relativePath: string): T | null {
   return null;
 }
 
+/** Loads the initial stock state from cache data or repository defaults. */
 function loadSeedState(): BrvmState {
   const cached = readJsonFile<{ stocks?: StockData[]; lastSyncTime?: string; lastSync?: string }>(
     "data/stocks_cache.json"
@@ -74,10 +79,12 @@ function loadSeedState(): BrvmState {
   };
 }
 
+/** Loads repository-provided company descriptions for the in-memory cache. */
 function loadSeedDescriptions(): Record<string, string> {
   return readJsonFile<Record<string, string>>("data/company_descriptions.json") ?? {};
 }
 
+/** Returns the persisted stock state, seeding it when necessary. */
 export async function getState(): Promise<BrvmState> {
   const redis = getRedis();
   if (redis) {
@@ -98,6 +105,7 @@ export async function getState(): Promise<BrvmState> {
   return memoryState;
 }
 
+/** Saves stock state to memory and the configured Redis store. */
 export async function saveState(state: BrvmState): Promise<void> {
   memoryState = state;
   const redis = getRedis();
@@ -106,6 +114,7 @@ export async function saveState(state: BrvmState): Promise<void> {
   }
 }
 
+/** Reports whether a quotation synchronization lock is active. */
 export async function isSyncing(): Promise<boolean> {
   const redis = getRedis();
   if (redis) {
@@ -115,6 +124,7 @@ export async function isSyncing(): Promise<boolean> {
   return false;
 }
 
+/** Creates or clears the quotation synchronization lock. */
 export async function setSyncing(value: boolean): Promise<void> {
   const redis = getRedis();
   if (!redis) return;
@@ -125,6 +135,7 @@ export async function setSyncing(value: boolean): Promise<void> {
   }
 }
 
+/** Returns the persisted symbol-to-sector map or its default value. */
 export async function getSectorMap(): Promise<Record<string, string>> {
   const redis = getRedis();
   if (redis) {
@@ -137,6 +148,7 @@ export async function getSectorMap(): Promise<Record<string, string>> {
   return memorySectors ?? { ...DEFAULT_SYMBOL_SECTOR_MAP };
 }
 
+/** Saves the symbol-to-sector map to memory and Redis. */
 export async function saveSectorMap(map: Record<string, string>): Promise<void> {
   memorySectors = map;
   const redis = getRedis();
@@ -145,6 +157,7 @@ export async function saveSectorMap(map: Record<string, string>): Promise<void> 
   }
 }
 
+/** Returns a cached company description by its normalized key. */
 export async function getDescription(key: string): Promise<string | null> {
   const redis = getRedis();
   if (redis) {
@@ -163,6 +176,7 @@ export async function getDescription(key: string): Promise<string | null> {
   return memoryDescriptions[key] ?? null;
 }
 
+/** Saves a company description to memory and Redis. */
 export async function saveDescription(key: string, description: string): Promise<void> {
   memoryDescriptions[key] = description;
   const redis = getRedis();
@@ -171,6 +185,7 @@ export async function saveDescription(key: string, description: string): Promise
   }
 }
 
+/** Returns the cursor for the next dividend synchronization batch. */
 export async function getDivCursor(): Promise<number> {
   const redis = getRedis();
   if (redis) {
@@ -180,6 +195,7 @@ export async function getDivCursor(): Promise<number> {
   return memoryDivCursor;
 }
 
+/** Persists the cursor for the next dividend synchronization batch. */
 export async function setDivCursor(index: number): Promise<void> {
   memoryDivCursor = index;
   const redis = getRedis();
@@ -188,6 +204,7 @@ export async function setDivCursor(index: number): Promise<void> {
   }
 }
 
+/** Returns a cached analysis for the requested bulletin date. */
 export async function getBulletinAnalysis(dateCode: string) {
   const redis = getRedis();
   if (redis) {
@@ -198,6 +215,7 @@ export async function getBulletinAnalysis(dateCode: string) {
   return memoryBulletins.get(dateCode) ?? null;
 }
 
+/** Saves a bulletin analysis to memory and Redis. */
 export async function saveBulletinAnalysis(
   dateCode: string,
   payload: { analysis: string; sources: { title: string; uri: string }[] }
@@ -209,6 +227,7 @@ export async function saveBulletinAnalysis(
   }
 }
 
+/** Reports whether Redis persistence is configured. */
 export function hasRedis(): boolean {
   return getRedis() !== null;
 }

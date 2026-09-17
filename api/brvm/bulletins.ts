@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { scrapeOfficialBulletins } from "../../lib/brvm/bulletins";
 
+/** Returns the latest official BRVM bulletins discovered on the exchange website. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET") {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });

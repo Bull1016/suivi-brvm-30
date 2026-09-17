@@ -1,6 +1,7 @@
 import { DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
 import type { DividendHistory, StockData } from "./types";
 
+/** Derives sector, dividend streak, latest dividend, and metadata for a stock. */
 export function processStockDividends(
   stock: Omit<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector"> &
     Partial<Pick<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector">>,

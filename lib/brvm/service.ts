@@ -21,10 +21,12 @@ import {
 import { generateCompanyDescription } from "./gemini";
 import type { StockData } from "./types";
 
+/** Returns the configured BRVM 30 composition document URL. */
 function brvm30Url() {
   return process.env.BRVM_30_URL || DEFAULT_BRVM30_PDF;
 }
 
+/** Returns stocks together with their synchronization status and metadata. */
 export async function listStocks() {
   const [state, syncing] = await Promise.all([getState(), isSyncing()]);
   return {
@@ -36,6 +38,7 @@ export async function listStocks() {
   };
 }
 
+/** Scrapes current quotations and persists the refreshed stock state. */
 export async function syncQuotations() {
   if (await isSyncing()) {
     return {
@@ -89,6 +92,7 @@ export async function syncQuotations() {
   }
 }
 
+/** Refreshes and persists dividend history for one stock symbol. */
 export async function syncDividendsForSymbol(symbol: string) {
   const state = await getState();
   const sectorMap = await getSectorMap();
@@ -131,6 +135,7 @@ export async function syncDividendsForSymbol(symbol: string) {
   }
 }
 
+/** Refreshes a cursor-based batch of stock dividend histories. */
 export async function syncDividendsBatch(batchSize = 2) {
   const state = await getState();
   if (state.stocks.length === 0) {
@@ -161,6 +166,7 @@ export async function syncDividendsBatch(batchSize = 2) {
   return { success: true, updated, cursor: (start + batchSize) % state.stocks.length };
 }
 
+/** Returns a cached, AI-generated, or fallback company description. */
 export async function companyDescription(symbol: string, country: string) {
   const targetSymbol = symbol.toUpperCase();
   const targetCountry = country.toLowerCase();

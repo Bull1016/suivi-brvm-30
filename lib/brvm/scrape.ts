@@ -11,6 +11,7 @@ export type ScrapedQuote = {
   variation: number;
 };
 
+/** Builds a symbol-to-sector map by scraping each BRVM sector page. */
 export async function fetchBRVMSectors(): Promise<Record<string, string>> {
   const sectorIds = [194, 195, 196, 197, 198, 199, 200];
   const newMap: Record<string, string> = { ...DEFAULT_SYMBOL_SECTOR_MAP };
@@ -49,6 +50,7 @@ export async function fetchBRVMSectors(): Promise<Record<string, string>> {
   return newMap;
 }
 
+/** Extracts valid dividend records from a Sika Finance quote page. */
 export function parseDividendsFromHtml(html: string): DividendHistory[] {
   const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
   let dividendTableHtml = "";
@@ -93,6 +95,7 @@ export function parseDividendsFromHtml(html: string): DividendHistory[] {
   return dividends;
 }
 
+/** Scrapes current BRVM quotations from the Sika Finance market table. */
 export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
   const sikaUrl = "https://www.sikafinance.com/marches/aaz";
   const res = await fetch(sikaUrl, { headers: SCRAPE_HEADERS });
@@ -103,6 +106,7 @@ export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
 
   const html = await res.text();
 
+  /** Normalizes text extracted from a quotation table cell. */
   const cleanCellText = (text: string) => {
     if (!text) return "";
     return text
@@ -148,6 +152,7 @@ export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
   return scrapedStocks;
 }
 
+/** Merges scraped quotations into the existing stock collection. */
 export function mergeScrapedQuotes(
   existing: StockData[],
   scraped: ScrapedQuote[],
@@ -174,6 +179,7 @@ export function mergeScrapedQuotes(
   });
 }
 
+/** Fills a parsed dividend history into the five-year rolling window. */
 export function dividendsForRollingWindow(parsed: DividendHistory[]): DividendHistory[] {
   const lastYear = new Date().getFullYear() - 1;
   const targetYears = Array.from({ length: 5 }, (_, i) => lastYear - i);
@@ -183,6 +189,7 @@ export function dividendsForRollingWindow(parsed: DividendHistory[]): DividendHi
   });
 }
 
+/** Scrapes and normalizes dividend history for one listed stock. */
 export async function scrapeStockDividends(symbol: string, country: string): Promise<DividendHistory[]> {
   const url = `https://www.sikafinance.com/marches/cotation_${symbol}.${country}`;
   const responseHtml = await fetch(url, { headers: SCRAPE_HEADERS });

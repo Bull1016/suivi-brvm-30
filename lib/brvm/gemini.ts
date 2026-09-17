@@ -2,6 +2,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 
 let ai: GoogleGenAI | null | undefined;
 
+/** Returns the lazily initialized Gemini client when an API key is configured. */
 export function getGemini(): GoogleGenAI | null {
   if (ai !== undefined) return ai;
   if (!process.env.GEMINI_API_KEY) {
@@ -19,6 +20,7 @@ export function getGemini(): GoogleGenAI | null {
   return ai;
 }
 
+/** Generates a French company description with Gemini when the client is available. */
 export async function generateCompanyDescription(
   companyName: string,
   symbol: string,
@@ -51,6 +53,7 @@ export async function generateCompanyDescription(
   return null;
 }
 
+/** Generates a sourced Markdown analysis for a BRVM bulletin. */
 export async function analyzeBulletinWithGemini(dateCode: string, pdfUrl: string) {
   const client = getGemini();
   if (!client) {
