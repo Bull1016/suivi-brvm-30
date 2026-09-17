@@ -1,9 +1,9 @@
  import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
-import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants";
-import { processStockDividends } from "./process";
-import type { BrvmState, StockData } from "./types";
+import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
+import { processStockDividends } from "./process.js";
+import type { BrvmState, StockData } from "./types.js";
 
 const KEY_STATE = "brvm:state";
 const KEY_SYNCING = "brvm:syncing";

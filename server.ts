@@ -7,10 +7,10 @@ import {
   listStocks,
   syncDividendsForSymbol,
   syncQuotations,
-} from "./lib/brvm/service";
-import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./lib/brvm/bulletins";
-import { analyzeBulletinWithGemini } from "./lib/brvm/gemini";
-import { getBulletinAnalysis, saveBulletinAnalysis } from "./lib/brvm/store";
+} from "./lib/brvm/service.js";
+import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./lib/brvm/bulletins.js";
+import { analyzeBulletinWithGemini } from "./lib/brvm/gemini.js";
+import { getBulletinAnalysis, saveBulletinAnalysis } from "./lib/brvm/store.js";
 
 dotenv.config();
 

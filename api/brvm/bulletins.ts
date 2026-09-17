@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { scrapeOfficialBulletins } from "../../lib/brvm/bulletins";
+import { scrapeOfficialBulletins } from "../../lib/brvm/bulletins.js";
 
 /** Returns the latest official BRVM bulletins discovered on the exchange website. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

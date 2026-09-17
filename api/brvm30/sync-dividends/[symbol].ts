@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { queryParam } from "../../../lib/brvm/http";
-import { syncDividendsForSymbol } from "../../../lib/brvm/service";
+import { queryParam } from "../../../lib/brvm/http.js";
+import { syncDividendsForSymbol } from "../../../lib/brvm/service.js";
 
 /** Synchronizes dividend history for the requested BRVM symbol. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

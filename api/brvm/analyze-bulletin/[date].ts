@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { queryParam } from "../../../lib/brvm/http";
-import { getBulletinAnalysis, saveBulletinAnalysis } from "../../../lib/brvm/store";
-import { analyzeBulletinWithGemini } from "../../../lib/brvm/gemini";
-import { validateBulletinUrlForDateCode } from "../../../lib/brvm/bulletins";
+import { queryParam } from "../../../lib/brvm/http.js";
+import { getBulletinAnalysis, saveBulletinAnalysis } from "../../../lib/brvm/store.js";
+import { analyzeBulletinWithGemini } from "../../../lib/brvm/gemini.js";
+import { validateBulletinUrlForDateCode } from "../../../lib/brvm/bulletins.js";
 
 /** Returns a cached or newly generated analysis for the requested BRVM bulletin. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {

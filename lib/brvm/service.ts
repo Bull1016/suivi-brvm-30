@@ -1,11 +1,11 @@
-import { DEFAULT_BRVM30_PDF } from "./types";
-import { processStockDividends } from "./process";
+import { DEFAULT_BRVM30_PDF } from "./types.js";
+import { processStockDividends } from "./process.js";
 import {
   fetchBRVMSectors,
   mergeScrapedQuotes,
   scrapeSikaQuotes,
   scrapeStockDividends,
-} from "./scrape";
+} from "./scrape.js";
 import {
   getDescription,
   getDivCursor,
@@ -17,9 +17,9 @@ import {
   saveState,
   setDivCursor,
   setSyncing,
-} from "./store";
-import { generateCompanyDescription } from "./gemini";
-import type { StockData } from "./types";
+} from "./store.js";
+import { generateCompanyDescription } from "./gemini.js";
+import type { StockData } from "./types.js";
 
 /** Returns the configured BRVM 30 composition document URL. */
 function brvm30Url() {

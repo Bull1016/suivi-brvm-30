@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isCronAuthorized } from "../../lib/brvm/http";
-import { syncQuotations } from "../../lib/brvm/service";
+import { isCronAuthorized } from "../../lib/brvm/http.js";
+import { syncQuotations } from "../../lib/brvm/service.js";
 
 /** Synchronizes BRVM quotations for manual requests or authorized cron invocations. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
