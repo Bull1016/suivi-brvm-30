@@ -2,11 +2,11 @@
   "crons": [
     {
       "path": "/api/brvm30/sync",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 1 * * *"
     },
     {
       "path": "/api/brvm30/sync-dividends-cron",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 2 * * *"
     }
   ],
   "functions": {

@@ -56,24 +56,24 @@ export const Header: React.FC<HeaderProps> = ({
             disabled={isSyncing}
             className={`inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-wider py-3 px-6 rounded-none shadow-[3px_3px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-100 ${
               isSyncing
-                ? "bg-[#141414]/20 text-[#141414]/50 border-2 border-[#141414]/30 cursor-not-allowed"
-                : "bg-[#141414] hover:bg-black text-[#E4E3E0] border-2 border-[#141414] cursor-pointer"
+                ? "bg-blue-100 text-blue-800 border-2 border-blue-800 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white border-2 border-blue-800 cursor-pointer"
             }`}
             id="btn-sync-all"
           >
-            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-[#141414]/40" : "text-white"}`} />
-            <span>{isSyncing ? "Synchronisation..." : "Synchroniser"}</span>
+            <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin text-blue-900" : "text-white"}`} />
+            <span>{isSyncing ? "Synchronisation..." : "Synchroniser manuellement"}</span>
           </button>
         </div>
       </div>
 
       <div className="mt-6 pt-6 border-t border-[#141414] flex flex-wrap items-center justify-between gap-4 text-[11px] font-mono uppercase">
         <div className="flex items-center space-x-2 text-[#141414]/70">
-          <span className="inline-block w-2.5 h-2.5 bg-green-500 border border-[#141414]" />
-          <span>Mise à jour automatique toutes les 5 minutes</span>
+          <span className="inline-block w-2.5 h-2.5 bg-blue-500 border border-[#141414]" />
+          <span>Mise à jour automatique quotidienne (Hobby plan)</span>
         </div>
         <div className="text-[#141414]/60">
-          Dernier import : <span className="text-[#141414] font-bold">{formatDate(lastSync)}</span>
+          Dernière synchronisation : <span className="text-blue-700 font-bold">{formatDate(lastSync)}</span>
         </div>
       </div>
     </header>
