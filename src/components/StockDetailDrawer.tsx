@@ -34,26 +34,31 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
   onSyncDividends,
   lastYear
 }) => {
+  const prefersReducedMotion = typeof window !== "undefined"
+    ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    : false;
+
   return (
     <AnimatePresence>
       {selectedStock && (
         <>
           {/* Backdrop */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.6 }}
-            exit={{ opacity: 0 }}
+            initial={prefersReducedMotion ? { opacity: 0.6 } : { opacity: 0 }}
+            animate={prefersReducedMotion ? { opacity: 0.6 } : { opacity: 0.6 }}
+            exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+            transition={prefersReducedMotion ? { duration: 0 } : undefined}
             onClick={onClose}
             className="fixed inset-0 bg-[#141414] z-40"
           />
 
           {/* Panel */}
           <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-lg bg-white border-l-4 border-[#141414] shadow-2xl z-50 overflow-y-auto flex flex-col font-mono text-xs text-[#141414]"
+            initial={prefersReducedMotion ? { x: 0 } : { x: "100%" }}
+            animate={prefersReducedMotion ? { x: 0 } : { x: 0 }}
+            exit={prefersReducedMotion ? { x: "100%" } : { x: "100%" }}
+            transition={prefersReducedMotion ? { duration: 0 } : { type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed top-0 right-0 bottom-0 w-full max-w-lg bg-white border-l-4 border-[#141414] shadow-2xl z-50 overflow-y-auto flex flex-col font-mono text-xs text-[#141414] overscroll-behavior-contain"
           >
             {/* Drawer Header */}
             <div className="p-6 border-b-2 border-[#141414] flex items-center justify-between bg-[#E4E3E0]/40">
@@ -72,14 +77,15 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                         href={SECTOR_CONFIG[selectedStock.sector].url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`inline-flex items-center space-x-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all ${
+                        aria-label={`Voir la page officielle du secteur BRVM: ${selectedStock.sector}`}
+                        className={`inline-flex items-center space-x-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
                           SECTOR_CONFIG[selectedStock.sector].badgeBg
                         }`}
                         title={`Voir la page officielle du secteur BRVM: ${selectedStock.sector}`}
                       >
                         <span>{SECTOR_CONFIG[selectedStock.sector].icon}</span>
                         <span>{selectedStock.sector}</span>
-                        <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-60" />
+                        <ExternalLink className="w-2.5 h-2.5 ml-0.5 opacity-60" aria-hidden="true" />
                       </a>
                     )}
                   </div>
@@ -90,7 +96,8 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-[#141414] hover:bg-[#141414]/10 rounded-none transition-all"
+                aria-label="Fermer le panneau de détails"
+                className="p-2 text-[#141414] hover:bg-[#141414]/10 rounded-none transition-all focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -105,8 +112,8 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                 </h4>
                 {isFetchingDescription ? (
                   <div className="flex items-center space-x-2 text-[#141414]/60 py-2">
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                    <span className="font-mono">Chargement de la description officielle...</span>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                    <span className="font-mono">Chargement de la description officielle…</span>
                   </div>
                 ) : companyDescription ? (
                   <p className="text-[#141414] font-sans leading-relaxed text-[11px] whitespace-pre-line">
@@ -125,7 +132,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                   <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider block">
                     Dernier Cours
                   </span>
-                  <span className="text-xl font-bold text-[#141414] font-mono block mt-1">
+                  <span className="text-xl font-bold text-[#141414] font-mono block mt-1 tabular-nums">
                     {formatPrice(selectedStock.currentPrice)}
                   </span>
                   <span
@@ -146,7 +153,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                   <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider block">
                     Dernier Dividende
                   </span>
-                  <span className="text-xl font-bold text-[#141414] font-mono block mt-1">
+                  <span className="text-xl font-bold text-[#141414] font-mono block mt-1 tabular-nums">
                     {formatPrice(selectedStock.latestDividend)}
                   </span>
                   <span className="text-[9px] text-[#141414]/50 block mt-1.5 uppercase font-semibold">
@@ -161,7 +168,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                   <span className="text-[9px] text-[#E4E3E0]/60 font-bold uppercase block">
                     Plus haut
                   </span>
-                  <span className="text-sm font-bold text-white mt-1 block">
+                  <span className="text-sm font-bold text-white mt-1 block tabular-nums">
                     {formatPrice(selectedStock.high)}
                   </span>
                 </div>
@@ -169,7 +176,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                   <span className="text-[9px] text-[#E4E3E0]/60 font-bold uppercase block">
                     Plus bas
                   </span>
-                  <span className="text-sm font-bold text-white mt-1 block">
+                  <span className="text-sm font-bold text-white mt-1 block tabular-nums">
                     {formatPrice(selectedStock.low)}
                   </span>
                 </div>
@@ -243,7 +250,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                               </span>
                             )}
                           </td>
-                          <td className="py-3 px-4 text-right font-mono font-bold text-[#141414]/80">
+                          <td className="py-3 px-4 text-right font-mono font-bold text-[#141414]/80 tabular-nums">
                             {div.paid ? formatPrice(div.amount) : "0 FCFA"}
                           </td>
                         </tr>
@@ -275,7 +282,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${pct}%` }}
-                              transition={{ duration: 0.8, ease: "easeOut" }}
+                              transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.8, ease: "easeOut" }}
                               className="bg-gradient-to-r from-emerald-600 to-teal-600 h-full"
                             />
                           )}
@@ -313,15 +320,16 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
               <button
                 onClick={() => onSyncDividends(selectedStock.symbol)}
                 disabled={isUpdatingDividends}
-                className={`w-full py-3 bg-[#141414] hover:bg-black text-[#E4E3E0] rounded-none border-2 border-[#141414] font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-100 ${
+                aria-label={isUpdatingDividends ? "Recherche en cours" : "Recharger l'historique officiel"}
+                className={`w-full py-3 bg-[#141414] hover:bg-black text-[#E4E3E0] rounded-none border-2 border-[#141414] font-bold text-xs uppercase tracking-wider shadow-[3px_3px_0px_#141414] active:translate-x-0.5 active:translate-y-0.5 transition-all duration-100 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 inline-flex items-center justify-center gap-2 ${
                   isUpdatingDividends ? "cursor-not-allowed opacity-50" : "cursor-pointer"
                 }`}
                 id={`btn-sync-div-${selectedStock.symbol}`}
               >
-                <RefreshCw className={`w-4 h-4 ${isUpdatingDividends ? "animate-spin" : ""}`} />
+                <RefreshCw className={`w-4 h-4 ${isUpdatingDividends ? "animate-spin motion-reduce:animate-none" : ""}`} aria-hidden="true" />
                 <span>
                   {isUpdatingDividends
-                    ? "Recherche en cours..."
+                    ? "Recherche en cours…"
                     : "Recharger l'historique officiel"}
                 </span>
               </button>

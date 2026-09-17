@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { queryParam } from "../../../lib/brvm/http";
 import { getBulletinAnalysis, saveBulletinAnalysis } from "../../../lib/brvm/store";
 import { analyzeBulletinWithGemini } from "../../../lib/brvm/gemini";
+import { validateBulletinUrlForDateCode } from "../../../lib/brvm/bulletins";
 
 /** Returns a cached or newly generated analysis for the requested BRVM bulletin. */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -26,6 +27,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         analysis: cached.analysis,
         sources: cached.sources,
         source: "cache",
+      });
+    }
+
+    if (!validateBulletinUrlForDateCode(url, dateCode)) {
+      return res.status(400).json({
+        success: false,
+        message: "L'URL fournie ne correspond pas à la date du bulletin.",
       });
     }
 

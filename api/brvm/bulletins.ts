@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.error(error);
     return res.status(500).json({
       success: false,
-      message: "Impossible de charger les bulletins de la cote.",
+      message: (error as Error).message || "Impossible de charger les bulletins de la cote.",
     });
   }
 }

@@ -12,16 +12,13 @@ export function processStockDividends(
   const lastYear = currentYear - 1;
   const startYear = lastYear - 4;
 
-  const sorted = [...dividends].sort((a, b) => b.year - a.year);
   let consecutiveYears = 0;
-  for (const div of sorted) {
-    if (div.year <= lastYear && div.year >= startYear) {
-      if (div.paid) {
-        consecutiveYears++;
-      } else {
-        break;
-      }
+  for (let year = lastYear; year >= startYear; year--) {
+    const dividend = dividends.find((d) => d.year === year);
+    if (!dividend || !dividend.paid) {
+      break;
     }
+    consecutiveYears++;
   }
 
   const streak = consecutiveYears >= 3 ? consecutiveYears : 0;

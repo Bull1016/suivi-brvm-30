@@ -24,6 +24,38 @@ export const StocksTable: React.FC<StocksTableProps> = ({
   onSort,
   error
 }) => {
+  const renderSortableHeader = (
+    field: keyof StockData,
+    label: string,
+    cellClassName = "",
+    justifyClassName = "justify-start"
+  ) => {
+    const ariaSort = sortField === field
+      ? sortDirection === "asc" ? "ascending" : "descending"
+      : "none";
+
+    return (
+      <th className={cellClassName} aria-sort={ariaSort}>
+        <button
+          type="button"
+          onClick={() => onSort(field)}
+          className={`flex w-full items-center ${justifyClassName} space-x-1 py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none`}
+        >
+          <span>{label}</span>
+          {sortField === field ? (
+            sortDirection === "asc" ? (
+              <ChevronUp className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-emerald-400" aria-hidden="true" />
+            )
+          ) : (
+            <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" aria-hidden="true" />
+          )}
+        </button>
+      </th>
+    );
+  };
+
   return (
     <div className="bg-white border-2 border-[#141414] rounded-none shadow-[8px_8px_0px_#141414] overflow-hidden mb-8">
       {error && (
@@ -39,149 +71,14 @@ export const StocksTable: React.FC<StocksTableProps> = ({
         <table className="w-full text-left border-collapse min-w-[850px]">
           <thead>
             <tr className="bg-[#141414] text-[#E4E3E0] text-[10px] font-bold uppercase tracking-wider border-b-2 border-[#141414] font-mono">
-              <th
-                className="py-4 px-6 w-32 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("symbol")}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Symbole</span>
-                  {sortField === "symbol" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("name")}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Entreprise</span>
-                  {sortField === "name" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("sector")}
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Secteur BRVM</span>
-                  {sortField === "sector" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 text-right w-44 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("currentPrice")}
-              >
-                <div className="flex items-center justify-end space-x-1">
-                  <span>Prix actuel</span>
-                  {sortField === "currentPrice" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("variation")}
-              >
-                <div className="flex items-center justify-end space-x-1">
-                  <span>Variation</span>
-                  {sortField === "variation" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell"
-                onClick={() => onSort("high")}
-              >
-                <div className="flex items-center justify-end space-x-1">
-                  <span>Haut</span>
-                  {sortField === "high" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 text-right w-36 cursor-pointer select-none hover:bg-neutral-800 transition-colors hidden sm:table-cell"
-                onClick={() => onSort("low")}
-              >
-                <div className="flex items-center justify-end space-x-1">
-                  <span>Bas</span>
-                  {sortField === "low" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
-
-              <th
-                className="py-4 px-6 text-center w-52 cursor-pointer select-none hover:bg-neutral-800 transition-colors"
-                onClick={() => onSort("streak")}
-              >
-                <div className="flex items-center justify-center space-x-1">
-                  <span>Dividende (D)</span>
-                  {sortField === "streak" ? (
-                    sortDirection === "asc" ? (
-                      <ChevronUp className="w-3.5 h-3.5 text-emerald-400" />
-                    ) : (
-                      <ChevronDown className="w-3.5 h-3.5 text-emerald-400" />
-                    )
-                  ) : (
-                    <ChevronsUpDown className="w-3.5 h-3.5 text-neutral-600" />
-                  )}
-                </div>
-              </th>
+              {renderSortableHeader("symbol", "Symbole", "w-32")}
+              {renderSortableHeader("name", "Entreprise")}
+              {renderSortableHeader("sector", "Secteur BRVM")}
+              {renderSortableHeader("currentPrice", "Prix actuel", "w-44", "justify-end")}
+              {renderSortableHeader("variation", "Variation", "w-36", "justify-end")}
+              {renderSortableHeader("high", "Haut", "w-36 hidden sm:table-cell", "justify-end")}
+              {renderSortableHeader("low", "Bas", "w-36 hidden sm:table-cell", "justify-end")}
+              {renderSortableHeader("streak", "Dividende (D)", "w-52", "justify-center")}
             </tr>
           </thead>
           <tbody className="divide-y divide-[#141414]/15 text-xs font-mono text-[#141414]">
@@ -200,10 +97,18 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => onSelectStock(stock)}
-                      className={`hover:bg-[#141414]/5 transition-colors duration-150 cursor-pointer ${
+                      className={`hover:bg-[#141414]/5 transition-colors duration-150 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus:outline-none ${
                         selectedStock?.symbol === stock.symbol ? "bg-[#141414]/10 font-bold" : ""
                       }`}
                       id={`row-${stock.symbol}`}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.target !== e.currentTarget) return;
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectStock(stock);
+                        }
+                      }}
                     >
                       {/* Symbol Column */}
                       <td className="py-3 px-6 font-mono font-bold text-slate-900">
@@ -257,7 +162,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       </td>
 
                       {/* Current Price Column */}
-                      <td className="py-3 px-6 text-right font-mono font-black text-sm text-[#141414]">
+                      <td className="py-3 px-6 text-right font-mono font-black text-sm text-[#141414] tabular-nums">
                         {formatPrice(stock.currentPrice)}
                       </td>
 
@@ -278,12 +183,12 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                       </td>
 
                       {/* High Session Column */}
-                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell">
+                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell tabular-nums">
                         {formatPrice(stock.high)}
                       </td>
 
                       {/* Low Session Column */}
-                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell">
+                      <td className="py-3 px-6 text-right font-mono text-xs text-[#141414]/60 hidden sm:table-cell tabular-nums">
                         {formatPrice(stock.low)}
                       </td>
 
@@ -297,7 +202,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                                 {stock.streak}/5
                               </span>
                             </span>
-                            <span className="text-[11px] text-[#141414] font-mono font-bold mt-1">
+                            <span className="text-[11px] text-[#141414] font-mono font-bold mt-1 tabular-nums">
                               {formatPrice(stock.latestDividend)}
                             </span>
                           </div>

@@ -23,7 +23,7 @@ export default function App() {
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [lastSync, setLastSync] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
-  const [brvm30Url, setBrvm30Url] = useState<string>(process.env.BRVM_30_URL);
+  const [brvm30Url, setBrvm30Url] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{
     text: string;
@@ -123,7 +123,7 @@ export default function App() {
   const triggerSync = async () => {
     if (isSyncing) return;
     setIsSyncing(true);
-    showStatus("Synchronisation des cotations avec Sika Finance...", "info");
+    showStatus("Synchronisation des cotations avec Sika Finance…", "info");
 
     try {
       const res = await fetch("/api/brvm30/sync", { method: "POST" });
@@ -152,7 +152,7 @@ export default function App() {
   const syncStockDividends = async (symbol: string) => {
     if (isUpdatingDividends) return;
     setIsUpdatingDividends(true);
-    setDividendUpdateMsg("Récupération en direct de l'historique des dividendes...");
+    setDividendUpdateMsg("Récupération en direct de l'historique des dividendes…");
 
     try {
       const res = await fetch(`/api/brvm30/sync-dividends/${symbol}`, { method: "POST" });
@@ -373,12 +373,12 @@ export default function App() {
   // ─── Render ──────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans antialiased pb-12">
+    <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans antialiased pb-12 touch-action-manipulation">
       {/* Toast notification */}
       <StatusBanner statusMsg={statusMsg} />
 
       {/* Main container */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
         {/* Page header */}
         <Header
           brvm30Url={brvm30Url}
@@ -432,7 +432,7 @@ export default function App() {
           </>
         ) : (
           /* ── BULLETINS TAB ───────────────────────────────────────── */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8 animate-fade-in">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
             <BulletinsSidebar
               bulletins={bulletins}
               selectedBulletin={selectedBulletin}
@@ -451,7 +451,7 @@ export default function App() {
             />
           </div>
         )}
-      </div>
+      </main>
 
       {/* Slide-in detail drawer */}
       <StockDetailDrawer

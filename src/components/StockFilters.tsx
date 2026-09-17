@@ -45,18 +45,22 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#141414]" />
+          <label htmlFor="search-input" className="sr-only">Rechercher par symbole, nom ou secteur</label>
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#141414]" aria-hidden="true" />
           <input
+            id="search-input"
             type="text"
-            placeholder="Rechercher par symbole, nom ou secteur..."
+            placeholder="Rechercher par symbole, nom ou secteur…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-0 rounded-none py-2.5 pl-11 pr-4 text-xs font-mono text-[#141414] placeholder-[#141414]/50 outline-none transition-all duration-200"
+            autoComplete="off"
+            className="w-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-none py-2.5 pl-11 pr-4 text-xs font-mono text-[#141414] placeholder-[#141414]/50 outline-none transition-all duration-200"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#141414]/50 hover:text-[#141414]"
+              aria-label="Effacer la recherche"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#141414]/50 hover:text-[#141414] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-none"
             >
               <X className="w-4 h-4" />
             </button>
@@ -70,7 +74,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </span>
           <button
             onClick={() => setDividendFilter("ALL")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+            aria-label="Filtrer: tous les dividendes"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               dividendFilter === "ALL"
                 ? "bg-[#141414] border-[#141414] text-[#E4E3E0]"
                 : "bg-white border-[#141414] text-[#141414] hover:bg-slate-50"
@@ -80,24 +85,26 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </button>
           <button
             onClick={() => setDividendFilter("ELIGIBLE")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 ${
+            aria-label="Filtrer: dividendes réguliers (3 ans ou plus)"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
               dividendFilter === "ELIGIBLE"
                 ? "bg-emerald-600 border-[#141414] text-white"
                 : "bg-white border-[#141414] text-emerald-800 hover:bg-emerald-50/50"
             }`}
           >
-            <span className="w-1.5 h-1.5 bg-emerald-400 border border-[#141414]/30 rounded-full" />
+            <span className="w-1.5 h-1.5 bg-emerald-400 border border-[#141414]/30 rounded-full" aria-hidden="true" />
             <span>Régulier (D ≥ 3 ans)</span>
           </button>
           <button
             onClick={() => setDividendFilter("INELIGIBLE")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 ${
+            aria-label="Filtrer: dividendes irréguliers (moins de 3 ans)"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 ${
               dividendFilter === "INELIGIBLE"
                 ? "bg-amber-600 border-[#141414] text-white"
                 : "bg-white border-[#141414] text-amber-900 hover:bg-amber-50/50"
             }`}
           >
-            <span className="w-1.5 h-1.5 bg-amber-400 border border-[#141414]/30 rounded-full" />
+            <span className="w-1.5 h-1.5 bg-amber-400 border border-[#141414]/30 rounded-full" aria-hidden="true" />
             <span>Irrégulier (D &lt; 3 ans)</span>
           </button>
         </div>
@@ -113,7 +120,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
 
           <button
             onClick={() => applyPricePreset("ALL")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+            aria-label="Filtrer: tous les prix"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               pricePreset === "ALL" && !minPrice && !maxPrice
                 ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
                 : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -123,7 +131,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </button>
           <button
             onClick={() => applyPricePreset("UNDER_2500")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+            aria-label="Filtrer: prix inférieurs à 2 500 F"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               pricePreset === "UNDER_2500"
                 ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
                 : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -133,7 +142,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </button>
           <button
             onClick={() => applyPricePreset("2500_10000")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+            aria-label="Filtrer: prix entre 2 500 F et 10 000 F"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               pricePreset === "2500_10000"
                 ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
                 : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -143,7 +153,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </button>
           <button
             onClick={() => applyPricePreset("OVER_10000")}
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 ${
+            aria-label="Filtrer: prix supérieurs à 10 000 F"
+            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
               pricePreset === "OVER_10000"
                 ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
                 : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -156,8 +167,9 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
         {/* Custom Min / Max Inputs */}
         <div className="flex items-center space-x-2 text-xs font-mono">
           <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
-            <span className="text-[10px] text-[#141414]/50 uppercase font-bold">Min:</span>
+            <label htmlFor="min-price" className="text-[10px] text-[#141414]/50 uppercase font-bold">Min:</label>
             <input
+              id="min-price"
               type="number"
               placeholder="0"
               value={minPrice}
@@ -165,7 +177,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
                 setMinPrice(e.target.value);
                 setPricePreset("CUSTOM");
               }}
-              className="w-20 bg-transparent text-xs font-bold text-[#141414] outline-none font-mono"
+              autoComplete="off"
+              className="w-20 bg-transparent text-xs font-bold text-[#141414] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 font-mono"
             />
             <span className="text-[10px] text-[#141414]/50">F</span>
           </div>
@@ -173,8 +186,9 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           <span className="text-[#141414]/60 font-bold">-</span>
 
           <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
-            <span className="text-[10px] text-[#141414]/50 uppercase font-bold">Max:</span>
+            <label htmlFor="max-price" className="text-[10px] text-[#141414]/50 uppercase font-bold">Max:</label>
             <input
+              id="max-price"
               type="number"
               placeholder="Max"
               value={maxPrice}
@@ -182,7 +196,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
                 setMaxPrice(e.target.value);
                 setPricePreset("CUSTOM");
               }}
-              className="w-24 bg-transparent text-xs font-bold text-[#141414] outline-none font-mono"
+              autoComplete="off"
+              className="w-24 bg-transparent text-xs font-bold text-[#141414] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 font-mono"
             />
             <span className="text-[10px] text-[#141414]/50">F</span>
           </div>
@@ -194,7 +209,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
                 setMaxPrice("");
                 setPricePreset("ALL");
               }}
-              className="p-1 text-rose-600 hover:text-rose-800"
+              aria-label="Réinitialiser la plage de prix"
+              className="p-1 text-rose-600 hover:text-rose-800 focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 rounded-none"
               title="Réinitialiser la plage de prix"
             >
               <X className="w-4 h-4" />
@@ -212,7 +228,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
 
         <button
           onClick={() => setSelectedSector("ALL")}
-          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 ${
+          aria-label="Filtrer: tous les secteurs"
+          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
             selectedSector === "ALL"
               ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
               : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -239,7 +256,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
             <button
               key={sectorName}
               onClick={() => setSelectedSector(sectorName)}
-              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 ${
+              aria-label={`Filtrer: secteur ${sectorName}`}
+              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                 isSelected
                   ? "bg-[#141414] text-[#E4E3E0] border-[#141414] shadow-[2px_2px_0px_rgba(0,0,0,0.15)]"
                   : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -268,7 +286,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
         </span>
         <button
           onClick={() => setSelectedCountry("ALL")}
-          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 ${
+          aria-label="Filtrer: tous les marchés"
+          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
             selectedCountry === "ALL"
               ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
               : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -293,7 +312,8 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
             <button
               key={code}
               onClick={() => setSelectedCountry(code.toUpperCase())}
-              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 ${
+              aria-label={`Filtrer: pays ${data.name}`}
+              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
                 selectedCountry === code.toUpperCase()
                   ? "bg-emerald-100 text-[#141414] border-[#141414]"
                   : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"

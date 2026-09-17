@@ -52,13 +52,19 @@ export async function syncQuotations() {
 
   await setSyncing(true);
   try {
-    const [state, sectorMap, scraped] = await Promise.all([
+    const [state, scraped] = await Promise.all([
       getState(),
-      fetchBRVMSectors().catch(async () => getSectorMap()),
       scrapeSikaQuotes(),
     ]);
 
-    await saveSectorMap(sectorMap);
+    let sectorMap;
+    try {
+      sectorMap = await fetchBRVMSectors();
+      await saveSectorMap(sectorMap);
+    } catch (e) {
+      console.error("Failed to fetch sectors, using cached map:", e);
+      sectorMap = await getSectorMap();
+    }
 
     if (scraped.length === 0) {
       throw new Error("Aucune cotation n'a pu être extraite de Sika Finance.");
@@ -199,9 +205,9 @@ export async function companyDescription(symbol: string, country: string) {
 
   if (!finalDescription) {
     finalDescription = `Aucune description détaillée n'est actuellement disponible en ligne pour l'entreprise ${companyName} (${targetSymbol}). Il s'agit d'une entreprise majeure cotée à la BRVM représentant le secteur d'activité lié à son profil d'activité d'origine.`;
+  } else {
+    await saveDescription(cacheKey, finalDescription);
   }
-
-  await saveDescription(cacheKey, finalDescription);
   return {
     success: true,
     description: finalDescription,

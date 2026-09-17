@@ -25,7 +25,7 @@ export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats }) => {
             Composition officielle BRVM 30
           </p>
         </div>
-        <div className="p-3 bg-slate-50 border-2 border-[#141414] rounded-none text-[#141414] shadow-[2px_2px_0px_#141414]">
+        <div className="p-3 bg-slate-50 border-2 border-[#141414] rounded-none text-[#141414] shadow-[2px_2px_0px_#141414]" aria-hidden="true">
           <Building2 className="w-6 h-6" />
         </div>
       </div>
@@ -55,7 +55,7 @@ export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats }) => {
             Séance consolidée de l'indice
           </p>
         </div>
-        <div className="p-3 bg-[#E4E3E0]/15 border border-[#E4E3E0]/30 rounded-none text-[#E4E3E0]">
+        <div className="p-3 bg-[#E4E3E0]/15 border border-[#E4E3E0]/30 rounded-none text-[#E4E3E0]" aria-hidden="true">
           {stats.averageVariation >= 0 ? (
             <TrendingUp className="w-6 h-6" />
           ) : (
@@ -77,7 +77,7 @@ export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats }) => {
             Versements continus depuis ≥ 3 ans
           </p>
         </div>
-        <div className="p-3 bg-emerald-50 border-2 border-[#141414] rounded-none text-emerald-700 shadow-[2px_2px_0px_#141414]">
+        <div className="p-3 bg-emerald-50 border-2 border-[#141414] rounded-none text-emerald-700 shadow-[2px_2px_0px_#141414]" aria-hidden="true">
           <Award className="w-6 h-6" />
         </div>
       </div>
