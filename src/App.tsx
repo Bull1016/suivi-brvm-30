@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import { StockData, BRVMResponse } from "./types";
 import {
   DEFAULT_SYMBOL_SECTOR_FALLBACK
@@ -464,6 +465,9 @@ export default function App() {
         onSyncDividends={syncStockDividends}
         lastYear={lastYear}
       />
+      
+      {/* Vercel Web Analytics */}
+      <Analytics />
     </div>
   );
 }
