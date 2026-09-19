@@ -2,6 +2,8 @@
 
 Audit de la branche `dev` (commit `007eb62`, 19/09/2026). Objectif produit : **une expérience simple et conviviale**.
 
+Ce fichier regroupe l'audit, les bugs, les incohérences, les sujets d'accessibilité, la dette technique et les améliorations d'interface. Le catalogue des fonctionnalités `FEAT` est maintenu séparément dans [FEATURES.md](FEATURES.md) ; les références dans le plan de travail restent leur source de suivi.
+
 **Légende** — Priorité : `P0` bloquant / données fausses · `P1` important · `P2` confort · `P3` idée.
 Effort : `S` < 2 h · `M` ½–1 jour · `L` > 1 jour.
 
@@ -226,30 +228,12 @@ Lignes de bulletins = `div onClick` (0 focusable) → `<button>`. Lignes du tabl
 
 ---
 
-## 6. Fonctionnalités
-
-| ID | Fonctionnalité | Détail | Prio | Effort |
-|---|---|---|---|---|
-| FEAT-01 | Favoris ★ + filtre « Mes titres » | localStorage d'abord ; l'accueil devient personnel | P1 | S |
-| FEAT-02 | Rendement en % | dividende ÷ cours, colonne triable, « Top rendement » ; données déjà disponibles | P1 | S |
-| FEAT-03 | Mode Simple / Expert | Simple : nom, prix, variation, rendement. Expert : Haut/Bas, score, secteur | P1 | S |
-| FEAT-04 | Filtres dans l'URL | `?secteur=…&pays=bj` : lien partageable (WhatsApp), bouton retour fonctionnel | P1 | S |
-| FEAT-05 | Simulateur de portefeuille | quantité + prix de revient → plus-value, dividendes annuels estimés (retenue à la source paramétrable) | P2 | M |
-| FEAT-06 | Historique de cours | instantané quotidien en Redis (le cron existe) → mini-courbe 1M/3M/1A dans le tiroir, variation depuis janvier | P2 | M |
-| FEAT-07 | Calendrier des détachements | extrait des BOC déjà analysés | P2 | M |
-| FEAT-08 | Alertes | variation > x %, détachement ; e-mail ou Telegram (API WhatsApp payante) | P3 | M–L |
-| FEAT-09 | PWA hors-ligne | dernier état en cache, installable ; utile en connexion instable | P2 | M |
-| FEAT-10 | Questions en français sur les BOC | « quels titres ont détaché cette semaine ? » en réutilisant les analyses en cache | P3 | M |
-| FEAT-11 | Petits plus | pastille « Marché ouvert / fermé », comparateur 2–3 titres, export CSV, mode sombre, infobulles de glossaire (rendement, détachement) | P3 | S chacun |
-
----
-
-## 7. Ordre de travail proposé
+## 6. Ordre de travail proposé
 
 1. **Sprint 1 — Données et sécurité** : BUG-01 → BUG-06, puis INC-09 et INC-10 (rapides).
 2. **Sprint 2 — Layout à fort impact** : UX-04 (filtres), UX-05 (tableau + cartes mobiles), UX-01 (en-tête), INC-08 (chargement), puis UX-03, UX-02, UX-06.
 3. **Sprint 3 — Cohérence et accessibilité** : INC-01 → INC-07, A11Y-01 → A11Y-04, UX-07, UX-08.
-4. **Sprint 4 — Valeur utilisateur** : FEAT-01 → FEAT-04, puis FEAT-06, FEAT-05, FEAT-09.
+4. **Sprint 4 — Valeur utilisateur** : voir [FEATURES.md](FEATURES.md), FEAT-01 → FEAT-04, puis FEAT-06, FEAT-05, FEAT-09.
 5. **En continu** : TECH-01 → TECH-13 (TECH-10 tests dès le sprint 1 pour verrouiller BUG-01/02).
 
 **Définition de « terminé » pour le layout** : mesures de la section 0 atteintes à 1440×900 et 390×844, aucune classe Tailwind sans effet, navigation complète au clavier, contraste ≥ 4,5:1 sur tout texte.
