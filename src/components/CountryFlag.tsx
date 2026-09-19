@@ -17,11 +17,12 @@ const FLAG_COMPONENTS: Record<string, React.ComponentType<{ className?: string }
   ne: NE,
 };
 
-export const CountryFlag: React.FC<{ code: string; className?: string }> = ({
+export const CountryFlag: React.FC<{ code: unknown; className?: string }> = ({
   code,
   className = "w-5 h-3.5 inline-block rounded-none border border-[#141414]/30 shadow-xs flex-shrink-0"
 }) => {
-  const Flag = FLAG_COMPONENTS[code.toLowerCase()];
+  const normalizedCode = typeof code === "string" ? code.toLowerCase() : "";
+  const Flag = FLAG_COMPONENTS[normalizedCode];
   if (!Flag) return <span className="text-base leading-none">🌍</span>;
   return <Flag className={className} />;
 };

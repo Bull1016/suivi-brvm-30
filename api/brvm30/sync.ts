@@ -11,7 +11,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ success: false, message: "Non autorisé." });
     }
   } else if (method === "POST") {
-    if (!(await checkRateLimit(req))) {
+    const platformIp = req.headers["x-vercel-forwarded-for"];
+    const callerIp = (Array.isArray(platformIp) ? platformIp[0] : platformIp) || req.socket.remoteAddress;
+    if (!(await checkRateLimit(callerIp))) {
       return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter avant d'effectuer une nouvelle synchronisation." });
     }
   } else {

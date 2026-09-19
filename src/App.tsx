@@ -50,8 +50,9 @@ export default function App() {
   const [isUpdatingDividends, setIsUpdatingDividends] = useState<boolean>(false);
   const [dividendUpdateMsg, setDividendUpdateMsg] = useState<string | null>(null);
   const [companyDescription, setCompanyDescription] = useState<string | null>(null);
+  const [companyDescriptionSource, setCompanyDescriptionSource] = useState<string | null>(null);
   const [isFetchingDescription, setIsFetchingDescription] = useState<boolean>(false);
-  const [descriptionCache, setDescriptionCache] = useState<Record<string, string>>({});
+  const [descriptionCache, setDescriptionCache] = useState<Record<string, { description: string; source: string }>>({});
 
   // ─── Tab / Bulletins states ─────────────────────────────────────
   const [activeTab, setActiveTab] = useState<TabType>("STOCKS");
@@ -81,6 +82,7 @@ export default function App() {
   const bulletinIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
   const descAbortControllerRef = React.useRef<AbortController | null>(null);
   const bulletinAbortControllerRef = React.useRef<AbortController | null>(null);
+  const stocksRequestSequenceRef = React.useRef(0);
 
   // ─── Effects ────────────────────────────────────────────────────
 
@@ -92,6 +94,7 @@ export default function App() {
       if (bulletinIntervalRef.current) clearInterval(bulletinIntervalRef.current);
       if (descAbortControllerRef.current) descAbortControllerRef.current.abort();
       if (bulletinAbortControllerRef.current) bulletinAbortControllerRef.current.abort();
+      stocksRequestSequenceRef.current += 1;
     };
   }, []);
 
@@ -115,6 +118,7 @@ export default function App() {
       fetchCompanyDescription(selectedStock.symbol, selectedStock.country);
     } else {
       setCompanyDescription(null);
+      setCompanyDescriptionSource(null);
     }
   }, [selectedStock?.symbol]);
 
@@ -153,40 +157,47 @@ export default function App() {
   // ─── API calls ──────────────────────────────────────────────────
 
   const fetchStocks = async () => {
+    const requestSequence = ++stocksRequestSequenceRef.current;
     try {
       setError(null);
       const res = await fetch("/api/brvm30/stocks");
       if (!res.ok) throw new Error("Erreur de récupération des données");
       const data: BRVMResponse & { brvm30Url?: string } = await res.json();
+      if (requestSequence !== stocksRequestSequenceRef.current) return;
       if (data.success) {
         setStocks(data.stocks);
         setLastSync(data.lastSync);
         setIsSyncing(data.isSyncing);
         if (data.brvm30Url) setBrvm30Url(data.brvm30Url);
 
-        if (selectedStock) {
-          const updated = data.stocks.find((s) => s.symbol === selectedStock.symbol);
+        if (selectedStockRef.current) {
+          const updated = data.stocks.find((s) => s.symbol === selectedStockRef.current?.symbol);
           if (updated) setSelectedStock(updated);
         }
       } else {
         setError(data.message || "Une erreur est survenue");
       }
     } catch (err) {
+      if (requestSequence !== stocksRequestSequenceRef.current) return;
       console.error(err);
       setError("Impossible de contacter le serveur. Assurez-vous que l'application a démarré.");
     } finally {
-      setIsLoadingStocks(false);
+      if (requestSequence === stocksRequestSequenceRef.current) {
+        setIsLoadingStocks(false);
+      }
     }
   };
 
   const triggerSync = async () => {
     if (isSyncing) return;
+    stocksRequestSequenceRef.current += 1;
     setIsSyncing(true);
     showStatus("Synchronisation des cotations avec Sika Finance…", "info");
 
     try {
       const res = await fetch("/api/brvm30/sync", { method: "POST" });
       const data = await res.json();
+      stocksRequestSequenceRef.current += 1;
       if (data.success) {
         if (Array.isArray(data.stocks)) {
           setStocks(data.stocks);
@@ -203,6 +214,7 @@ export default function App() {
         showStatus(data.message || "Échec de la synchronisation", "error");
       }
     } catch (err) {
+      stocksRequestSequenceRef.current += 1;
       setIsSyncing(false);
       showStatus("Erreur lors de la tentative de synchronisation", "error");
     }
@@ -244,13 +256,15 @@ export default function App() {
 
     const cacheKey = `${symbol}.${country}`;
     if (descriptionCache[cacheKey]) {
-      setCompanyDescription(descriptionCache[cacheKey]);
+      setCompanyDescription(descriptionCache[cacheKey].description);
+      setCompanyDescriptionSource(descriptionCache[cacheKey].source);
       setIsFetchingDescription(false);
       return;
     }
 
     setIsFetchingDescription(true);
     setCompanyDescription(null);
+    setCompanyDescriptionSource(null);
     try {
       const res = await fetch(`/api/brvm30/company-description/${symbol}/${country}`, {
         signal: controller.signal,
@@ -259,13 +273,19 @@ export default function App() {
       if (controller.signal.aborted) return;
 
       if (data.success) {
-        setDescriptionCache((prev) => ({ ...prev, [cacheKey]: data.description }));
+        const source = typeof data.source === "string" ? data.source : "fallback";
+        setDescriptionCache((prev) => ({
+          ...prev,
+          [cacheKey]: { description: data.description, source },
+        }));
         if (selectedStockRef.current?.symbol === symbol) {
           setCompanyDescription(data.description);
+          setCompanyDescriptionSource(source);
         }
       } else {
         if (selectedStockRef.current?.symbol === symbol) {
           setCompanyDescription("Impossible de charger la description de l'entreprise.");
+          setCompanyDescriptionSource(null);
         }
       }
     } catch (e: any) {
@@ -273,6 +293,7 @@ export default function App() {
       console.error(e);
       if (selectedStockRef.current?.symbol === symbol) {
         setCompanyDescription("Erreur réseau lors de la récupération de la description.");
+        setCompanyDescriptionSource(null);
       }
     } finally {
       if (!controller.signal.aborted && selectedStockRef.current?.symbol === symbol) {
@@ -371,6 +392,10 @@ export default function App() {
     setStatusMsg({ text, type });
     statusTimeoutRef.current = setTimeout(() => setStatusMsg(null), 5000);
   };
+
+  const closeStockDrawer = React.useCallback(() => {
+    setSelectedStock(null);
+  }, []);
 
   const applyPricePreset = (preset: string) => {
     setPricePreset(preset);
@@ -520,8 +545,12 @@ export default function App() {
         <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* ── STOCKS TAB ─────────────────────────────────────────── */}
-        {activeTab === "STOCKS" ? (
-          <>
+        <div
+          id="stocks-panel"
+          role="tabpanel"
+          aria-labelledby="stocks-tab"
+          hidden={activeTab !== "STOCKS"}
+        >
             {/* KPI bento cards */}
             <BentoMetrics stats={stats} />
 
@@ -560,10 +589,16 @@ export default function App() {
 
             {/* Dividend eligibility legend */}
             <DividendLegend lastYear={lastYear} />
-          </>
-        ) : (
-          /* ── BULLETINS TAB ───────────────────────────────────────── */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        </div>
+
+        {/* ── BULLETINS TAB ───────────────────────────────────────── */}
+        <div
+          id="bulletins-panel"
+          role="tabpanel"
+          aria-labelledby="bulletins-tab"
+          hidden={activeTab !== "BULLETINS"}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8"
+        >
             <BulletinsSidebar
               bulletins={bulletins}
               selectedBulletin={selectedBulletin}
@@ -580,15 +615,15 @@ export default function App() {
               bulletinLoadingStep={bulletinLoadingStep}
               onRunAnalysis={runBulletinAnalysis}
             />
-          </div>
-        )}
+        </div>
       </main>
 
       {/* Slide-in detail drawer */}
       <StockDetailDrawer
         selectedStock={selectedStock}
-        onClose={() => setSelectedStock(null)}
+        onClose={closeStockDrawer}
         companyDescription={companyDescription}
+        companyDescriptionSource={companyDescriptionSource}
         isFetchingDescription={isFetchingDescription}
         isUpdatingDividends={isUpdatingDividends}
         dividendUpdateMsg={dividendUpdateMsg}

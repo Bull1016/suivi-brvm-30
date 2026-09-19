@@ -8,7 +8,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });
   }
 
-  if (!(await checkRateLimit(req))) {
+  const platformIp = req.headers["x-vercel-forwarded-for"];
+  const callerIp = (Array.isArray(platformIp) ? platformIp[0] : platformIp) || req.socket.remoteAddress;
+  if (!(await checkRateLimit(callerIp))) {
     return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
   }
 

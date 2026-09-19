@@ -1,6 +1,15 @@
 import { DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
 import type { DividendHistory, StockData, DividendStatus } from "./types.js";
 
+const UNKNOWN_COUNTRY_CODE = "xx";
+
+/** Keeps supported country values safe for persistence and rendering. */
+export function normalizeCountryCode(country: unknown): string {
+  return typeof country === "string" && /^[a-z]{2}$/.test(country)
+    ? country
+    : UNKNOWN_COUNTRY_CODE;
+}
+
 /** Derives sector, dividend streak, dividend status, latest dividend, and metadata for a stock. */
 export function processStockDividends(
   stock: Omit<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector" | "dividendStatus"> &
@@ -42,7 +51,7 @@ export function processStockDividends(
   return {
     name: stock.name,
     symbol: stock.symbol,
-    country: stock.country,
+    country: normalizeCountryCode(stock.country),
     currentPrice: stock.currentPrice,
     high: stock.high,
     low: stock.low,

@@ -79,8 +79,8 @@ export const StocksTable: React.FC<StocksTableProps> = ({
               {renderSortableHeader("sector", "Secteur BRVM")}
               {renderSortableHeader("currentPrice", "Prix (FCFA)", "w-32", "justify-end")}
               {renderSortableHeader("variation", "Variation", "w-28", "justify-end")}
-              {renderSortableHeader("high", "Haut", "w-28 hidden xl:table-cell", "justify-end")}
-              {renderSortableHeader("low", "Bas", "w-28 hidden xl:table-cell", "justify-end")}
+              {renderSortableHeader("high", "Haut", "w-28 hidden sm:table-cell", "justify-end")}
+              {renderSortableHeader("low", "Bas", "w-28 hidden sm:table-cell", "justify-end")}
               {renderSortableHeader("streak", "Dividende (D)", "w-36", "justify-center")}
             </tr>
           </thead>

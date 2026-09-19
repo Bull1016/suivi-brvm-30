@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { processStockDividends } from "../lib/brvm/process";
+import { normalizeCountryCode, processStockDividends } from "../lib/brvm/process";
 import { parseDividendsFromHtml } from "../lib/brvm/scrape";
 import { validateBulletinUrlForDateCode } from "../lib/brvm/bulletins";
 import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "../lib/brvm/constants";
@@ -31,6 +31,13 @@ describe("BRVM Unit Tests", () => {
     expect(processed.streak).toBe(5);
     expect(processed.latestDividend).toBe(100);
     expect(processed.dividendStatus).toBe("a_jour");
+  });
+
+  it("normalizes invalid country values to the globe fallback code", () => {
+    expect(normalizeCountryCode("ci")).toBe("ci");
+    expect(normalizeCountryCode("CIV")).toBe("xx");
+    expect(normalizeCountryCode(null)).toBe("xx");
+    expect(normalizeCountryCode(undefined)).toBe("xx");
   });
 
   it("parseDividendsFromHtml parses valid HTML tables correctly", () => {

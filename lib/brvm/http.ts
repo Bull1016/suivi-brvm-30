@@ -5,6 +5,19 @@ type HeaderMap = Record<string, string | string[] | undefined>;
 
 let ratelimitInstance: Ratelimit | null | undefined = undefined;
 const memoryRateLimitMap = new Map<string, { count: number; resetAt: number }>();
+let memoryRateLimitCleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+function startMemoryRateLimitCleanup(): void {
+  if (memoryRateLimitCleanupTimer) return;
+
+  memoryRateLimitCleanupTimer = setInterval(() => {
+    const now = Date.now();
+    for (const [ip, record] of memoryRateLimitMap) {
+      if (now >= record.resetAt) memoryRateLimitMap.delete(ip);
+    }
+  }, 60000);
+  memoryRateLimitCleanupTimer.unref?.();
+}
 
 function getRateLimiter(): Ratelimit | null {
   if (ratelimitInstance !== undefined) return ratelimitInstance;
@@ -48,17 +61,13 @@ export function isCronAuthorized(req: { method?: string; headers?: HeaderMap }):
 }
 
 /** Checks rate limits for sensitive endpoints (10 requests / minute per IP). */
-export async function checkRateLimit(req: { headers?: HeaderMap; socket?: { remoteAddress?: string } }): Promise<boolean> {
-  const rawIp =
-    headerValue(req.headers, "x-forwarded-for").split(",")[0].trim() ||
-    headerValue(req.headers, "x-real-ip") ||
-    req.socket?.remoteAddress ||
-    "127.0.0.1";
+export async function checkRateLimit(callerIp?: string): Promise<boolean> {
+  const limiterKey = callerIp || "127.0.0.1";
 
   const limiter = getRateLimiter();
   if (limiter) {
     try {
-      const { success } = await limiter.limit(rawIp);
+      const { success } = await limiter.limit(limiterKey);
       return success;
     } catch (e) {
       console.error("Upstash ratelimit error, falling back to memory:", e);
@@ -66,9 +75,10 @@ export async function checkRateLimit(req: { headers?: HeaderMap; socket?: { remo
   }
 
   const now = Date.now();
-  const record = memoryRateLimitMap.get(rawIp);
-  if (!record || now > record.resetAt) {
-    memoryRateLimitMap.set(rawIp, { count: 1, resetAt: now + 60000 });
+  startMemoryRateLimitCleanup();
+  const record = memoryRateLimitMap.get(limiterKey);
+  if (!record || now >= record.resetAt) {
+    memoryRateLimitMap.set(limiterKey, { count: 1, resetAt: now + 60000 });
     return true;
   }
 

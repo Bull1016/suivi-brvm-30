@@ -19,10 +19,12 @@ app.use(express.json());
 
 app.get("/api/brvm30/stocks", async (_req, res) => {
   try {
+    const body = await listStocks();
     res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=30");
-    res.json(await listStocks());
+    res.json(body);
   } catch (error) {
     console.error(error);
+    res.setHeader("Cache-Control", "no-store");
     res.status(500).json({ success: false, message: "Impossible de charger les cotations." });
   }
 });
@@ -49,7 +51,7 @@ app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
 
 app.get("/api/brvm30/company-description/:symbol/:country", async (req, res) => {
   try {
-    if (!(await checkRateLimit(req))) {
+    if (!(await checkRateLimit(req.socket.remoteAddress))) {
       return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
     }
     const result = await companyDescription(req.params.symbol, req.params.country);
@@ -78,7 +80,7 @@ app.get("/api/brvm/analyze-bulletin/:date", async (req, res) => {
   const url = typeof req.query.url === "string" ? req.query.url : "";
 
   try {
-    if (!(await checkRateLimit(req))) {
+    if (!(await checkRateLimit(req.socket.remoteAddress))) {
       return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
     }
     const result = await analyzeBulletin(dateCode, url);

@@ -287,8 +287,9 @@ export async function analyzeBulletin(dateCode: string, url: string) {
   // Validate URL is in official scraped bulletins to prevent poisoning with external links
   try {
     const officialBulletins = await scrapeOfficialBulletins();
+    const normalizedUrl = new URL(url).href;
     const isOfficial = officialBulletins.some(
-      (b) => b.dateCode === dateCode && (b.url === url || b.url.includes(dateCode))
+      (b) => b.dateCode === dateCode && new URL(b.url).href === normalizedUrl
     );
     if (!isOfficial) {
       return {
@@ -297,7 +298,11 @@ export async function analyzeBulletin(dateCode: string, url: string) {
       };
     }
   } catch (e) {
-    console.error("Warning: Could not verify official bulletin list:", e);
+    console.error("Could not verify official bulletin list:", e);
+    return {
+      status: 503 as const,
+      body: { success: false, message: "Impossible de vérifier la liste des bulletins officiels." },
+    };
   }
 
   const result = await analyzeBulletinWithGemini(dateCode, url);

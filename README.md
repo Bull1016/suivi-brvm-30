@@ -84,7 +84,7 @@ GET  /api/brvm/analyze-bulletin/:date?url=
 ## Installation et Configuration
 
 ### Prérequis
-- [Node.js](https://nodejs.org/) ≥ 18
+- [Node.js](https://nodejs.org/) ≥ 20.18.1
 - Une clé API [Google AI Studio](https://aistudio.google.com/) (Gemini)
 - Pour la persistance en production : une base [Upstash Redis](https://upstash.com/) (intégration **Vercel KV** dans le dashboard du projet)
 

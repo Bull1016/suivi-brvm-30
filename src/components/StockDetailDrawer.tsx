@@ -17,6 +17,7 @@ interface StockDetailDrawerProps {
   selectedStock: StockData | null;
   onClose: () => void;
   companyDescription: string | null;
+  companyDescriptionSource: string | null;
   isFetchingDescription: boolean;
   isUpdatingDividends: boolean;
   dividendUpdateMsg: string | null;
@@ -28,22 +29,59 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
   selectedStock,
   onClose,
   companyDescription,
+  companyDescriptionSource,
   isFetchingDescription,
   isUpdatingDividends,
   dividendUpdateMsg,
   onSyncDividends,
   lastYear
 }) => {
+  const dialogRef = React.useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const isOpen = selectedStock !== null;
   const prefersReducedMotion = typeof window !== "undefined"
     ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
     : false;
 
   React.useEffect(() => {
-    if (!selectedStock) return;
+    if (!isOpen) return;
+
+    const previouslyFocusedElement = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+    const focusFrame = window.requestAnimationFrame(() => {
+      closeButtonRef.current?.focus();
+    });
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        e.preventDefault();
         onClose();
+        return;
+      }
+
+      if (e.key !== "Tab" || !dialogRef.current) return;
+
+      const focusableElements = Array.from(
+        dialogRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusableElements.length === 0) {
+        e.preventDefault();
+        dialogRef.current.focus();
+        return;
+      }
+
+      const firstElement = focusableElements[0];
+      const lastElement = focusableElements[focusableElements.length - 1];
+      const activeElement = document.activeElement;
+      if (e.shiftKey && (activeElement === firstElement || !dialogRef.current.contains(activeElement))) {
+        e.preventDefault();
+        lastElement.focus();
+      } else if (!e.shiftKey && activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
       }
     };
 
@@ -52,10 +90,14 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
+      if (previouslyFocusedElement?.isConnected) {
+        previouslyFocusedElement.focus();
+      }
     };
-  }, [selectedStock, onClose]);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -73,9 +115,11 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
 
           {/* Panel */}
           <motion.div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="drawer-company-title"
+            tabIndex={-1}
             initial={prefersReducedMotion ? { x: 0 } : { x: "100%" }}
             animate={prefersReducedMotion ? { x: 0 } : { x: 0 }}
             exit={prefersReducedMotion ? { x: "100%" } : { x: "100%" }}
@@ -122,6 +166,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                 </div>
               </div>
               <button
+                ref={closeButtonRef}
                 onClick={onClose}
                 aria-label="Fermer le panneau de détails"
                 className="p-2 text-[#141414] hover:bg-[#141414]/10 rounded-none transition-all focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2"
@@ -256,7 +301,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                   <h4 className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider font-mono">
                     Description de l'entreprise
                   </h4>
-                  {companyDescription && (
+                  {companyDescriptionSource === "ai-generation" && (
                     <span className="text-[9px] bg-purple-100 text-purple-900 border border-purple-700 font-mono font-bold px-1.5 py-0.5">
                       Généré par IA — peut contenir des erreurs
                     </span>

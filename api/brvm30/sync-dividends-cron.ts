@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(200).json(result);
   } catch (error) {
     console.error("Cron dividend sync failed:", error);
-    return res.status(500).json({ success: false, message: (error as Error).message });
+    return res.status(500).json({ success: false, message: "La synchronisation des dividendes a échoué." });
   }
 }
 
