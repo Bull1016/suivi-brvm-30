@@ -71,7 +71,6 @@ export const COUNTRIES_MAP: Record<string, { name: string; flag: string }> = {
 export const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = {
   SNTS: "Télécommunications",
   SGBC: "Services Financiers",
-  CBIB: "Services Financiers",
   CBIBF: "Services Financiers",
   ETIT: "Services Financiers",
   BOAB: "Services Financiers",
@@ -80,7 +79,6 @@ export const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = {
   BOAN: "Services Financiers",
   BOAS: "Services Financiers",
   BOAM: "Services Financiers",
-  ONTB: "Télécommunications",
   ONTBF: "Télécommunications",
   SIBC: "Services Financiers",
   ECOC: "Services Financiers",
@@ -96,9 +94,8 @@ export const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = {
   BICC: "Services Financiers",
   CFAC: "Consommation Discrétionnaire",
   BNBC: "Consommation Discrétionnaire",
-  SDVC: "Industriels",
+  SDSC: "Industriels",
   SHEC: "Énergie",
-  ABJC: "Consommation Discrétionnaire",
   SLBC: "Consommation de Base",
   FTSC: "Industriels",
   ORGT: "Services Financiers"

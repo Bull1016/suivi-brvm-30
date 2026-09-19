@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { isCronAuthorized } from "../../lib/brvm/http.js";
+import { isCronAuthorized, checkRateLimit } from "../../lib/brvm/http.js";
 import { syncQuotations } from "../../lib/brvm/service.js";
 
 /** Synchronizes BRVM quotations for manual requests or authorized cron invocations. */
@@ -10,7 +10,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!isCronAuthorized(req)) {
       return res.status(401).json({ success: false, message: "Non autorisé." });
     }
-  } else if (method !== "POST") {
+  } else if (method === "POST") {
+    if (!(await checkRateLimit(req))) {
+      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter avant d'effectuer une nouvelle synchronisation." });
+    }
+  } else {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });
   }
 

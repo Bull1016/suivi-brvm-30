@@ -18,7 +18,9 @@ import {
   setDivCursor,
   setSyncing,
 } from "./store.js";
-import { generateCompanyDescription } from "./gemini.js";
+import { generateCompanyDescription, analyzeBulletinWithGemini } from "./gemini.js";
+import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./bulletins.js";
+import { getBulletinAnalysis, saveBulletinAnalysis } from "./store.js";
 import type { StockData } from "./types.js";
 
 /** Returns the configured BRVM 30 composition document URL. */
@@ -50,6 +52,22 @@ export async function syncQuotations() {
     };
   }
 
+  const currentState = await getState();
+  if (currentState.lastSync) {
+    const elapsed = Date.now() - new Date(currentState.lastSync).getTime();
+    if (!isNaN(elapsed) && elapsed < 2 * 60 * 1000) {
+      const waitSeconds = Math.ceil((120000 - elapsed) / 1000);
+      return {
+        status: 429 as const,
+        body: {
+          success: false,
+          message: `Veuillez patienter ${waitSeconds} seconde(s) avant la prochaine synchronisation.`,
+          nextAllowedAt: new Date(new Date(currentState.lastSync).getTime() + 120000).toISOString(),
+        },
+      };
+    }
+  }
+
   await setSyncing(true);
   try {
     const [state, scraped] = await Promise.all([
@@ -71,6 +89,11 @@ export async function syncQuotations() {
     }
 
     const stocks = mergeScrapedQuotes(state.stocks, scraped, sectorMap);
+    const scrapedCount = stocks.filter((s) => s.source === "scraped").length;
+    if (scrapedCount < 28) {
+      throw new Error(`Moins de 28 titres appariés (${scrapedCount}/${stocks.length}). Synchronisation annulée.`);
+    }
+
     const lastSync = new Date().toISOString();
     await saveState({ stocks, lastSync });
 
@@ -176,25 +199,39 @@ export async function syncDividendsBatch(batchSize = 2) {
 export async function companyDescription(symbol: string, country: string) {
   const targetSymbol = symbol.toUpperCase();
   const targetCountry = country.toLowerCase();
-  const cacheKey = `${targetSymbol}.${targetCountry}`;
 
-  const cached = await getDescription(cacheKey);
-  if (cached) {
+  const state = await getState();
+  const stock = state.stocks.find(
+    (s: StockData) => s.symbol.toUpperCase() === targetSymbol && s.country.toLowerCase() === targetCountry
+  );
+
+  if (!stock) {
     return {
-      success: true,
-      description: cached,
-      source: "cache",
+      status: 404 as const,
+      body: {
+        success: false,
+        message: "Action ou pays non trouvé dans l'indice BRVM 30.",
+      },
     };
   }
 
-  const state = await getState();
-  const stock = state.stocks.find((s: StockData) => s.symbol.toUpperCase() === targetSymbol);
-  const companyName = stock ? stock.name : targetSymbol;
+  const cacheKey = `${targetSymbol}.${targetCountry}`;
+  const cached = await getDescription(cacheKey);
+  if (cached) {
+    return {
+      status: 200 as const,
+      body: {
+        success: true,
+        description: cached,
+        source: "cache",
+      },
+    };
+  }
 
   let finalDescription = "";
   let source = "fallback";
   try {
-    const generated = await generateCompanyDescription(companyName, targetSymbol, targetCountry);
+    const generated = await generateCompanyDescription(stock.name, targetSymbol, targetCountry);
     if (generated) {
       finalDescription = generated;
       source = "ai-generation";
@@ -204,13 +241,73 @@ export async function companyDescription(symbol: string, country: string) {
   }
 
   if (!finalDescription) {
-    finalDescription = `Aucune description détaillée n'est actuellement disponible en ligne pour l'entreprise ${companyName} (${targetSymbol}). Il s'agit d'une entreprise majeure cotée à la BRVM représentant le secteur d'activité lié à son profil d'activité d'origine.`;
+    finalDescription = `Aucune description détaillée n'est actuellement disponible en ligne pour l'entreprise ${stock.name} (${targetSymbol}). Il s'agit d'une entreprise majeure cotée à la BRVM représentant le secteur ${stock.sector}.`;
   } else {
     await saveDescription(cacheKey, finalDescription);
   }
   return {
-    success: true,
-    description: finalDescription,
-    source,
+    status: 200 as const,
+    body: {
+      success: true,
+      description: finalDescription,
+      source,
+    },
+  };
+}
+
+/** Evaluates and returns analysis for an official BRVM bulletin. */
+export async function analyzeBulletin(dateCode: string, url: string) {
+  if (!dateCode || !url) {
+    return {
+      status: 400 as const,
+      body: { success: false, message: "Date ou URL du bulletin manquante." },
+    };
+  }
+
+  const cached = await getBulletinAnalysis(dateCode);
+  if (cached) {
+    return {
+      status: 200 as const,
+      body: {
+        success: true,
+        analysis: cached.analysis,
+        sources: cached.sources,
+        source: "cache",
+      },
+    };
+  }
+
+  if (!validateBulletinUrlForDateCode(url, dateCode)) {
+    return {
+      status: 400 as const,
+      body: { success: false, message: "L'URL fournie ne correspond pas à la date du bulletin." },
+    };
+  }
+
+  // Validate URL is in official scraped bulletins to prevent poisoning with external links
+  try {
+    const officialBulletins = await scrapeOfficialBulletins();
+    const isOfficial = officialBulletins.some(
+      (b) => b.dateCode === dateCode && (b.url === url || b.url.includes(dateCode))
+    );
+    if (!isOfficial) {
+      return {
+        status: 400 as const,
+        body: { success: false, message: "L'URL spécifiée ne fait pas partie des bulletins officiels scannés." },
+      };
+    }
+  } catch (e) {
+    console.error("Warning: Could not verify official bulletin list:", e);
+  }
+
+  const result = await analyzeBulletinWithGemini(dateCode, url);
+  await saveBulletinAnalysis(dateCode, result);
+  return {
+    status: 200 as const,
+    body: {
+      success: true,
+      analysis: result.analysis,
+      sources: result.sources,
+    },
   };
 }

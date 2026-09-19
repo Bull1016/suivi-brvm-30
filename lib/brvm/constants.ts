@@ -1,4 +1,4 @@
-import type { DividendHistory } from "./types";
+import type { DividendHistory } from "./types.js";
 
 type SeedStock = {
   name: string;
@@ -24,7 +24,6 @@ export const BRVM_SECTORS: Record<number, string> = {
 export const DEFAULT_SYMBOL_SECTOR_MAP: Record<string, string> = {
   SNTS: "Télécommunications",
   SGBC: "Services Financiers",
-  CBIB: "Services Financiers",
   CBIBF: "Services Financiers",
   ETIT: "Services Financiers",
   BOAB: "Services Financiers",
@@ -33,7 +32,6 @@ export const DEFAULT_SYMBOL_SECTOR_MAP: Record<string, string> = {
   BOAN: "Services Financiers",
   BOAS: "Services Financiers",
   BOAM: "Services Financiers",
-  ONTB: "Télécommunications",
   ONTBF: "Télécommunications",
   SIBC: "Services Financiers",
   ECOC: "Services Financiers",
@@ -49,9 +47,8 @@ export const DEFAULT_SYMBOL_SECTOR_MAP: Record<string, string> = {
   BICC: "Services Financiers",
   CFAC: "Consommation Discrétionnaire",
   BNBC: "Consommation Discrétionnaire",
-  SDVC: "Industriels",
+  SDSC: "Industriels",
   SHEC: "Énergie",
-  ABJC: "Consommation Discrétionnaire",
   SLBC: "Consommation de Base",
   FTSC: "Industriels",
   ORGT: "Services Financiers"
@@ -94,7 +91,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
   },
   {
     name: "Coris Bank International",
-    symbol: "CBIB",
+    symbol: "CBIBF",
     country: "bf",
     currentPrice: 10500,
     high: 10600,
@@ -222,7 +219,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
   },
   {
     name: "Onatel Burkina Faso",
-    symbol: "ONTB",
+    symbol: "ONTBF",
     country: "bf",
     currentPrice: 2450,
     high: 2500,
@@ -462,7 +459,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
   },
   {
     name: "Africa Global Logistics CI (ex-Bolloré)",
-    symbol: "SDVC",
+    symbol: "SDSC",
     country: "ci",
     currentPrice: 1950,
     high: 2000,
@@ -477,7 +474,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     ]
   },
   {
-    name: "Servair Abidjan",
+    name: "Vivo Energy Côte d'Ivoire",
     symbol: "SHEC",
     country: "ci",
     currentPrice: 1800,
@@ -487,7 +484,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     dividends: [
       { year: 2025, amount: 150, paid: true },
       { year: 2024, amount: 120, paid: true },
-      { year: 2023, amount: 0, paid: false }, // Streak broken here! Under 3 years consecutive starting 2025
+      { year: 2023, amount: 0, paid: false },
       { year: 2022, amount: 0, paid: false },
       { year: 2021, amount: 0, paid: false }
     ]
@@ -503,7 +500,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     dividends: [
       { year: 2025, amount: 4500, paid: true },
       { year: 2024, amount: 4000, paid: true },
-      { year: 2023, amount: 0, paid: false }, // Streak broken here too! Under 3 years
+      { year: 2023, amount: 0, paid: false },
       { year: 2022, amount: 3500, paid: true },
       { year: 2021, amount: 3000, paid: true }
     ]
@@ -533,7 +530,7 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     low: 2750,
     variation: -0.71,
     dividends: [
-      { year: 2025, amount: 0, paid: false }, // No dividend in 2025 -> Streak is 0
+      { year: 2025, amount: 0, paid: false },
       { year: 2024, amount: 150, paid: true },
       { year: 2023, amount: 140, paid: true },
       { year: 2022, amount: 130, paid: true },
