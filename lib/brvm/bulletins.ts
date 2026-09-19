@@ -1,5 +1,5 @@
-import type { BulletinItem } from "./types";
-import { SCRAPE_HEADERS } from "./types";
+import type { BulletinItem } from "./types.js";
+import { SCRAPE_HEADERS } from "./types.js";
 
 const BULLETIN_PAGES = [
   "https://www.brvm.org/fr/bulletins-officiels-de-la-cote",

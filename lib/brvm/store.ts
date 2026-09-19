@@ -13,7 +13,7 @@ const KEY_DIV_CURSOR = "brvm:div-cursor";
 /** Builds the Redis key for a dated bulletin analysis. */
 const KEY_BULLETIN = (dateCode: string) => `brvm:bulletin:${dateCode}`;
 
-const SYNCING_TTL_SECONDS = 60;
+const SYNCING_TTL_SECONDS = 90;
 
 let memoryState: BrvmState | null = null;
 let memoryDescriptions: Record<string, string> = {};

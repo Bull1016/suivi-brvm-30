@@ -1,3 +1,4 @@
+import * as cheerio from "cheerio";
 import { BRVM_SECTORS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
 import { processStockDividends } from "./process.js";
 import { SCRAPE_HEADERS, type DividendHistory, type StockData } from "./types.js";
@@ -45,22 +46,24 @@ export async function fetchBRVMSectors(): Promise<Record<string, string>> {
         );
         if (!response.ok) return;
         const sectorName = BRVM_SECTORS[id];
-        const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
-        const stockTable = tables.find((t) => t.includes("Symbole") && t.includes("Nom"));
-        if (!stockTable) return;
-        const trMatches = stockTable.match(/<tr[\s\S]*?<\/tr>/gi) || [];
-        for (const tr of trMatches) {
-          if (tr.includes("<th")) continue;
-          const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
-          if (tdMatches.length < 2) continue;
-          const symText = tdMatches[0].replace(/<[^>]*>/g, "").trim();
-          const symMatch = symText.match(/^([A-Z0-9]{3,6})\b/);
-          if (!symMatch) continue;
-          const sym = symMatch[1];
-          newMap[sym] = sectorName;
-          if (sym === "ONTBF") newMap["ONTB"] = sectorName;
-          if (sym === "CBIBF") newMap["CBIB"] = sectorName;
-        }
+        const $ = cheerio.load(html);
+
+        $("table").each((_, table) => {
+          const text = $(table).text();
+          if (text.includes("Symbole") && text.includes("Nom")) {
+            $(table).find("tr").each((_, tr) => {
+              if ($(tr).find("th").length > 0) return;
+              const tds = $(tr).find("td");
+              if (tds.length >= 2) {
+                const symText = $(tds[0]).text().trim();
+                const symMatch = symText.match(/^([A-Z0-9]{3,6})\b/);
+                if (symMatch) {
+                  newMap[symMatch[1]] = sectorName;
+                }
+              }
+            });
+          }
+        });
         successfulParses++;
       } catch (e) {
         console.error(`Failed to fetch sector ${id}:`, e);
@@ -77,45 +80,29 @@ export async function fetchBRVMSectors(): Promise<Record<string, string>> {
 
 /** Extracts valid dividend records from a Sika Finance quote page. */
 export function parseDividendsFromHtml(html: string): DividendHistory[] {
-  const tables = html.match(/<table[\s\S]*?<\/table>/gi) || [];
-  let dividendTableHtml = "";
-
-  for (const table of tables) {
-    if (table.includes("Année") && table.includes("Montant") && table.includes("Rendement")) {
-      dividendTableHtml = table;
-      break;
-    }
-  }
-
-  if (!dividendTableHtml) {
-    return [];
-  }
-
-  const trMatches = dividendTableHtml.match(/<tr>[\s\S]*?<\/tr>/gi) || [];
+  if (!html) return [];
+  const $ = cheerio.load(html);
   const dividends: DividendHistory[] = [];
+  const maxYear = new Date().getFullYear() + 1;
 
-  for (const tr of trMatches) {
-    const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
-    if (tdMatches.length === 3) {
-      const yearText = tdMatches[0].replace(/<[^>]*>/g, "").replace(/\s+/g, "").trim();
-      const amountText = tdMatches[1]
-        .replace(/<[^>]*>/g, "")
-        .replace(/\s+/g, "")
-        .replace(",", ".")
-        .trim();
+  $("table").each((_, table) => {
+    const text = $(table).text();
+    if (text.includes("Année") && text.includes("Montant")) {
+      $(table).find("tr").each((_, tr) => {
+        const tds = $(tr).find("td");
+        if (tds.length === 3) {
+          const yearText = $(tds[0]).text().replace(/\s+/g, "").trim();
+          const amountText = $(tds[1]).text().replace(/\s+/g, "").replace(",", ".").trim();
+          const year = parseInt(yearText, 10);
+          const amount = parseFloat(amountText);
 
-      const year = parseInt(yearText, 10);
-      const amount = parseFloat(amountText);
-
-      if (!Number.isNaN(year) && !Number.isNaN(amount) && year >= 2000 && year <= 2030) {
-        dividends.push({
-          year,
-          amount,
-          paid: amount > 0,
-        });
-      }
+          if (!Number.isNaN(year) && !Number.isNaN(amount) && year >= 2000 && year <= maxYear) {
+            dividends.push({ year, amount, paid: amount > 0 });
+          }
+        }
+      });
     }
-  }
+  });
 
   return dividends;
 }
@@ -129,31 +116,27 @@ export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
     throw new Error(`Sika Finance AAZ returned HTTP status ${response.status}`);
   }
 
-  /** Normalizes text extracted from a quotation table cell. */
-  const cleanCellText = (text: string) => {
-    if (!text) return "";
-    return text
-      .replace(/&#x[0-9a-f]+;/gi, "")
-      .replace(/&nbsp;/g, "")
-      .replace(/\s+/g, "")
-      .trim();
-  };
-
-  const trMatches = html.match(/<tr>[\s\S]*?<\/tr>/gi) || [];
+  const $ = cheerio.load(html);
   const scrapedStocks: ScrapedQuote[] = [];
 
-  for (const tr of trMatches) {
-    const hrefMatch = tr.match(/href="\/marches\/cotation_([A-Z0-9]+)\.([a-z]{2})"/i);
-    if (!hrefMatch) continue;
-    const symbol = hrefMatch[1].toUpperCase();
-    const country = hrefMatch[2].toLowerCase();
-    const tdMatches = tr.match(/<td[^>]*>([\s\S]*?)<\/td>/gi) || [];
-    if (tdMatches.length < 8) continue;
+  $("tr").each((_, tr) => {
+    const href = $(tr).find('a[href*="/marches/cotation_"]').attr("href");
+    if (!href) return;
+    const match = href.match(/cotation_([A-Z0-9]+)\.([a-z]{2})/i);
+    if (!match) return;
 
-    const highText = cleanCellText(tdMatches[2].replace(/<[^>]*>/g, ""));
-    const lowText = cleanCellText(tdMatches[3].replace(/<[^>]*>/g, ""));
-    const priceText = cleanCellText(tdMatches[6].replace(/<[^>]*>/g, ""));
-    const varText = cleanCellText(tdMatches[7].replace(/<[^>]*>/g, "")).replace("%", "");
+    const symbol = match[1].toUpperCase();
+    const country = match[2].toLowerCase();
+    const tds = $(tr).find("td");
+    if (tds.length < 8) return;
+
+    const cleanText = (elem: cheerio.Cheerio<any>) =>
+      elem.text().replace(/\s+/g, "").replace(/&nbsp;/g, "").replace("%", "").trim();
+
+    const highText = cleanText($(tds[2]));
+    const lowText = cleanText($(tds[3]));
+    const priceText = cleanText($(tds[6]));
+    const varText = cleanText($(tds[7]));
 
     const currentPrice = parseFloat(priceText);
     const high = parseFloat(highText) || currentPrice;
@@ -170,7 +153,7 @@ export async function scrapeSikaQuotes(): Promise<ScrapedQuote[]> {
         variation,
       });
     }
-  }
+  });
 
   return scrapedStocks;
 }

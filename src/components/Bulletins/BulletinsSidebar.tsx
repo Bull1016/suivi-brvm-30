@@ -22,6 +22,8 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
   onSelectBulletin,
   onRefreshBulletins
 }) => {
+  const [showWhy, setShowWhy] = React.useState(false);
+
   return (
     <div className="lg:col-span-4 space-y-4">
       <div className="bg-white border-2 border-[#141414] rounded-none p-5 shadow-[4px_4px_0px_#141414]">
@@ -47,10 +49,13 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
             bulletins.map((bulletin) => {
               const isSelected = selectedBulletin?.dateCode === bulletin.dateCode;
               return (
-                <div
+                <button
+                  type="button"
                   key={bulletin.dateCode}
                   onClick={() => onSelectBulletin(bulletin)}
-                  className={`p-3.5 border-2 cursor-pointer transition-all ${
+                  aria-pressed={isSelected}
+                  aria-label={`Bulletin du ${bulletin.dateStr}`}
+                  className={`w-full text-left p-3.5 border-2 cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-amber-500 focus:outline-none ${
                     isSelected
                       ? "bg-[#141414] text-[#E4E3E0] border-[#141414] shadow-[3px_3px_0px_rgba(0,0,0,0.15)]"
                       : "bg-white hover:bg-slate-50 text-[#141414] border-[#141414] shadow-[2px_2px_0px_#141414]"
@@ -70,7 +75,7 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
                         </span>
                         <span
                           className={`text-[9px] font-mono ${
-                            isSelected ? "text-slate-400" : "text-slate-500"
+                            isSelected ? "text-slate-300" : "text-slate-600"
                           }`}
                         >
                           BOC_{bulletin.dateCode}
@@ -85,6 +90,7 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
+                      aria-label={`Télécharger le PDF d'origine du bulletin du ${bulletin.dateStr}`}
                       className={`p-1.5 border hover:opacity-80 rounded-none transition-all ${
                         isSelected
                           ? "border-[#E4E3E0]/30 hover:bg-[#E4E3E0]/15 text-white"
@@ -92,10 +98,10 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
                       }`}
                       title="Télécharger le PDF d'origine"
                     >
-                      <FileDown className="w-3.5 h-3.5" />
+                      <FileDown className="w-3.5 h-3.5" aria-hidden="true" />
                     </a>
                   </div>
-                </div>
+                </button>
               );
             })
           )}
@@ -112,36 +118,38 @@ export const BulletinsSidebar: React.FC<BulletinsSidebarProps> = ({
       </div>
 
       {/* Informational Bento Card about Bulletins */}
-      <div className="bg-[#141414] text-[#E4E3E0] border-2 border-[#141414] p-5 shadow-[4px_4px_0px_rgba(0,0,0,0.15)]">
-        <div className="flex items-center space-x-2 mb-3">
-          <TrendingUp className="w-5 h-5 text-amber-400" />
-          <h4 className="text-xs font-black uppercase tracking-wider font-mono text-white">
-            Pourquoi analyser le BOC ?
-          </h4>
-        </div>
-        <ul className="space-y-3 text-[11px] font-mono leading-relaxed text-[#E4E3E0]/80">
-          <li className="flex items-start space-x-2">
-            <span className="text-amber-400 mt-0.5 font-bold">»</span>
-            <span>
-              <strong className="text-white">Indices sectoriels :</strong> Suivez les forces motrices
-              des secteurs (Finance, Services Publics, etc.) plutôt que de simples actions isolées.
-            </span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <span className="text-amber-400 mt-0.5 font-bold">»</span>
-            <span>
-              <strong className="text-white">Marché Obligataire :</strong> Obtenez les taux réels et
-              rendements des emprunts d'État souverains.
-            </span>
-          </li>
-          <li className="flex items-start space-x-2">
-            <span className="text-amber-400 mt-0.5 font-bold">»</span>
-            <span>
-              <strong className="text-white">Opérations de Blocs :</strong> Repérez les transferts
-              de parts stratégiques par les grands institutionnels.
-            </span>
-          </li>
-        </ul>
+      <div className="bg-[#141414] text-[#E4E3E0] border-2 border-[#141414] p-4 shadow-[3px_3px_0px_rgba(0,0,0,0.15)]">
+        <button
+          type="button"
+          onClick={() => setShowWhy((prev) => !prev)}
+          className="w-full flex items-center justify-between text-left focus:outline-none"
+        >
+          <div className="flex items-center space-x-2">
+            <TrendingUp className="w-4 h-4 text-amber-400" />
+            <h4 className="text-xs font-black uppercase tracking-wider font-mono text-white">
+              Pourquoi analyser le BOC ?
+            </h4>
+          </div>
+          <span className="text-xs font-mono text-amber-400 font-bold">
+            {showWhy ? "−" : "+"}
+          </span>
+        </button>
+        {showWhy && (
+          <ul className="mt-3 space-y-2 text-[11px] font-mono leading-relaxed text-[#E4E3E0]/80 border-t border-[#E4E3E0]/20 pt-3">
+            <li className="flex items-start space-x-2">
+              <span className="text-amber-400 font-bold">»</span>
+              <span><strong className="text-white">Indices sectoriels :</strong> Forces motrices par secteur.</span>
+            </li>
+            <li className="flex items-start space-x-2">
+              <span className="text-amber-400 font-bold">»</span>
+              <span><strong className="text-white">Marché Obligataire :</strong> Taux et rendements des emprunts souverains.</span>
+            </li>
+            <li className="flex items-start space-x-2">
+              <span className="text-amber-400 font-bold">»</span>
+              <span><strong className="text-white">Opérations de Blocs :</strong> Transferts de parts stratégiques par institutionnels.</span>
+            </li>
+          </ul>
+        )}
       </div>
     </div>
   );

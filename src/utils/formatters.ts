@@ -1,9 +1,10 @@
 export const formatPrice = (price: number): string => {
-  return new Intl.NumberFormat("fr-FR", {
-    style: "currency",
-    currency: "XOF",
-    maximumFractionDigits: 0
+  if (price === undefined || price === null || isNaN(price)) return "0 FCFA";
+  const formatted = new Intl.NumberFormat("fr-FR", {
+    minimumFractionDigits: price % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
   }).format(price);
+  return `${formatted} FCFA`;
 };
 
 export const formatDate = (dateStr: string): string => {

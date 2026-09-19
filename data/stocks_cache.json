@@ -84,7 +84,7 @@
     },
     {
       "name": "Coris Bank International",
-      "symbol": "CBIB",
+      "symbol": "CBIBF",
       "country": "bf",
       "currentPrice": 10500,
       "high": 10600,
@@ -412,7 +412,7 @@
     },
     {
       "name": "Onatel Burkina Faso",
-      "symbol": "ONTB",
+      "symbol": "ONTBF",
       "country": "bf",
       "currentPrice": 2450,
       "high": 2500,
@@ -1027,7 +1027,7 @@
     },
     {
       "name": "Africa Global Logistics CI (ex-Bolloré)",
-      "symbol": "SDVC",
+      "symbol": "SDSC",
       "country": "ci",
       "currentPrice": 1950,
       "high": 2000,
@@ -1067,7 +1067,7 @@
       "sector": "Industriels"
     },
     {
-      "name": "Servair Abidjan",
+      "name": "Vivo Energy Côte d'Ivoire",
       "symbol": "SHEC",
       "country": "ci",
       "currentPrice": 2150,
