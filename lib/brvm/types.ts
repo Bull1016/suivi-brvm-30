@@ -26,6 +26,7 @@ export interface StockData {
 export interface BrvmState {
   stocks: StockData[];
   lastSync: string;
+  compositionVersion?: string;
 }
 
 export interface BulletinItem {

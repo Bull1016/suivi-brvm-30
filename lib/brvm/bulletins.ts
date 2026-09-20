@@ -7,6 +7,8 @@ const BULLETIN_PAGES = [
   "https://www.brvm.org/fr/bulletins",
 ];
 
+let bulletinsCache: { data: BulletinItem[]; expiresAt: number } | null = null;
+
 /** Resolves a bulletin link against the BRVM website. */
 function absoluteUrl(href: string): string {
   if (href.startsWith("http")) return href;
@@ -67,8 +69,13 @@ export function validateBulletinUrlForDateCode(url: string, dateCode: string): b
   }
 }
 
-/** Scrapes and returns the 30 most recent official BRVM bulletins. */
+/** Scrapes and returns the 30 most recent official BRVM bulletins. Caches results for 1 hour. */
 export async function scrapeOfficialBulletins(): Promise<BulletinItem[]> {
+  const now = Date.now();
+  if (bulletinsCache && now < bulletinsCache.expiresAt) {
+    return bulletinsCache.data;
+  }
+
   const found = new Map<string, BulletinItem>();
   let anyPageSucceeded = false;
 
@@ -117,9 +124,15 @@ export async function scrapeOfficialBulletins(): Promise<BulletinItem[]> {
     }
   }
 
-  if (!anyPageSucceeded) {
+  if (!anyPageSucceeded && !bulletinsCache) {
     throw new Error("Aucune source de bulletin n'a pu être contactée avec succès.");
   }
 
-  return [...found.values()].sort((a, b) => b.dateCode.localeCompare(a.dateCode)).slice(0, 30);
+  if (found.size > 0) {
+    const list = [...found.values()].sort((a, b) => b.dateCode.localeCompare(a.dateCode)).slice(0, 30);
+    bulletinsCache = { data: list, expiresAt: now + 3600 * 1000 };
+    return list;
+  }
+
+  return bulletinsCache ? bulletinsCache.data : [];
 }

@@ -1,5 +1,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
+export const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
 let ai: GoogleGenAI | null | undefined;
 
 /** Returns the lazily initialized Gemini client when an API key is configured. */
@@ -11,11 +13,6 @@ export function getGemini(): GoogleGenAI | null {
   }
   ai = new GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY,
-    httpOptions: {
-      headers: {
-        "User-Agent": "aistudio-build",
-      },
-    },
   });
   return ai;
 }
@@ -32,7 +29,7 @@ export async function generateCompanyDescription(
   const prompt = `Provide a professional, realistic, and highly informative company description in French of 1 to 3 paragraphs for the BRVM-listed company "${companyName}" (symbol: ${symbol}, country: ${country.toUpperCase()}). Describe its primary business sector (e.g. banking, telecommunications, agriculture, energy, etc.), its history, its services, and its position on the regional market. Return ONLY a JSON object with a single 'description' string property.`;
 
   const geminiResponse = await client.models.generateContent({
-    model: "gemini-3.6-flash",
+    model: GEMINI_MODEL,
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -71,7 +68,7 @@ Rédige en français un rapport structuré (markdown) couvrant :
 Cite uniquement des informations cohérentes avec un BOC BRVM.`;
 
   const response = await client.models.generateContent({
-    model: "gemini-3.6-flash",
+    model: GEMINI_MODEL,
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }, { urlContext: { url: pdfUrl } }],

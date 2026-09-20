@@ -1,4 +1,4 @@
- import fs from "fs";
+import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
 import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
@@ -14,6 +14,7 @@ const KEY_DIV_CURSOR = "brvm:div-cursor";
 const KEY_BULLETIN = (dateCode: string) => `brvm:bulletin:${dateCode}`;
 
 const SYNCING_TTL_SECONDS = 90;
+const COMPOSITION_VERSION = "191-2026";
 
 let memoryState: BrvmState | null = null;
 let memoryDescriptions: Record<string, string> = {};
@@ -76,7 +77,7 @@ function readJsonFile<T>(relativePath: string): T | null {
 
 /** Loads the initial stock state from cache data or repository defaults. */
 function loadSeedState(): BrvmState {
-  const cached = readJsonFile<{ stocks?: StockData[]; lastSyncTime?: string; lastSync?: string }>(
+  const cached = readJsonFile<{ stocks?: StockData[]; lastSyncTime?: string; lastSync?: string; compositionVersion?: string }>(
     "data/stocks_cache.json"
   );
   if (cached?.stocks && Array.isArray(cached.stocks) && cached.stocks.length > 0) {
@@ -85,11 +86,56 @@ function loadSeedState(): BrvmState {
     return {
       stocks: cached.stocks.map((s) => processStockDividends(s)),
       lastSync: lastSyncTime || legacyLastSync,
+      compositionVersion: cached.compositionVersion || COMPOSITION_VERSION,
     };
   }
   return {
     stocks: seedStocksFromDefaults(),
     lastSync: "",
+    compositionVersion: COMPOSITION_VERSION,
+  };
+}
+
+/** Reconciles a persisted state with the official BRVM 30 composition (Avis 191-2026). */
+export function reconcileState(stored: BrvmState): BrvmState {
+  const seedStocks = seedStocksFromDefaults();
+  const seedMap = new Map(seedStocks.map((s) => [s.symbol, s]));
+
+  const ALIASES: Record<string, string> = {
+    CBIB: "CBIBF",
+    ONTB: "ONTBF",
+    SDVC: "SDSC",
+  };
+
+  const existingMap = new Map<string, StockData>();
+  for (const stock of stored?.stocks || []) {
+    let sym = (stock.symbol || "").toUpperCase();
+    if (ALIASES[sym]) sym = ALIASES[sym];
+    if (seedMap.has(sym)) {
+      existingMap.set(sym, stock);
+    }
+  }
+
+  const reconciledStocks: StockData[] = seedStocks.map((seed) => {
+    const existing = existingMap.get(seed.symbol);
+    if (!existing) return seed;
+
+    const merged = {
+      ...seed,
+      ...existing,
+      symbol: seed.symbol,
+      name: seed.name,
+      country: seed.country,
+      sector: seed.sector || existing.sector,
+      dividends: existing.dividends?.length ? existing.dividends : seed.dividends,
+    };
+    return processStockDividends(merged);
+  });
+
+  return {
+    stocks: reconciledStocks,
+    lastSync: stored?.lastSync || "",
+    compositionVersion: COMPOSITION_VERSION,
   };
 }
 
@@ -98,12 +144,18 @@ function loadSeedDescriptions(): Record<string, string> {
   return readJsonFile<Record<string, string>>("data/company_descriptions.json") ?? {};
 }
 
-/** Returns the persisted stock state, seeding it when necessary. */
+/** Returns the persisted stock state, seeding or reconciling it when necessary. */
 export async function getState(): Promise<BrvmState> {
   const redis = getRedis();
   if (redis) {
     const stored = await redis.get<BrvmState>(KEY_STATE);
     if (stored?.stocks?.length) {
+      if (stored.compositionVersion !== COMPOSITION_VERSION || stored.stocks.length !== 30) {
+        const reconciled = reconcileState(stored);
+        await redis.set(KEY_STATE, reconciled);
+        memoryState = reconciled;
+        return reconciled;
+      }
       const normalized = normalizeStateCountries(stored);
       if (normalized !== stored) await redis.set(KEY_STATE, normalized);
       memoryState = normalized;
@@ -118,12 +170,18 @@ export async function getState(): Promise<BrvmState> {
   if (!memoryState) {
     memoryState = loadSeedState();
   }
+  if (memoryState.compositionVersion !== COMPOSITION_VERSION || memoryState.stocks.length !== 30) {
+    memoryState = reconcileState(memoryState);
+  }
   return memoryState;
 }
 
 /** Saves stock state to memory and the configured Redis store. */
 export async function saveState(state: BrvmState): Promise<void> {
-  const normalized = normalizeStateCountries(state);
+  const normalized = normalizeStateCountries({
+    ...state,
+    compositionVersion: COMPOSITION_VERSION,
+  });
   memoryState = normalized;
   const redis = getRedis();
   if (redis) {

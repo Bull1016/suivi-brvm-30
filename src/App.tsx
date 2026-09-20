@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
 import { StockData, BRVMResponse } from "./types";
 import {
@@ -15,7 +15,13 @@ import { StocksTable } from "./components/StocksTable";
 import { DividendLegend } from "./components/DividendLegend";
 import { StockDetailDrawer } from "./components/StockDetailDrawer";
 import { BulletinsSidebar, BulletinItem } from "./components/Bulletins/BulletinsSidebar";
-import { BulletinAnalysisView } from "./components/Bulletins/BulletinAnalysisView";
+
+// Lazy load heavy Markdown analysis view to optimize initial JS bundle size (NEW-08)
+const BulletinAnalysisView = lazy(() =>
+  import("./components/Bulletins/BulletinAnalysisView").then((m) => ({
+    default: m.BulletinAnalysisView,
+  }))
+);
 
 export default function App() {
   const lastYear = new Date().getFullYear() - 1;
@@ -103,7 +109,7 @@ export default function App() {
     fetchStocks();
   }, []);
 
-  // Poll stocks while synchronization is running
+  // Poll stocks while synchronization is running (use timestamp to bypass cache NEW-11)
   useEffect(() => {
     if (!isSyncing) return;
     const interval = setInterval(() => {
@@ -160,7 +166,8 @@ export default function App() {
     const requestSequence = ++stocksRequestSequenceRef.current;
     try {
       setError(null);
-      const res = await fetch("/api/brvm30/stocks");
+      // Append cache buster parameter to bypass stale proxy caches (NEW-11)
+      const res = await fetch(`/api/brvm30/stocks?t=${Date.now()}`);
       if (!res.ok) throw new Error("Erreur de récupération des données");
       const data: BRVMResponse & { brvm30Url?: string } = await res.json();
       if (requestSequence !== stocksRequestSequenceRef.current) return;
@@ -425,11 +432,11 @@ export default function App() {
 
   // ─── Derived data ────────────────────────────────────────────────
 
-  // Normalize sector using fallback map
+  // Normalize sector using fallback map, falling back to "Non classé" if unknown (NEW-11)
   const processedStocks = useMemo(() => {
     return stocks.map((s) => ({
       ...s,
-      sector: s.sector || DEFAULT_SYMBOL_SECTOR_FALLBACK[s.symbol] || "Services Financiers"
+      sector: s.sector || DEFAULT_SYMBOL_SECTOR_FALLBACK[s.symbol] || "Non classé"
     }));
   }, [stocks]);
 
@@ -552,7 +559,7 @@ export default function App() {
           hidden={activeTab !== "STOCKS"}
         >
             {/* KPI bento cards */}
-            <BentoMetrics stats={stats} />
+            <BentoMetrics stats={stats} brvm30Url={brvm30Url} />
 
             {/* Search + filters toolbar */}
             <StockFilters
@@ -606,15 +613,21 @@ export default function App() {
               onSelectBulletin={setSelectedBulletin}
               onRefreshBulletins={fetchBulletins}
             />
-            <BulletinAnalysisView
-              selectedBulletin={selectedBulletin}
-              bulletinAnalysis={bulletinAnalysis}
-              bulletinSources={bulletinSources}
-              isAnalyzingBulletin={isAnalyzingBulletin}
-              analysisError={analysisError}
-              bulletinLoadingStep={bulletinLoadingStep}
-              onRunAnalysis={runBulletinAnalysis}
-            />
+            <Suspense fallback={
+              <div className="lg:col-span-8 bg-white border-2 border-[#141414] p-8 font-mono text-xs text-[#141414]">
+                Chargement du module d'analyse…
+              </div>
+            }>
+              <BulletinAnalysisView
+                selectedBulletin={selectedBulletin}
+                bulletinAnalysis={bulletinAnalysis}
+                bulletinSources={bulletinSources}
+                isAnalyzingBulletin={isAnalyzingBulletin}
+                analysisError={analysisError}
+                bulletinLoadingStep={bulletinLoadingStep}
+                onRunAnalysis={runBulletinAnalysis}
+              />
+            </Suspense>
         </div>
       </main>
 
