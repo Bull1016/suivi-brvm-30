@@ -2,6 +2,7 @@ import React from "react";
 import { Search, X, SlidersHorizontal, Layers } from "lucide-react";
 import { SECTOR_CONFIG, COUNTRIES_MAP } from "../constants/brvmData";
 import { StockData } from "../types";
+import { CountryFlag } from "./CountryFlag";
 
 interface StockFiltersProps {
   searchTerm: string;
@@ -19,6 +20,7 @@ interface StockFiltersProps {
   selectedCountry: string;
   setSelectedCountry: (country: string) => void;
   stocksFilteredByOthers: StockData[];
+  stocksForCountryCounts?: StockData[];
   applyPricePreset: (preset: string) => void;
 }
 
@@ -38,10 +40,33 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
   selectedCountry,
   setSelectedCountry,
   stocksFilteredByOthers,
+  stocksForCountryCounts = stocksFilteredByOthers,
   applyPricePreset
 }) => {
+  const isMinGreaterThanMax =
+    minPrice !== "" && maxPrice !== "" && Number(minPrice) > Number(maxPrice);
+
+  const hasActiveFilters =
+    searchTerm !== "" ||
+    dividendFilter !== "ALL" ||
+    selectedSector !== "ALL" ||
+    selectedCountry !== "ALL" ||
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    pricePreset !== "ALL";
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setDividendFilter("ALL");
+    setSelectedSector("ALL");
+    setSelectedCountry("ALL");
+    setMinPrice("");
+    setMaxPrice("");
+    setPricePreset("ALL");
+  };
+
   return (
-    <section className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-6 shadow-[4px_4px_0px_#141414] mb-8 space-y-5">
+    <section className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-5 shadow-[3px_3px_0px_#141414] mb-6 space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
@@ -165,7 +190,13 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
         </div>
 
         {/* Custom Min / Max Inputs */}
-        <div className="flex items-center space-x-2 text-xs font-mono">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+          {isMinGreaterThanMax && (
+            <span className="text-[10px] text-rose-700 font-bold font-mono bg-rose-50 border border-rose-300 px-2 py-1">
+              ⚠️ Min &gt; Max
+            </span>
+          )}
+          <div className="flex items-center space-x-2 text-xs font-mono">
           <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
             <label htmlFor="min-price" className="text-[10px] text-[#141414]/50 uppercase font-bold">Min:</label>
             <input
@@ -216,6 +247,7 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
               <X className="w-4 h-4" />
             </button>
           )}
+          </div>
         </div>
       </div>
 
@@ -280,14 +312,14 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
       </div>
 
       {/* Country Badges Filters */}
-      <div className="pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
+      <div className="pt-3 border-t border-[#141414] flex flex-wrap items-center gap-2">
         <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono">
           Pays :
         </span>
         <button
           onClick={() => setSelectedCountry("ALL")}
           aria-label="Filtrer: tous les marchés"
-          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 ${
             selectedCountry === "ALL"
               ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
               : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
@@ -305,7 +337,7 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           </span>
         </button>
         {Object.entries(COUNTRIES_MAP).map(([code, data]) => {
-          const countOfCountry = stocksFilteredByOthers.filter(
+          const countOfCountry = stocksForCountryCounts.filter(
             (s) => s.country === code
           ).length;
           return (
@@ -313,13 +345,13 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
               key={code}
               onClick={() => setSelectedCountry(code.toUpperCase())}
               aria-label={`Filtrer: pays ${data.name}`}
-              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 ${
                 selectedCountry === code.toUpperCase()
                   ? "bg-emerald-100 text-[#141414] border-[#141414]"
                   : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
               }`}
             >
-              <span>{data.flag}</span>
+              <CountryFlag code={code} />
               <span>{data.name}</span>
               <span className="text-[9px] bg-[#141414]/10 text-[#141414] font-mono border border-[#141414]/20 rounded-none px-1.5 py-0.5 ml-1">
                 {countOfCountry}
@@ -328,6 +360,49 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           );
         })}
       </div>
+
+      {/* Active Filter Chips */}
+      {hasActiveFilters && (
+        <div className="pt-3 border-t border-[#141414] flex flex-wrap items-center gap-2 text-xs font-mono">
+          <span className="text-[10px] text-[#141414]/60 uppercase font-bold mr-1">Filtres actifs :</span>
+          {searchTerm && (
+            <span className="inline-flex items-center gap-1 bg-slate-100 text-[#141414] border border-[#141414] px-2 py-0.5 font-bold text-[10px]">
+              "{searchTerm}"
+              <button onClick={() => setSearchTerm("")} aria-label="Effacer recherche"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          {dividendFilter !== "ALL" && (
+            <span className="inline-flex items-center gap-1 bg-slate-100 text-[#141414] border border-[#141414] px-2 py-0.5 font-bold text-[10px]">
+              {dividendFilter === "ELIGIBLE" ? "D ≥ 3 ans" : "D < 3 ans"}
+              <button onClick={() => setDividendFilter("ALL")} aria-label="Effacer filtre dividendes"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          {selectedSector !== "ALL" && (
+            <span className="inline-flex items-center gap-1 bg-slate-100 text-[#141414] border border-[#141414] px-2 py-0.5 font-bold text-[10px]">
+              {selectedSector}
+              <button onClick={() => setSelectedSector("ALL")} aria-label="Effacer filtre secteur"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          {selectedCountry !== "ALL" && (
+            <span className="inline-flex items-center gap-1 bg-slate-100 text-[#141414] border border-[#141414] px-2 py-0.5 font-bold text-[10px]">
+              {COUNTRIES_MAP[selectedCountry.toLowerCase()]?.name || selectedCountry}
+              <button onClick={() => setSelectedCountry("ALL")} aria-label="Effacer filtre pays"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          {(minPrice || maxPrice) && (
+            <span className="inline-flex items-center gap-1 bg-slate-100 text-[#141414] border border-[#141414] px-2 py-0.5 font-bold text-[10px]">
+              {minPrice || 0} - {maxPrice || "∞"} F
+              <button onClick={() => { setMinPrice(""); setMaxPrice(""); setPricePreset("ALL"); }} aria-label="Effacer filtre prix"><X className="w-3 h-3" /></button>
+            </span>
+          )}
+          <button
+            onClick={clearAllFilters}
+            className="text-[10px] text-rose-700 font-bold uppercase underline hover:text-rose-900 ml-auto"
+          >
+            Réinitialiser tout
+          </button>
+        </div>
+      )}
     </section>
   );
 };

@@ -1,5 +1,7 @@
 import React from "react";
 import { FileText, Sparkles, XCircle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { BulletinItem } from "./BulletinsSidebar";
 
 interface BulletinAnalysisViewProps {
@@ -37,7 +39,7 @@ export const BulletinAnalysisView: React.FC<BulletinAnalysisViewProps> = ({
           <div>
             <div className="flex items-center space-x-2 mb-1">
               <span className="bg-amber-100 text-[#141414] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 border border-[#141414] font-mono">
-                Séance du Jour
+                {selectedBulletin.dateCode === new Date().toISOString().slice(0, 10).replace(/-/g, "") ? "Séance du Jour" : "Bulletin de Cote"}
               </span>
               <span className="text-[10px] text-[#141414]/60 font-mono">
                 BOC_{selectedBulletin.dateCode}
@@ -111,8 +113,32 @@ export const BulletinAnalysisView: React.FC<BulletinAnalysisViewProps> = ({
         ) : bulletinAnalysis ? (
           <div className="space-y-6">
             <div className="prose prose-sm max-w-none text-[#141414]">
-              <div className="text-[12px] font-sans leading-relaxed whitespace-pre-line text-[#141414]/90 bg-slate-50 border-2 border-[#141414] p-5 shadow-[3px_3px_0px_#141414] rounded-none">
-                {bulletinAnalysis}
+              <div className="text-[13px] font-sans leading-relaxed text-[#141414]/90 bg-slate-50 border-2 border-[#141414] p-5 shadow-[3px_3px_0px_#141414] rounded-none overflow-x-auto">
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    h1: ({ children }) => <h1 className="text-lg font-black uppercase text-[#141414] mt-4 mb-2 font-sans border-b border-[#141414]/20 pb-1">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-base font-bold uppercase text-[#141414] mt-4 mb-2 font-sans">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-bold text-[#141414] mt-3 mb-1 font-sans">{children}</h3>,
+                    p: ({ children }) => <p className="mb-3 leading-relaxed font-sans">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1 font-sans">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1 font-sans">{children}</ol>,
+                    li: ({ children }) => <li className="font-sans">{children}</li>,
+                    table: ({ children }) => (
+                      <div className="overflow-x-auto my-4 border-2 border-[#141414]">
+                        <table className="w-full text-left border-collapse text-xs font-mono">{children}</table>
+                      </div>
+                    ),
+                    thead: ({ children }) => <thead className="bg-[#141414] text-[#E4E3E0] uppercase font-bold">{children}</thead>,
+                    tbody: ({ children }) => <tbody className="divide-y divide-[#141414]/20 bg-white">{children}</tbody>,
+                    tr: ({ children }) => <tr className="hover:bg-slate-100">{children}</tr>,
+                    th: ({ children }) => <th className="p-2 border border-[#141414]/20 font-bold">{children}</th>,
+                    td: ({ children }) => <td className="p-2 border border-[#141414]/20">{children}</td>,
+                    strong: ({ children }) => <strong className="font-bold text-[#141414]">{children}</strong>,
+                  }}
+                >
+                  {bulletinAnalysis}
+                </ReactMarkdown>
               </div>
             </div>
 
@@ -121,7 +147,7 @@ export const BulletinAnalysisView: React.FC<BulletinAnalysisViewProps> = ({
               <div className="border-t border-[#141414]/10 pt-4 mt-6">
                 <h4 className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mb-2.5 font-mono flex items-center space-x-1.5">
                   <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Sources vérifiées et croisées par l'IA :</span>
+                  <span>Sources consultées par l'IA :</span>
                 </h4>
                 <div className="flex flex-wrap gap-2">
                   {bulletinSources.map((source, idx) => (
@@ -167,7 +193,7 @@ export const BulletinAnalysisView: React.FC<BulletinAnalysisViewProps> = ({
         <span>
           Avertissement : Les analyses financières IA sont des synthèses automatisées et ne constituent pas des conseils d'investissement.
         </span>
-        <span className="font-bold text-[#141414]/70">Antigravity Trading Agent 2.5</span>
+        <span className="font-bold text-[#141414]/70">Suivi BRVM 30</span>
       </div>
     </div>
   );

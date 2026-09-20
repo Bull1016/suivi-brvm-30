@@ -9,11 +9,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (!isCronAuthorized(req)) {
-    return res.status(401).json({ success: false, message: "Non autorisé." });
+    console.warn("Cron invocation unauthorized: missing or invalid CRON_SECRET authorization header.");
+    return res.status(401).json({ success: false, message: "Non autorisé. Jeton CRON_SECRET invalide." });
   }
 
-  const result = await syncDividendsBatch(2);
-  return res.status(200).json(result);
+  try {
+    const result = await syncDividendsBatch(2);
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Cron dividend sync failed:", error);
+    return res.status(500).json({ success: false, message: "La synchronisation des dividendes a échoué." });
+  }
 }
 
 export const config = {
