@@ -53,7 +53,7 @@
 | **API production** | Fonctions serverless Vercel (`api/`) |
 | **API locale** | Express + Vite middleware (`server.ts`) |
 | **Cache** | Upstash Redis (Vercel KV) + seed JSON |
-| **IA** | `@google/genai` — modèle `gemini-2.5-flash` avec Google Grounding |
+| **IA** | `@google/genai` — modèle `gemini-3.8-live` avec Google Grounding |
 | **Scraping** | Scraper Regex maison (Sika Finance + brvm.org) |
 
 ### Structure

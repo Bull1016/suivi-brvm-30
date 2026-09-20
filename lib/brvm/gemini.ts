@@ -32,7 +32,7 @@ export async function generateCompanyDescription(
   const prompt = `Provide a professional, realistic, and highly informative company description in French of 1 to 3 paragraphs for the BRVM-listed company "${companyName}" (symbol: ${symbol}, country: ${country.toUpperCase()}). Describe its primary business sector (e.g. banking, telecommunications, agriculture, energy, etc.), its history, its services, and its position on the regional market. Return ONLY a JSON object with a single 'description' string property.`;
 
   const geminiResponse = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.8-live",
     contents: prompt,
     config: {
       responseMimeType: "application/json",
@@ -71,7 +71,7 @@ Rédige en français un rapport structuré (markdown) couvrant :
 Cite uniquement des informations cohérentes avec un BOC BRVM.`;
 
   const response = await client.models.generateContent({
-    model: "gemini-2.5-flash",
+    model: "gemini-3.8-live",
     contents: prompt,
     config: {
       tools: [{ googleSearch: {} }, { urlContext: { url: pdfUrl } }],
