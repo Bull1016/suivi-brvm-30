@@ -22,6 +22,7 @@ export default function App() {
 
   // ─── Data states ───────────────────────────────────────────────
   const [stocks, setStocks] = useState<StockData[]>([]);
+  const [isLoadingStocks, setIsLoadingStocks] = useState<boolean>(true);
   const [lastSync, setLastSync] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [brvm30Url, setBrvm30Url] = useState<string>("");
@@ -49,7 +50,9 @@ export default function App() {
   const [isUpdatingDividends, setIsUpdatingDividends] = useState<boolean>(false);
   const [dividendUpdateMsg, setDividendUpdateMsg] = useState<string | null>(null);
   const [companyDescription, setCompanyDescription] = useState<string | null>(null);
+  const [companyDescriptionSource, setCompanyDescriptionSource] = useState<string | null>(null);
   const [isFetchingDescription, setIsFetchingDescription] = useState<boolean>(false);
+  const [descriptionCache, setDescriptionCache] = useState<Record<string, { description: string; source: string }>>({});
 
   // ─── Tab / Bulletins states ─────────────────────────────────────
   const [activeTab, setActiveTab] = useState<TabType>("STOCKS");
@@ -61,13 +64,53 @@ export default function App() {
   const [isAnalyzingBulletin, setIsAnalyzingBulletin] = useState<boolean>(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [bulletinLoadingStep, setBulletinLoadingStep] = useState<number>(0);
+  const [bulletinCache, setBulletinCache] = useState<Record<string, { analysis: string; sources: any[] }>>({});
+
+  // ─── Refs for race conditions & cleanup ───────────────────────
+  const selectedStockRef = React.useRef(selectedStock);
+  useEffect(() => {
+    selectedStockRef.current = selectedStock;
+  }, [selectedStock]);
+
+  const selectedBulletinRef = React.useRef(selectedBulletin);
+  useEffect(() => {
+    selectedBulletinRef.current = selectedBulletin;
+  }, [selectedBulletin]);
+
+  const statusTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const dividendTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+  const bulletinIntervalRef = React.useRef<NodeJS.Timeout | null>(null);
+  const descAbortControllerRef = React.useRef<AbortController | null>(null);
+  const bulletinAbortControllerRef = React.useRef<AbortController | null>(null);
+  const stocksRequestSequenceRef = React.useRef(0);
 
   // ─── Effects ────────────────────────────────────────────────────
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
+      if (dividendTimeoutRef.current) clearTimeout(dividendTimeoutRef.current);
+      if (bulletinIntervalRef.current) clearInterval(bulletinIntervalRef.current);
+      if (descAbortControllerRef.current) descAbortControllerRef.current.abort();
+      if (bulletinAbortControllerRef.current) bulletinAbortControllerRef.current.abort();
+      stocksRequestSequenceRef.current += 1;
+    };
+  }, []);
 
   // Fetch stocks on mount
   useEffect(() => {
     fetchStocks();
   }, []);
+
+  // Poll stocks while synchronization is running
+  useEffect(() => {
+    if (!isSyncing) return;
+    const interval = setInterval(() => {
+      fetchStocks();
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isSyncing]);
 
   // Fetch company description when selected stock changes
   useEffect(() => {
@@ -75,14 +118,31 @@ export default function App() {
       fetchCompanyDescription(selectedStock.symbol, selectedStock.country);
     } else {
       setCompanyDescription(null);
+      setCompanyDescriptionSource(null);
     }
   }, [selectedStock?.symbol]);
 
-  // Reset bulletin analysis when selected bulletin changes
+  // Manage bulletin analysis selection & caching
   useEffect(() => {
+    if (bulletinIntervalRef.current) {
+      clearInterval(bulletinIntervalRef.current);
+      bulletinIntervalRef.current = null;
+    }
+    if (bulletinAbortControllerRef.current) {
+      bulletinAbortControllerRef.current.abort();
+      bulletinAbortControllerRef.current = null;
+    }
+    setIsAnalyzingBulletin(false);
+
     if (selectedBulletin) {
-      setBulletinAnalysis(null);
-      setBulletinSources([]);
+      const cached = bulletinCache[selectedBulletin.dateCode];
+      if (cached) {
+        setBulletinAnalysis(cached.analysis);
+        setBulletinSources(cached.sources || []);
+      } else {
+        setBulletinAnalysis(null);
+        setBulletinSources([]);
+      }
       setAnalysisError(null);
     }
   }, [selectedBulletin?.dateCode]);
@@ -97,38 +157,47 @@ export default function App() {
   // ─── API calls ──────────────────────────────────────────────────
 
   const fetchStocks = async () => {
+    const requestSequence = ++stocksRequestSequenceRef.current;
     try {
       setError(null);
       const res = await fetch("/api/brvm30/stocks");
       if (!res.ok) throw new Error("Erreur de récupération des données");
       const data: BRVMResponse & { brvm30Url?: string } = await res.json();
+      if (requestSequence !== stocksRequestSequenceRef.current) return;
       if (data.success) {
         setStocks(data.stocks);
         setLastSync(data.lastSync);
         setIsSyncing(data.isSyncing);
         if (data.brvm30Url) setBrvm30Url(data.brvm30Url);
 
-        if (selectedStock) {
-          const updated = data.stocks.find((s) => s.symbol === selectedStock.symbol);
+        if (selectedStockRef.current) {
+          const updated = data.stocks.find((s) => s.symbol === selectedStockRef.current?.symbol);
           if (updated) setSelectedStock(updated);
         }
       } else {
         setError(data.message || "Une erreur est survenue");
       }
     } catch (err) {
+      if (requestSequence !== stocksRequestSequenceRef.current) return;
       console.error(err);
       setError("Impossible de contacter le serveur. Assurez-vous que l'application a démarré.");
+    } finally {
+      if (requestSequence === stocksRequestSequenceRef.current) {
+        setIsLoadingStocks(false);
+      }
     }
   };
 
   const triggerSync = async () => {
     if (isSyncing) return;
+    stocksRequestSequenceRef.current += 1;
     setIsSyncing(true);
     showStatus("Synchronisation des cotations avec Sika Finance…", "info");
 
     try {
       const res = await fetch("/api/brvm30/sync", { method: "POST" });
       const data = await res.json();
+      stocksRequestSequenceRef.current += 1;
       if (data.success) {
         if (Array.isArray(data.stocks)) {
           setStocks(data.stocks);
@@ -145,6 +214,7 @@ export default function App() {
         showStatus(data.message || "Échec de la synchronisation", "error");
       }
     } catch (err) {
+      stocksRequestSequenceRef.current += 1;
       setIsSyncing(false);
       showStatus("Erreur lors de la tentative de synchronisation", "error");
     }
@@ -154,6 +224,8 @@ export default function App() {
     if (isUpdatingDividends) return;
     setIsUpdatingDividends(true);
     setDividendUpdateMsg("Récupération en direct de l'historique des dividendes…");
+
+    if (dividendTimeoutRef.current) clearTimeout(dividendTimeoutRef.current);
 
     try {
       const res = await fetch(`/api/brvm30/sync-dividends/${symbol}`, { method: "POST" });
@@ -171,26 +243,62 @@ export default function App() {
       setDividendUpdateMsg("Erreur réseau lors de la mise à jour.");
     } finally {
       setIsUpdatingDividends(false);
-      setTimeout(() => setDividendUpdateMsg(null), 4000);
+      dividendTimeoutRef.current = setTimeout(() => setDividendUpdateMsg(null), 4000);
     }
   };
 
   const fetchCompanyDescription = async (symbol: string, country: string) => {
+    if (descAbortControllerRef.current) {
+      descAbortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    descAbortControllerRef.current = controller;
+
+    const cacheKey = `${symbol}.${country}`;
+    if (descriptionCache[cacheKey]) {
+      setCompanyDescription(descriptionCache[cacheKey].description);
+      setCompanyDescriptionSource(descriptionCache[cacheKey].source);
+      setIsFetchingDescription(false);
+      return;
+    }
+
     setIsFetchingDescription(true);
     setCompanyDescription(null);
+    setCompanyDescriptionSource(null);
     try {
-      const res = await fetch(`/api/brvm30/company-description/${symbol}/${country}`);
+      const res = await fetch(`/api/brvm30/company-description/${symbol}/${country}`, {
+        signal: controller.signal,
+      });
       const data = await res.json();
+      if (controller.signal.aborted) return;
+
       if (data.success) {
-        setCompanyDescription(data.description);
+        const source = typeof data.source === "string" ? data.source : "fallback";
+        setDescriptionCache((prev) => ({
+          ...prev,
+          [cacheKey]: { description: data.description, source },
+        }));
+        if (selectedStockRef.current?.symbol === symbol) {
+          setCompanyDescription(data.description);
+          setCompanyDescriptionSource(source);
+        }
       } else {
-        setCompanyDescription("Impossible de charger la description de l'entreprise.");
+        if (selectedStockRef.current?.symbol === symbol) {
+          setCompanyDescription("Impossible de charger la description de l'entreprise.");
+          setCompanyDescriptionSource(null);
+        }
       }
-    } catch (e) {
+    } catch (e: any) {
+      if (e.name === "AbortError") return;
       console.error(e);
-      setCompanyDescription("Erreur réseau lors de la récupération de la description.");
+      if (selectedStockRef.current?.symbol === symbol) {
+        setCompanyDescription("Erreur réseau lors de la récupération de la description.");
+        setCompanyDescriptionSource(null);
+      }
     } finally {
-      setIsFetchingDescription(false);
+      if (!controller.signal.aborted && selectedStockRef.current?.symbol === symbol) {
+        setIsFetchingDescription(false);
+      }
     }
   };
 
@@ -217,44 +325,77 @@ export default function App() {
 
   const runBulletinAnalysis = async (bulletin: BulletinItem) => {
     if (isAnalyzingBulletin) return;
+
+    if (bulletinAbortControllerRef.current) {
+      bulletinAbortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    bulletinAbortControllerRef.current = controller;
+
     setIsAnalyzingBulletin(true);
     setBulletinAnalysis(null);
     setBulletinSources([]);
     setAnalysisError(null);
     setBulletinLoadingStep(0);
 
-    const stepInterval = setInterval(() => {
+    if (bulletinIntervalRef.current) clearInterval(bulletinIntervalRef.current);
+    bulletinIntervalRef.current = setInterval(() => {
       setBulletinLoadingStep((prev) => (prev < 4 ? prev + 1 : prev));
     }, 3500);
 
     try {
       const res = await fetch(
-        `/api/brvm/analyze-bulletin/${bulletin.dateCode}?url=${encodeURIComponent(bulletin.url)}`
+        `/api/brvm/analyze-bulletin/${bulletin.dateCode}?url=${encodeURIComponent(bulletin.url)}`,
+        { signal: controller.signal }
       );
       const data = await res.json();
-      clearInterval(stepInterval);
+      if (controller.signal.aborted) return;
+
+      if (bulletinIntervalRef.current) {
+        clearInterval(bulletinIntervalRef.current);
+        bulletinIntervalRef.current = null;
+      }
 
       if (data.success) {
-        setBulletinAnalysis(data.analysis);
-        setBulletinSources(data.sources || []);
+        const payload = { analysis: data.analysis, sources: data.sources || [] };
+        setBulletinCache((prev) => ({ ...prev, [bulletin.dateCode]: payload }));
+        if (selectedBulletinRef.current?.dateCode === bulletin.dateCode) {
+          setBulletinAnalysis(data.analysis);
+          setBulletinSources(data.sources || []);
+        }
       } else {
-        setAnalysisError(data.message || "Erreur lors de la génération de l'analyse.");
+        if (selectedBulletinRef.current?.dateCode === bulletin.dateCode) {
+          setAnalysisError(data.message || "Erreur lors de la génération de l'analyse.");
+        }
       }
-    } catch (e) {
-      clearInterval(stepInterval);
+    } catch (e: any) {
+      if (bulletinIntervalRef.current) {
+        clearInterval(bulletinIntervalRef.current);
+        bulletinIntervalRef.current = null;
+      }
+      if (e.name === "AbortError") return;
       console.error(e);
-      setAnalysisError("Erreur de communication avec le serveur d'analyse.");
+      if (selectedBulletinRef.current?.dateCode === bulletin.dateCode) {
+        setAnalysisError("Erreur de communication avec le serveur d'analyse.");
+      }
     } finally {
-      setIsAnalyzingBulletin(false);
+      if (!controller.signal.aborted && selectedBulletinRef.current?.dateCode === bulletin.dateCode) {
+        setIsAnalyzingBulletin(false);
+      }
     }
   };
 
   // ─── Helpers ────────────────────────────────────────────────────
 
   const showStatus = (text: string, type: "success" | "error" | "info") => {
+    if (statusTimeoutRef.current) clearTimeout(statusTimeoutRef.current);
     setStatusMsg({ text, type });
-    setTimeout(() => setStatusMsg(null), 5000);
+    statusTimeoutRef.current = setTimeout(() => setStatusMsg(null), 5000);
   };
+
+  const closeStockDrawer = React.useCallback(() => {
+    setSelectedStock(null);
+  }, []);
 
   const applyPricePreset = (preset: string) => {
     setPricePreset(preset);
@@ -263,12 +404,12 @@ export default function App() {
       setMaxPrice("");
     } else if (preset === "UNDER_2500") {
       setMinPrice("");
-      setMaxPrice("2500");
+      setMaxPrice("2499");
     } else if (preset === "2500_10000") {
       setMinPrice("2500");
       setMaxPrice("10000");
     } else if (preset === "OVER_10000") {
-      setMinPrice("10000");
+      setMinPrice("10001");
       setMaxPrice("");
     }
   };
@@ -304,8 +445,8 @@ export default function App() {
     return { count, averageVariation, dividendEligibleCount };
   }, [processedStocks]);
 
-  // Stocks filtered by everything except sector/country (used for badge counts)
-  const stocksFilteredByOthers = useMemo(() => {
+  // Base filtered list (Search, Dividend, Price Range)
+  const baseFilteredStocks = useMemo(() => {
     let result = [...processedStocks];
 
     if (searchTerm.trim() !== "") {
@@ -334,9 +475,21 @@ export default function App() {
     return result;
   }, [processedStocks, searchTerm, dividendFilter, minPrice, maxPrice]);
 
+  // Stocks filtered for Sector badge counts (respects selectedCountry)
+  const stocksForSectorCounts = useMemo(() => {
+    if (selectedCountry === "ALL") return baseFilteredStocks;
+    return baseFilteredStocks.filter((s) => s.country === selectedCountry.toLowerCase());
+  }, [baseFilteredStocks, selectedCountry]);
+
+  // Stocks filtered for Country badge counts (respects selectedSector)
+  const stocksForCountryCounts = useMemo(() => {
+    if (selectedSector === "ALL") return baseFilteredStocks;
+    return baseFilteredStocks.filter((s) => s.sector === selectedSector);
+  }, [baseFilteredStocks, selectedSector]);
+
   // Fully filtered and sorted list for the table
   const filteredAndSortedStocks = useMemo(() => {
-    let result = [...stocksFilteredByOthers];
+    let result = [...baseFilteredStocks];
 
     if (selectedCountry !== "ALL") {
       result = result.filter((s) => s.country === selectedCountry.toLowerCase());
@@ -369,12 +522,12 @@ export default function App() {
     }
 
     return result;
-  }, [stocksFilteredByOthers, selectedCountry, selectedSector, sortField, sortDirection]);
+  }, [baseFilteredStocks, selectedCountry, selectedSector, sortField, sortDirection]);
 
   // ─── Render ──────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans antialiased pb-12 touch-action-manipulation">
+    <div className="min-h-screen bg-[#E4E3E0] text-[#141414] font-sans antialiased pb-12 touch-manipulation">
       {/* Toast notification */}
       <StatusBanner statusMsg={statusMsg} />
 
@@ -392,8 +545,12 @@ export default function App() {
         <NavigationTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
         {/* ── STOCKS TAB ─────────────────────────────────────────── */}
-        {activeTab === "STOCKS" ? (
-          <>
+        <div
+          id="stocks-panel"
+          role="tabpanel"
+          aria-labelledby="stocks-tab"
+          hidden={activeTab !== "STOCKS"}
+        >
             {/* KPI bento cards */}
             <BentoMetrics stats={stats} />
 
@@ -413,7 +570,8 @@ export default function App() {
               setPricePreset={setPricePreset}
               selectedCountry={selectedCountry}
               setSelectedCountry={setSelectedCountry}
-              stocksFilteredByOthers={stocksFilteredByOthers}
+              stocksFilteredByOthers={stocksForSectorCounts}
+              stocksForCountryCounts={stocksForCountryCounts}
               applyPricePreset={applyPricePreset}
             />
 
@@ -426,14 +584,21 @@ export default function App() {
               sortDirection={sortDirection}
               onSort={handleSort}
               error={error}
+              isLoading={isLoadingStocks}
             />
 
             {/* Dividend eligibility legend */}
             <DividendLegend lastYear={lastYear} />
-          </>
-        ) : (
-          /* ── BULLETINS TAB ───────────────────────────────────────── */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+        </div>
+
+        {/* ── BULLETINS TAB ───────────────────────────────────────── */}
+        <div
+          id="bulletins-panel"
+          role="tabpanel"
+          aria-labelledby="bulletins-tab"
+          hidden={activeTab !== "BULLETINS"}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8"
+        >
             <BulletinsSidebar
               bulletins={bulletins}
               selectedBulletin={selectedBulletin}
@@ -450,15 +615,15 @@ export default function App() {
               bulletinLoadingStep={bulletinLoadingStep}
               onRunAnalysis={runBulletinAnalysis}
             />
-          </div>
-        )}
+        </div>
       </main>
 
       {/* Slide-in detail drawer */}
       <StockDetailDrawer
         selectedStock={selectedStock}
-        onClose={() => setSelectedStock(null)}
+        onClose={closeStockDrawer}
         companyDescription={companyDescription}
+        companyDescriptionSource={companyDescriptionSource}
         isFetchingDescription={isFetchingDescription}
         isUpdatingDividends={isUpdatingDividends}
         dividendUpdateMsg={dividendUpdateMsg}

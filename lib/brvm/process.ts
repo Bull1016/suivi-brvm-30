@@ -1,10 +1,19 @@
 import { DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
-import type { DividendHistory, StockData } from "./types.js";
+import type { DividendHistory, StockData, DividendStatus } from "./types.js";
 
-/** Derives sector, dividend streak, latest dividend, and metadata for a stock. */
+const UNKNOWN_COUNTRY_CODE = "xx";
+
+/** Keeps supported country values safe for persistence and rendering. */
+export function normalizeCountryCode(country: unknown): string {
+  return typeof country === "string" && /^[a-z]{2}$/.test(country)
+    ? country
+    : UNKNOWN_COUNTRY_CODE;
+}
+
+/** Derives sector, dividend streak, dividend status, latest dividend, and metadata for a stock. */
 export function processStockDividends(
-  stock: Omit<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector"> &
-    Partial<Pick<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector">>,
+  stock: Omit<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector" | "dividendStatus"> &
+    Partial<Pick<StockData, "streak" | "latestDividend" | "lastUpdated" | "source" | "sector" | "dividendStatus">>,
   sectorMap: Record<string, string> = DEFAULT_SYMBOL_SECTOR_MAP
 ): StockData {
   const dividends: DividendHistory[] = stock.dividends ?? [];
@@ -21,7 +30,16 @@ export function processStockDividends(
     consecutiveYears++;
   }
 
-  const streak = consecutiveYears >= 3 ? consecutiveYears : 0;
+  const totalPaidYears = dividends.filter((d) => d.paid).length;
+  let dividendStatus: DividendStatus = "aucun";
+  if (consecutiveYears > 0) {
+    dividendStatus = "a_jour";
+  } else if (totalPaidYears > 0) {
+    dividendStatus = "interrompu";
+  } else {
+    dividendStatus = "aucun";
+  }
+
   const lastYearDiv = dividends.find((d) => d.year === lastYear);
   const latestDividend = lastYearDiv && lastYearDiv.paid ? lastYearDiv.amount : 0;
   const sector =
@@ -33,14 +51,15 @@ export function processStockDividends(
   return {
     name: stock.name,
     symbol: stock.symbol,
-    country: stock.country,
+    country: normalizeCountryCode(stock.country),
     currentPrice: stock.currentPrice,
     high: stock.high,
     low: stock.low,
     variation: stock.variation,
     dividends,
     sector,
-    streak,
+    streak: consecutiveYears,
+    dividendStatus,
     latestDividend,
     lastUpdated: new Date().toISOString(),
     source: stock.source || "fallback",

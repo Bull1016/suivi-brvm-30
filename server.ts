@@ -1,18 +1,16 @@
+import "dotenv/config";
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import dotenv from "dotenv";
 import {
   companyDescription,
   listStocks,
   syncDividendsForSymbol,
   syncQuotations,
+  analyzeBulletin,
 } from "./lib/brvm/service.js";
-import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./lib/brvm/bulletins.js";
-import { analyzeBulletinWithGemini } from "./lib/brvm/gemini.js";
-import { getBulletinAnalysis, saveBulletinAnalysis } from "./lib/brvm/store.js";
-
-dotenv.config();
+import { scrapeOfficialBulletins } from "./lib/brvm/bulletins.js";
+import { checkRateLimit } from "./lib/brvm/http.js";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -21,9 +19,12 @@ app.use(express.json());
 
 app.get("/api/brvm30/stocks", async (_req, res) => {
   try {
-    res.json(await listStocks());
+    const body = await listStocks();
+    res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=30");
+    res.json(body);
   } catch (error) {
     console.error(error);
+    res.setHeader("Cache-Control", "no-store");
     res.status(500).json({ success: false, message: "Impossible de charger les cotations." });
   }
 });
@@ -50,7 +51,11 @@ app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
 
 app.get("/api/brvm30/company-description/:symbol/:country", async (req, res) => {
   try {
-    res.json(await companyDescription(req.params.symbol, req.params.country));
+    if (!(await checkRateLimit(req.socket.remoteAddress))) {
+      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
+    }
+    const result = await companyDescription(req.params.symbol, req.params.country);
+    res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Impossible de générer la description." });
@@ -73,38 +78,13 @@ app.get("/api/brvm/bulletins", async (_req, res) => {
 app.get("/api/brvm/analyze-bulletin/:date", async (req, res) => {
   const dateCode = req.params.date;
   const url = typeof req.query.url === "string" ? req.query.url : "";
-  if (!dateCode || !url) {
-    return res.status(400).json({
-      success: false,
-      message: "Date ou URL du bulletin manquante.",
-    });
-  }
 
   try {
-    const cached = await getBulletinAnalysis(dateCode);
-    if (cached) {
-      return res.json({
-        success: true,
-        analysis: cached.analysis,
-        sources: cached.sources,
-        source: "cache",
-      });
+    if (!(await checkRateLimit(req.socket.remoteAddress))) {
+      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
     }
-
-    if (!validateBulletinUrlForDateCode(url, dateCode)) {
-      return res.status(400).json({
-        success: false,
-        message: "L'URL fournie ne correspond pas à la date du bulletin.",
-      });
-    }
-
-    const result = await analyzeBulletinWithGemini(dateCode, url);
-    await saveBulletinAnalysis(dateCode, result);
-    return res.json({
-      success: true,
-      analysis: result.analysis,
-      sources: result.sources,
-    });
+    const result = await analyzeBulletin(dateCode, url);
+    return res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
     return res.status(500).json({

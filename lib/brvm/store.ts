@@ -2,7 +2,7 @@
 import path from "path";
 import { Redis } from "@upstash/redis";
 import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
-import { processStockDividends } from "./process.js";
+import { normalizeCountryCode, processStockDividends } from "./process.js";
 import type { BrvmState, StockData } from "./types.js";
 
 const KEY_STATE = "brvm:state";
@@ -13,7 +13,7 @@ const KEY_DIV_CURSOR = "brvm:div-cursor";
 /** Builds the Redis key for a dated bulletin analysis. */
 const KEY_BULLETIN = (dateCode: string) => `brvm:bulletin:${dateCode}`;
 
-const SYNCING_TTL_SECONDS = 60;
+const SYNCING_TTL_SECONDS = 90;
 
 let memoryState: BrvmState | null = null;
 let memoryDescriptions: Record<string, string> = {};
@@ -22,6 +22,18 @@ let memoryDivCursor = 0;
 const memoryBulletins = new Map<string, { analysis: string; sources: { title: string; uri: string }[] }>();
 
 let redisClient: Redis | null | undefined;
+
+/** Ensures persisted stock country values remain safe for every consumer. */
+function normalizeStateCountries(state: BrvmState): BrvmState {
+  let changed = false;
+  const stocks = state.stocks.map((stock) => {
+    const country = normalizeCountryCode(stock.country);
+    if (country === stock.country) return stock;
+    changed = true;
+    return { ...stock, country };
+  });
+  return changed ? { ...state, stocks } : state;
+}
 
 /** Returns the cached Redis client when persistence credentials are configured. */
 function getRedis(): Redis | null {
@@ -92,8 +104,10 @@ export async function getState(): Promise<BrvmState> {
   if (redis) {
     const stored = await redis.get<BrvmState>(KEY_STATE);
     if (stored?.stocks?.length) {
-      memoryState = stored;
-      return stored;
+      const normalized = normalizeStateCountries(stored);
+      if (normalized !== stored) await redis.set(KEY_STATE, normalized);
+      memoryState = normalized;
+      return normalized;
     }
     const seeded = loadSeedState();
     await redis.set(KEY_STATE, seeded);
@@ -109,10 +123,11 @@ export async function getState(): Promise<BrvmState> {
 
 /** Saves stock state to memory and the configured Redis store. */
 export async function saveState(state: BrvmState): Promise<void> {
-  memoryState = state;
+  const normalized = normalizeStateCountries(state);
+  memoryState = normalized;
   const redis = getRedis();
   if (redis) {
-    await redis.set(KEY_STATE, state);
+    await redis.set(KEY_STATE, normalized);
   }
 }
 

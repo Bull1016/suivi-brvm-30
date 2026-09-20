@@ -1,3 +1,5 @@
+export type DividendStatus = "a_jour" | "en_attente" | "interrompu" | "aucun";
+
 export interface DividendHistory {
   year: number;
   amount: number;
@@ -15,6 +17,7 @@ export interface StockData {
   variation: number;
   dividends: DividendHistory[];
   streak: number;
+  dividendStatus?: DividendStatus;
   latestDividend: number;
   lastUpdated: string;
   source: "scraped" | "fallback";

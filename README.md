@@ -1,6 +1,6 @@
 # Bull Investment Tracker — Suivi de l'Indice BRVM 30
 
-**Bull Investment Tracker** est une application web moderne conçue pour suivre et analyser en temps réel les performances des 30 entreprises les plus dynamiques de la Bourse Régionale des Valeurs Mobilières (BRVM). L'interface adopte un style néobrutaliste à fort contraste et intègre des fonctionnalités d'analyse financière automatisée par intelligence artificielle.
+**Bull Investment Tracker** est une application web moderne conçue pour suivre et analyser les performances des 30 entreprises les plus dynamiques de la Bourse Régionale des Valeurs Mobilières (BRVM). L'interface adopte un style néobrutaliste à fort contraste et intègre des fonctionnalités d'analyse financière automatisée par intelligence artificielle.
 
 ---
 
@@ -38,7 +38,7 @@
 
 ### Synchronisation & Cache
 - En production Vercel : cache **Upstash Redis** (seed initial depuis `data/*.json`).
-- Cron Vercel pour rafraîchir les cotations (et un lot de dividendes) toutes les 5 minutes (plan Pro).
+- Cron Vercel pour rafraîchir les cotations (et un lot de dividendes) selon le plan configuré.
 - Synchronisation globale déclenchable manuellement depuis l'en-tête.
 
 ---
@@ -84,7 +84,7 @@ GET  /api/brvm/analyze-bulletin/:date?url=
 ## Installation et Configuration
 
 ### Prérequis
-- [Node.js](https://nodejs.org/) ≥ 18
+- [Node.js](https://nodejs.org/) ≥ 20.18.1
 - Une clé API [Google AI Studio](https://aistudio.google.com/) (Gemini)
 - Pour la persistance en production : une base [Upstash Redis](https://upstash.com/) (intégration **Vercel KV** dans le dashboard du projet)
 
