@@ -1,6 +1,6 @@
 # Rapport de Corrections et Procédure de Vérification — Suivi BRVM 30
 
-Ce document récapitule l'ensemble des corrections, optimisations et refontes effectuées sur l'application **Suivi BRVM 30** conformément aux directives de audit `agents/BACKLOG.md`.
+Ce document récapitule l'ensemble des corrections, optimisations et refontes effectuées sur l'application **Suivi BRVM 30** conformément aux directives de audit `agents/Claude/BACKLOG.md`.
 
 ---
 
@@ -128,4 +128,4 @@ Suivez cette procédure pas-à-pas pour valider le bon fonctionnement de l'appli
 
 ## 3. Conclusion
 
-Toutes les exigences du `BACKLOG.md` ont été appliquées, vérifiées par tests automatiques Vitest, contrôles de types TypeScript, et captures visuelles Playwright. Le projet est corrigé, sécurisé et optimisé.
+Toutes les exigences du `Claude/BACKLOG.md` ont été appliquées, vérifiées par tests automatiques Vitest, contrôles de types TypeScript, et captures visuelles Playwright. Le projet est corrigé, sécurisé et optimisé.

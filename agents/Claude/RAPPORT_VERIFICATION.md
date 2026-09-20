@@ -2,7 +2,7 @@
 
 **État audité** : branche `dev`, commit `f3cdc8b` (merge PR #11), 20/09/2026.
 **Point de comparaison** : audit initial sur `007eb62` (49 fichiers modifiés depuis, +4 710 / −929 lignes).
-**Périmètre** : vérification des corrections annoncées dans `agents/RAPPORT_CORRECTIONS.md` + nouvel état des lieux. Les fonctionnalités (`agents/FEATURES.md`) ne sont pas commencées et ne sont pas évaluées ici.
+**Périmètre** : vérification des corrections annoncées dans `agents/Jules/RAPPORT_CORRECTIONS.md` + nouvel état des lieux. Les fonctionnalités (`agents/FEATURES.md`) ne sont pas commencées et ne sont pas évaluées ici.
 
 ---
 
@@ -186,7 +186,7 @@ Les 5 tests couvrent un cas nominal de dividendes, la normalisation du pays, un 
 
 ---
 
-## 5. Écarts entre `RAPPORT_CORRECTIONS.md` et l'état réel
+## 5. Écarts entre `Jules/RAPPORT_CORRECTIONS.md` et l'état réel
 
 | Affirmation du rapport | Réalité |
 |---|---|
