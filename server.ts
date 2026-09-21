@@ -15,9 +15,12 @@ import { checkRateLimit } from "./lib/brvm/http.js";
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.set("trust proxy", "loopback");
+app.set("trust proxy", 1);
 
 const getCallerIp = (req: express.Request) => {
+  const forwarded = req.headers["x-forwarded-for"];
+  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
+  if (Array.isArray(forwarded) && forwarded.length > 0) return forwarded[0].trim();
   return req.ip || req.socket.remoteAddress || "127.0.0.1";
 };
 
