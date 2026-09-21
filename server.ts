@@ -15,6 +15,12 @@ import { checkRateLimit } from "./lib/brvm/http.js";
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
+app.set("trust proxy", "loopback");
+
+const getCallerIp = (req: express.Request) => {
+  return req.ip || req.socket.remoteAddress || "127.0.0.1";
+};
+
 app.use(express.json());
 
 app.get("/api/brvm30/stocks", async (_req, res) => {
@@ -29,8 +35,12 @@ app.get("/api/brvm30/stocks", async (_req, res) => {
   }
 });
 
-app.post("/api/brvm30/sync", async (_req, res) => {
+app.post("/api/brvm30/sync", async (req, res) => {
   try {
+    const callerIp = getCallerIp(req);
+    if (!(await checkRateLimit(`sync:${callerIp}`))) {
+      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter avant la prochaine synchronisation." });
+    }
     const result = await syncQuotations();
     res.status(result.status).json(result.body);
   } catch (error) {
@@ -41,7 +51,8 @@ app.post("/api/brvm30/sync", async (_req, res) => {
 
 app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
   try {
-    const result = await syncDividendsForSymbol(req.params.symbol);
+    const callerIp = getCallerIp(req);
+    const result = await syncDividendsForSymbol(req.params.symbol, callerIp);
     res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
@@ -51,10 +62,8 @@ app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
 
 app.get("/api/brvm30/company-description/:symbol/:country", async (req, res) => {
   try {
-    if (!(await checkRateLimit(req.socket.remoteAddress))) {
-      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
-    }
-    const result = await companyDescription(req.params.symbol, req.params.country);
+    const callerIp = getCallerIp(req);
+    const result = await companyDescription(req.params.symbol, req.params.country, callerIp);
     res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
@@ -65,9 +74,11 @@ app.get("/api/brvm30/company-description/:symbol/:country", async (req, res) => 
 app.get("/api/brvm/bulletins", async (_req, res) => {
   try {
     const bulletins = await scrapeOfficialBulletins();
+    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=60");
     res.json({ success: true, bulletins });
   } catch (error) {
     console.error(error);
+    res.setHeader("Cache-Control", "no-store");
     res.status(500).json({
       success: false,
       message: (error as Error).message || "Impossible de charger les bulletins de la cote.",
@@ -80,10 +91,8 @@ app.get("/api/brvm/analyze-bulletin/:date", async (req, res) => {
   const url = typeof req.query.url === "string" ? req.query.url : "";
 
   try {
-    if (!(await checkRateLimit(req.socket.remoteAddress))) {
-      return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
-    }
-    const result = await analyzeBulletin(dateCode, url);
+    const callerIp = getCallerIp(req);
+    const result = await analyzeBulletin(dateCode, url, callerIp);
     return res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
@@ -109,7 +118,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, "127.0.0.1", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

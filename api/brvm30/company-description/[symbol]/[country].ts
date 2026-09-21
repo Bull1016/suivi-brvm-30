@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { queryParam, checkRateLimit } from "../../../../lib/brvm/http.js";
+import { queryParam } from "../../../../lib/brvm/http.js";
 import { companyDescription } from "../../../../lib/brvm/service.js";
 
 /** Returns a cached, generated, or fallback description for a listed company. */
@@ -10,9 +10,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const platformIp = req.headers["x-vercel-forwarded-for"];
   const callerIp = (Array.isArray(platformIp) ? platformIp[0] : platformIp) || req.socket.remoteAddress;
-  if (!(await checkRateLimit(callerIp))) {
-    return res.status(429).json({ success: false, message: "Trop de requêtes. Veuillez patienter une minute." });
-  }
 
   const symbol = queryParam(req.query.symbol);
   const country = queryParam(req.query.country);
@@ -21,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const result = await companyDescription(symbol, country);
+    const result = await companyDescription(symbol, country, callerIp);
     return res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);

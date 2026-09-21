@@ -9,12 +9,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   try {
     const bulletins = await scrapeOfficialBulletins();
+    res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=60");
     return res.status(200).json({
       success: true,
       bulletins,
     });
   } catch (error) {
     console.error(error);
+    res.setHeader("Cache-Control", "no-store");
     return res.status(500).json({
       success: false,
       message: (error as Error).message || "Impossible de charger les bulletins de la cote.",
