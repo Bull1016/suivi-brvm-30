@@ -29,7 +29,7 @@ export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats, brvm30Url }) 
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Voir le PDF officiel BRVM 30"
-              className="inline-flex items-center text-rose-700 hover:text-rose-900 ml-1 font-bold"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-rose-700 hover:text-rose-900 ml-1 font-bold"
               title="Voir l'Avis BRVM n°191-2026"
             >
               <FileText className="w-3.5 h-3.5" />

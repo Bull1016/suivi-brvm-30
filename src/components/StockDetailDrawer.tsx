@@ -149,7 +149,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Voir la page officielle du secteur BRVM: ${selectedStock.sector}`}
-                        className={`inline-flex items-center space-x-1 px-2 py-0.5 text-xs font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                        className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center space-x-1 px-2 py-0.5 text-xs font-bold uppercase tracking-tight border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all focus-visible:ring-2 focus-visible:ring-emerald-500 ${
                           SECTOR_CONFIG[selectedStock.sector].badgeBg
                         }`}
                         title={`Voir la page officielle du secteur BRVM: ${selectedStock.sector}`}
@@ -239,7 +239,7 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                 <div>
                   <h4 className="text-xs font-bold uppercase tracking-wide">
                     {selectedStock.dividendStatus === "en_attente"
-                      ? "Mention : Publication 2025 en attente"
+                      ? `Mention : Publication ${lastYear} en attente`
                       : selectedStock.streak >= 3
                       ? "Mention : Éligible Dividendes (Payeur Régulier)"
                       : "Mention : Non Éligible (Cycle < 3 ans)"}

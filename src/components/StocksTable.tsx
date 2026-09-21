@@ -174,6 +174,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
               {renderSortableHeader("currentPrice", "Prix (FCFA)", "w-32", "justify-end")}
               {renderSortableHeader("variation", "Variation", "w-28", "justify-end")}
               {renderSortableHeader("streak", "Dividende (D)", "w-36", "justify-center")}
+              <th className="w-28 px-4 text-center">Détails</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-[#141414]/15 text-xs font-mono text-[#141414]">
@@ -186,6 +187,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                   <td className="py-3 px-4"><div className="h-6 bg-[#141414]/10 w-24 ml-auto rounded-none" /></td>
                   <td className="py-3 px-4"><div className="h-6 bg-[#141414]/10 w-20 ml-auto rounded-none" /></td>
                   <td className="py-3 px-4"><div className="h-6 bg-[#141414]/10 w-24 mx-auto rounded-none" /></td>
+                  <td className="py-3 px-4"><div className="h-6 bg-[#141414]/10 w-16 mx-auto rounded-none" /></td>
                 </tr>
               ))
             ) : stocks.length > 0 ? (
@@ -197,21 +199,10 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                 return (
                   <tr
                     key={stock.symbol}
-                    role="button"
-                    onClick={() => onSelectStock(stock)}
-                    aria-label={`Voir les détails de ${stock.name} (${stock.symbol})`}
-                    className={`hover:bg-[#141414]/5 transition-colors duration-150 cursor-pointer h-14 focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none ${
+                    className={`hover:bg-[#141414]/5 transition-colors duration-150 h-14 ${
                       selectedStock?.symbol === stock.symbol ? "bg-[#141414]/10 font-bold" : ""
                     }`}
                     id={`row-${stock.symbol}`}
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.target !== e.currentTarget) return;
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onSelectStock(stock);
-                      }
-                    }}
                   >
                     {/* Symbol Column */}
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
@@ -244,8 +235,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                           href={SECTOR_CONFIG[stock.sector].url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className={`inline-flex items-center space-x-1 px-2 py-1 text-xs font-bold border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all ${
+                          className={`inline-flex min-h-[44px] min-w-[44px] items-center justify-center space-x-1 px-2 py-1 text-xs font-bold border shadow-[1px_1px_0px_#141414] hover:opacity-80 transition-all ${
                             SECTOR_CONFIG[stock.sector].badgeBg
                           }`}
                           title={`Voir la page officielle BRVM: ${stock.sector}`}
@@ -316,13 +306,26 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                         </div>
                       )}
                     </td>
+
+                    {/* Details Action Column */}
+                    <td className="py-3 px-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => onSelectStock(stock)}
+                        aria-label={`Voir les détails de ${stock.name} (${stock.symbol})`}
+                        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 border border-[#141414] px-2 text-xs font-bold hover:bg-[#141414] hover:text-white focus-visible:ring-2 focus-visible:ring-emerald-500 focus:outline-none"
+                      >
+                        <Info className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>Détails</span>
+                      </button>
+                    </td>
                   </tr>
                 );
               })
             ) : (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="py-12 text-center text-[#141414]/70 font-bold uppercase tracking-wider font-sans text-xs"
                 >
                   Aucun résultat ne correspond à vos filtres.

@@ -17,7 +17,7 @@ export const FilterChip: React.FC<FilterChipProps> = ({ label, onRemove, ariaLab
         type="button"
         onClick={onRemove}
         aria-label={ariaLabel}
-        className="text-[#E4E3E0]/70 hover:text-white focus:outline-none focus:ring-1 focus:ring-white"
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-[#E4E3E0]/70 hover:text-white focus:outline-none focus:ring-1 focus:ring-white"
       >
         <X className="w-3.5 h-3.5" />
       </button>
@@ -106,13 +106,13 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             autoComplete="off"
-            className="w-full h-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-none pl-9 pr-8 text-xs font-mono text-[#141414] placeholder-[#141414]/60 outline-none"
+            className="w-full h-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-none pl-9 pr-12 text-xs font-mono text-[#141414] placeholder-[#141414]/60 outline-none"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
               aria-label="Effacer la recherche"
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#141414]/60 hover:text-[#141414]"
+              className="absolute right-0 top-1/2 inline-flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center text-[#141414]/60 hover:text-[#141414]"
             >
               <X className="w-4 h-4" />
             </button>
@@ -254,7 +254,7 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
           <button
             type="button"
             onClick={clearAllFilters}
-            className="h-8 px-2.5 text-xs text-rose-700 font-bold uppercase underline hover:text-rose-900 ml-auto flex items-center space-x-1"
+            className="h-11 px-2.5 text-xs text-rose-700 font-bold uppercase underline hover:text-rose-900 ml-auto flex items-center space-x-1"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Réinitialiser tout</span>

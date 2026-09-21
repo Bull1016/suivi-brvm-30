@@ -15,14 +15,9 @@ import { checkRateLimit } from "./lib/brvm/http.js";
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
-app.set("trust proxy", 1);
+app.set("trust proxy", "loopback");
 
 const getCallerIp = (req: express.Request) => {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (forwarded) {
-    const raw = Array.isArray(forwarded) ? forwarded[0] : forwarded.split(",")[0];
-    if (raw) return raw.trim();
-  }
   return req.ip || req.socket.remoteAddress || "127.0.0.1";
 };
 
@@ -123,7 +118,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
+  app.listen(PORT, "127.0.0.1", () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

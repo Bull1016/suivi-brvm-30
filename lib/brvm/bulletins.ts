@@ -134,5 +134,10 @@ export async function scrapeOfficialBulletins(): Promise<BulletinItem[]> {
     return list;
   }
 
-  return bulletinsCache ? bulletinsCache.data : [];
+  if (bulletinsCache) {
+    bulletinsCache.expiresAt = now + 5 * 60 * 1000;
+    return bulletinsCache.data;
+  }
+
+  return [];
 }
