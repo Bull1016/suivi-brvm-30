@@ -12,8 +12,8 @@ function startMemoryRateLimitCleanup(): void {
 
   memoryRateLimitCleanupTimer = setInterval(() => {
     const now = Date.now();
-    for (const [ip, record] of memoryRateLimitMap) {
-      if (now >= record.resetAt) memoryRateLimitMap.delete(ip);
+    for (const [key, record] of memoryRateLimitMap) {
+      if (now >= record.resetAt) memoryRateLimitMap.delete(key);
     }
   }, 60000);
   memoryRateLimitCleanupTimer.unref?.();
@@ -60,9 +60,9 @@ export function isCronAuthorized(req: { method?: string; headers?: HeaderMap }):
   return false;
 }
 
-/** Checks rate limits for sensitive endpoints (10 requests / minute per IP). */
-export async function checkRateLimit(callerIp?: string): Promise<boolean> {
-  const limiterKey = callerIp || "127.0.0.1";
+/** Checks rate limits for sensitive endpoints (10 requests / minute per caller key). */
+export async function checkRateLimit(callerKey?: string, maxRequests = 10, windowMs = 60000): Promise<boolean> {
+  const limiterKey = callerKey || "127.0.0.1";
 
   const limiter = getRateLimiter();
   if (limiter) {
@@ -78,11 +78,11 @@ export async function checkRateLimit(callerIp?: string): Promise<boolean> {
   startMemoryRateLimitCleanup();
   const record = memoryRateLimitMap.get(limiterKey);
   if (!record || now >= record.resetAt) {
-    memoryRateLimitMap.set(limiterKey, { count: 1, resetAt: now + 60000 });
+    memoryRateLimitMap.set(limiterKey, { count: 1, resetAt: now + windowMs });
     return true;
   }
 
-  if (record.count >= 10) {
+  if (record.count >= maxRequests) {
     return false;
   }
 

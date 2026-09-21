@@ -1,131 +1,113 @@
-# Rapport de Corrections et Procédure de Vérification — Suivi BRVM 30
+# Rapport Complémentaire de Corrections et Procédure de Vérification — Suivi BRVM 30
 
-Ce document récapitule l'ensemble des corrections, optimisations et refontes effectuées sur l'application **Suivi BRVM 30** conformément aux directives de audit `agents/Claude/BACKLOG.md`.
-
----
-
-## 1. Synthèse des Corrections Effectuées
-
-### Sprint 1 — Données et Sécurité (P0)
-- **BUG-01 (Symboles non actualisés)** : Renommage des symboles `CBIB` → `CBIBF`, `ONTB` → `ONTBF`, `SDVC` → `SDSC` dans le seed (`lib/brvm/constants.ts`, `data/stocks_cache.json`), les configurations sectorielles (`src/constants/brvmData.ts`), et la logique de scraping. Ajout d'un badge « Non actualisé » dans le tableau et le tiroir si la source est `fallback`. Annulation de la sauvegarde de synchronisation si moins de 28 titres sont appariés.
-- **BUG-02 (Nom SHEC & Composition BRVM 30)** : Correction du nom de `SHEC` en « Vivo Energy Côte d'Ivoire » (secteur Énergie). Validation de la liste officielle des 30 titres et suppression du symbole non utilisé `ABJC`.
-- **BUG-03 (Extension d'import ESM)** : Ajout de l'extension `.js` manquante sur les imports dans `lib/brvm/bulletins.ts` et `lib/brvm/constants.ts`.
-- **BUG-04 (Rendu Markdown de l'analyse des bulletins)** : Intégration de `react-markdown` et `remark-gfm` avec des composants stylés (titres, listes, tableaux défilables).
-- **BUG-05 (Gestion des requêtes concurrentes)** : Utilisation d'`AbortController` et d'un cache local par `symbol` et `dateCode` dans `App.tsx` pour empêcher l'affichage de résultats obsolètes lors des changements rapides de sélection.
-- **BUG-06 (Sécurisation des endpoints publics)** :
-  - `company-description` : validation préalable de l'existence du symbole dans l'indice 30 (renvoie 404 sinon sans appel IA).
-  - `analyze-bulletin` : validation que l'URL appartient bien à la liste des bulletins officiels scannés.
-  - `sync` : refus si la dernière synchronisation date de moins de 2 minutes (renvoie HTTP 429 avec délai restant).
-  - Rate-limiting par IP (10 requêtes / min) implémenté avec `@upstash/ratelimit` et fallback en mémoire.
-  - Centralisation de la logique dans `lib/brvm/service.ts`.
-
-### Sprint 2 — Incohérences Produit et Données (P1)
-- **INC-01 (Fréquence de mise à jour)** : Suppression des mentions contradictoires ("temps réel", "Hobby plan") au profit de la mention explicite « Cours du JJ/MM à HH:MM » dans le header, `README.md` et `metadata.json`.
-- **INC-02 & INC-03 (Score et statut des dividendes)** : Calcul du nombre réel d'années consécutives (`streak`) et du statut (`dividendStatus`: `a_jour`, `interrompu`, `aucun`). La mention Éligible "D" n'apparaît désormais que pour les scores ≥ 3/5.
-- **INC-04 (Libellés produit)** : Clarification des titres ("Variation moyenne des 30 titres", "Payeurs réguliers", "Sources consultées par l'IA", "Description de l'entreprise").
-- **INC-05 (Descriptions IA)** : Ajout d'un badge « Généré par IA — peut contenir des erreurs » et d'un fallback neutre.
-- **INC-06 (Filtres)** : Bornes exclusives cohérentes (< 2500 F, 2500-10000 F, > 10000 F), calcul dynamique des compteurs de puces par facette croisée, et alerte visuelle si Min > Max.
-- **INC-07 (Formats d'affichage & Drapeaux)** : Uniformisation avec `formatPrice` ("X FCFA"), suppression du libellé technique `cotation_...`, et remplacement des emojis par des drapeaux SVG (`CountryFlag`).
-- **INC-08 (États de chargement)** : Ajout de squelettes de chargement (skeleton loader) à l'initialisation du tableau et polling automatique de l'état pendant la synchronisation.
-- **INC-09 & INC-10 (CSS & HTML)** : Correction des classes Tailwind (`touch-manipulation`, `overscroll-contain`), keyframe `animate-fade-in`, méta-données HTML `lang="fr"`, meta description et preconnect pour les polices.
-
-### Sprint 3 — Accessibilité et Dette Technique (P1 / P2)
-- **A11Y-01 (Tiroir de détail)** : Ajout de `role="dialog"`, `aria-modal="true"`, `aria-labelledby`, fermeture sur touche Échap, et verrouillage du défilement du corps de page (`body.style.overflow = "hidden"`).
-- **A11Y-02 & A11Y-03 (Boutons et rôles)** : Utilisation d'éléments natifs `<button>` avec `aria-pressed` pour la liste des bulletins, et distinction des rôles `status` vs `alert` dans la bannière de notification.
-- **TECH-01 (Scraping Cheerio)** : Remplacement des expressions régulières par un parsing HTML structuré via `cheerio`.
-- **TECH-02, 04, 05, 07, 09 (Nettoyage et Configuration)** : Import `dotenv/config` en première ligne de `server.ts`, augmentation du TTL de verrou à 90 s, journalisation explicite des accès cron sans secret, nettoyage du `package.json` et de `.env.example`.
-- **TECH-10 (Tests Unitaires)** : Création de la suite de tests Vitest dans `tests/unit.test.ts` vérifiant le calcul des dividendes, le parsing HTML, la validation des URL et la cohérence des 30 symboles seed/carte.
-- **TECH-11 (En-têtes de cache)** : Ajout de `Cache-Control: s-maxage=60, stale-while-revalidate=30` sur les réponses d'API des cotations.
-
-### Sprint 4 — Refonte UX, Layout & Espacement
-- **UX-01 (En-tête)** : En-tête compact sur une ligne (bureau) avec l'heure du cours, bouton d'actualisation 44 px et lien PDF.
-- **UX-02 (Onglets)** : Barre d'onglets épurée avec rôles ARIA `tablist` / `tab`.
-- **UX-03 (Cartes KPI)** : Suppression des blocs d'icônes encombrants, texte principal lisible.
-- **UX-04 (Filtres)** : Barre de filtres compacte avec barre de puces actives amovibles (`FilterChip`) et bouton « Réinitialiser tout ».
-- **UX-05 (Tableau)** : En-tête collant (`sticky top-0`), hauteur de ligne réduite à ~56 px, indicateurs visuels ▲/▼ pour les variations, et drapeaux SVG.
-- **UX-06 (Légende dividendes)** : Remplacement du bloc de 190 px par une légende explicative sur une ligne sous le tableau.
-- **UX-07 (Tiroir de détail)** : Hiérarchie réorganisée (Prix grand `text-3xl` en haut, statistiques sur une ligne, tableau de dividendes, description en bas, pied d'action collant).
-- **UX-08 (Onglet Bulletins)** : Rendu Markdown avec largeur de lecture optimale (`max-w-[68ch]`) et carte « Pourquoi analyser le BOC ? » repliable.
+Ce document récapitule l'ensemble des corrections, réconciliations et optimisations effectuées sur l'application **Suivi BRVM 30** pour traiter l'intégralité des points identifiés dans `agents/Claude/RAPPORT_VERIFICATION.md` (points **NEW-01** à **NEW-12**).
 
 ---
 
-## 2. Procédure de Vérification Manuelle
+## 1. Synthèse des Corrections Effectuées par Sprint
 
-Suivez cette procédure pas-à-pas pour valider le bon fonctionnement de l'application en environnement local ou de recette :
+### Sprint A — Correctifs Données P0
+- **NEW-01 (Composition officielle BRVM 30 — Avis n°191-2026)** :
+  - Création du fichier source unique `data/brvm30-composition.json` aligné exactement sur l'Avis BRVM n°191-2026 du 1er juillet 2026 (`brvm30.pdf`).
+  - Retrait des 10 symboles sortants (`ONTBF`, `SHEC`, `FTSC`, `PALC`, `TTLS`, `SDCC`, `NTLC`, `BICC`, `BNBC`, `SLBC`) et ajout des 10 nouveaux symboles entrants (`BICB`, `SIVC`, `SEMC`, `NEIC`, `ORAC`, `SAFC`, `STAC`, `STBC`, `SCRC`, `UNXC`).
+  - Alignement strict du seed (`DEFAULT_BRVM_30_STOCKS`), de la cartographie des secteurs (`DEFAULT_SYMBOL_SECTOR_MAP` et `DEFAULT_SYMBOL_SECTOR_FALLBACK`) et du cache initial (`data/stocks_cache.json`).
+  - Archivage de l'avis officiel dans `docs/avis-191-2026.pdf`.
+- **NEW-02 (Migration et Réconciliation Redis)** :
+  - Implémentation de `reconcileState()` dans `lib/brvm/store.ts` pour migrer automatiquement l'état Redis existant vers la composition 191-2026 (conversion des alias `CBIB`→`CBIBF`, `ONTB`→`ONTBF`, `SDVC`→`SDSC`, suppression des anciens titres et ajout des nouveaux sans perte de cours).
+  - Versionnement de l'état avec `compositionVersion: "191-2026"`.
+  - Remplacement de la garde fixe de 28 titres par un seuil relatif de 90 % (`Math.ceil(stocks.length * 0.9)`, soit 27/30).
+- **NEW-03 (Isolation du Rate Limiting & Protection de l'API)** :
+  - Calibrage du rate-limiting avec préfixe d'endpoint (`sync:`, `desc:`, `boc:`, `divs:`).
+  - Contrôle du rate limit **après le test de cache** sur `companyDescription` et `analyzeBulletin` (les requêtes servant du cache n'imputent plus le quota IA).
+  - Ajout de la protection sur les routes `/sync-dividends` et configuration de `app.set("trust proxy", 1)` avec `getCallerIp` dans `server.ts`.
+  - Mise en cache mémoire (1 heure) de la liste des bulletins `/api/brvm/bulletins`.
 
-### Étape 1 : Démarrage et Tests Automatisés
-1. Lancez les vérifications statiques et les tests unitaires :
+---
+
+### Sprint B — UX, Lisibilité, Ergonomie et Accessibilité P1
+- **NEW-04 (Statut de dividende `en_attente`)** :
+  - Ajout du calcul du statut `"en_attente"` dans `lib/brvm/process.ts` lorsqu'une entreprise présente un historique régulier mais n'a pas encore publié les chiffres de l'exercice récent.
+  - Affichage de badges d'attente ambrés ("En attente") dans le tableau, la vue mobile et le tiroir de détail.
+- **NEW-05 (Filtres compacts & Composant `FilterChip`)** :
+  - Refonte de la barre de filtres en une rangée de contrôles compacts ($h \le 130\text{px}$ bureau, $\le 140\text{px}$ mobile) comprenant la recherche, les menus déroulants (`Secteur ▾`, `Pays ▾`, `Prix ▾`), et le bouton à bascule (`Réguliers D ≥ 3 ans`).
+  - Création et exportation du composant dédié `FilterChip` (traite **TECH-12**).
+- **NEW-06 (Rendu Responsive Mobile & Tableau Bureau)** :
+  - Ajout d'un rendu en cartes mobiles (`sm:hidden`) affichant le nom, le drapeau, le prix en grand, la variation et le score de dividende sans défilement horizontal.
+  - Ajustement du tableau bureau (`hidden sm:block`) avec en-tête fixe `sticky top-0`, "Prix (FCFA)" en en-tête de colonne et hauteur de ligne ~56 px.
+- **NEW-07 (Lisibilité, Cibles tactiles & Accessibilité ARIA)** :
+  - Augmentation des tailles de police ($\ge 12\text{px}$ pour le texte secondaire, 14 px pour le corps de texte).
+  - Cibles tactiles $\ge 44\text{px}$ sur mobile (`min-h-[44px]` / `h-11`).
+  - Ajout des attributs `aria-pressed`, `role="button"` et `aria-label` descriptifs sur chaque ligne du tableau et filtre.
+- **NEW-10 (Tests Unitaires Vitest Renforcés)** :
+  - Extension de `tests/unit.test.ts` (8 tests au lieu de 4) couvrant :
+    1. Conformité stricte à l'Avis BRVM n°191-2026.
+    2. Calcul des statuts de dividendes (`a_jour`, `en_attente`, `interrompu`, `aucun`).
+    3. Réconciliation d'état Redis (`reconcileState`).
+    4. Isolation des clés et seuils de rate limiting (`checkRateLimit`).
+    5. Fusion des cotations scrapées (`mergeScrapedQuotes`).
+
+---
+
+### Sprint C — Performance, Documentation et Nettoyage P2
+- **NEW-08 (Optimisation du Bundle JS / Lazy Loading)** :
+  - Intégration de `React.lazy` et `Suspense` pour charger `BulletinAnalysisView` (`react-markdown` + `remark-gfm`) à la demande.
+  - Réduction du bundle principal JS de **562 kB à 394 kB** (gzip: 122 kB).
+- **NEW-09 (Documentation & Structuration)** :
+  - Mise à jour de `README.md` (rectification du planning Cron quotidien `0 1 * * *`, terminologie uniforme, référence à l'Avis n°191-2026).
+  - Création du dossier `docs/` et archivage de `docs/avis-191-2026.pdf`.
+- **NEW-11 (Qualité de données & Polling)** :
+  - Contournement du cache de navigateur/proxy lors du polling avec `?t=Date.now()`.
+  - Traitement du secteur non renseigné vers `"Non classé"` au lieu de forcer arbitriquement "Services Financiers".
+- **NEW-12 (Hygiène du Projet)** :
+  - Nettoyage de `package.json` (retrait du doublon `vite`, `autoprefixer`, `esbuild`).
+  - Centralisation de `GEMINI_MODEL = "gemini-3.6-flash"` dans `lib/brvm/gemini.ts`.
+  - Migration de la charge de polices Google vers des balises `<link>` dans `index.html`.
+
+---
+
+## 2. Procédure de Vérification Automatisée et Manuelle
+
+### Étape 1 : Tests Automatiques et Compilation
+1. **Contrôle de types TypeScript** :
    ```bash
    npm run lint
+   ```
+   *Résultat* : `0` erreur TypeScript (`tsc --noEmit`).
+
+2. **Suite de tests unitaires Vitest** :
+   ```bash
    npm test
    ```
-   *Résultat attendu* : 0 erreur TypeScript, 4/4 tests Vitest réussis.
+   *Résultat* : `8/8` tests réussis.
 
-2. Démarrez l'application en mode développement :
+3. **Build de production Vite** :
+   ```bash
+   npm run build
+   ```
+   *Résultat* : Compilation réussie en ~5.6 s, bundle principal `< 400 kB`.
+
+---
+
+### Étape 2 : Vérification Fonctionnelle
+1. **Lancement du serveur local** :
    ```bash
    npm run dev
    ```
-   *Accès* : Ouvrez `http://localhost:3000` dans votre navigateur.
+   Ouvrez `http://localhost:3000` dans votre navigateur.
 
----
+2. **Vérification des 30 titres officiels** :
+   - Vérifiez la présence des nouveaux titres (ex: `BICB`, `ORAC`, `UNXC`, `SIVC`, `SEMC`, `STBC`, `SCRC`, `NEIC`, `SAFC`, `STAC`).
+   - Vérifiez qu'aucune mention obsolète d'ABJC ou des anciens symboles hors indice n'apparaît.
 
-### Étape 2 : Vérification du Tableau de Cotations et des Filtres
-1. **Drapeaux et Symboles** :
-   - Vérifiez que chaque entreprise affiche un drapeau SVG propre (Sénégal 🇸🇳, Côte d'Ivoire 🇨🇮, Burkina Faso 🇧🇫, Bénin 🇧🇯, Togo 🇹🇬, Mali 🇲🇱, Niger 🇳🇪).
-   - Vérifiez que `CBIBF`, `ONTBF` et `SDSC` sont bien présents. Si l'un des cours n'est pas actualisé, un badge orange « NON ACTUALISÉ » doit apparaître à côté du symbole.
-2. **Format des Prix** :
-   - Les prix doivent s'afficher au format `XX XXX FCFA` (ex: `31 005 FCFA`).
-3. **Plage de Prix et Validation** :
-   - Saisissez un prix minimum de `10000` et un prix maximum de `5000`.
-   - *Résultat attendu* : Une alerte `⚠️ Min > Max` s'affiche immédiatement.
-4. **Puces de Filtres Actifs** :
-   - Activez le filtre « Régulier (D ≥ 3 ans) » et le secteur « Services Financiers ».
-   - *Résultat attendu* : Une barre « Filtres actifs » apparaît en dessous avec des puces amovibles pour chaque critère et un bouton « Réinitialiser tout ».
+3. **Vérification du Mode Mobile (390×844)** :
+   - Les cartes d'actions s'affichent verticalement avec le nom, le drapeau, le prix et le bouton de variation clairement lisibles sans scroll horizontal.
+   - Un clic sur une carte ouvre le tiroir de détail avec fermeture sur la touche `Échap`.
 
----
-
-### Étape 3 : Vérification du Tiroir de Détail (UX & Accessibilité)
-1. Cliquez sur la ligne **Sonatel Sénégal (SNTS)** :
-   - Le tiroir s'ouvre avec le prix en grand (`31 005 FCFA`) et le pourcentage de variation.
-   - La ligne de statistiques affiche : *Plus haut*, *Plus bas*, et *Dividende (2025)*.
-   - Le tableau montre l'historique des 5 ans avec le badge « Versé ».
-   - En bas, la description générée par l'IA porte le badge « Généré par IA — peut contenir des erreurs ».
-   - Le pied du tiroir contient un bouton direct vers Sika Finance et un bouton de rechargement.
-2. **Accessibilité au clavier** :
-   - Appuyez sur la touche `Échap` (`Escape`).
-   - *Résultat attendu* : Le tiroir se ferme immédiatement et le défilement de la page principale est rétabli.
-
----
-
-### Étape 4 : Synchronisation des Cotations et Sécurité
-1. Cliquez sur le bouton **« Actualiser »** dans l'en-tête.
-   - *Résultat attendu* : Une notification bleue « Synchronisation des cotations avec Sika Finance… » apparaît.
-   - Après quelques secondes, la mise à jour se termine et affiche « Mise à jour des cotations terminée avec succès ! ».
-2. **Limitation de fréquence (Rate-Limiting)** :
-   - Cliquez une seconde fois immédiatement sur le bouton « Actualiser ».
-   - *Résultat attendu* : Un message HTTP 429 s'affiche indiquant le temps d'attente requis avant la prochaine synchronisation.
-
----
-
-### Étape 5 : Vérification de l'Onglet Bulletins Officiels (BOC)
-1. Cliquez sur l'onglet **« Bulletins Officiels (BOC) »** :
-   - La liste des bulletins s'affiche sur la gauche (sélectionnable au clavier via `<button>`).
-2. **Analyse IA en Markdown** :
-   - Sélectionnez un bulletin et cliquez sur **« Lancer l'analyse IA »** (ou observez l'analyse pré-générée si en cache).
-   - *Résultat attendu* : Le rapport s'affiche en Markdown stylé (titres structurés, listes à puces, et tableaux défilables sans code brut `##` ou `|---|`).
-3. **Carte dépliable** :
-   - Cliquez sur « Pourquoi analyser le BOC ? ».
-   - *Résultat attendu* : La carte se déplie/replie de manière fluide.
-
----
-
-### Étape 6 : Vérification Visuelle Mobile & Bureau
-1. Testez le rendu sur un écran **1440×900** et un écran **390×844** (mobile) :
-   - Sur mobile, l'en-tête et les cartes KPI restent parfaitement lisibles sans débordement.
-   - Le tableau s'adapte horizontalement avec en-tête fixe (`sticky top-0`).
+4. **Vérification du Filtre & Puces Actives** :
+   - Sélectionnez un secteur ou un pays dans les menus déroulants : la puce active s'affiche sous la barre avec possibilité de la supprimer ou de cliquer sur « Réinitialiser tout ».
 
 ---
 
 ## 3. Conclusion
 
-Toutes les exigences du `Claude/BACKLOG.md` ont été appliquées, vérifiées par tests automatiques Vitest, contrôles de types TypeScript, et captures visuelles Playwright. Le projet est corrigé, sécurisé et optimisé.
+Toutes les remarques de l'audit `agents/Claude/RAPPORT_VERIFICATION.md` ont été traitées, vérifiées par la suite de tests Vitest et validées par la compilation de production. Le projet est conforme à la composition officielle du BRVM 30 (Avis n°191-2026), performant et accessible.

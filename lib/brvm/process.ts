@@ -30,18 +30,35 @@ export function processStockDividends(
     consecutiveYears++;
   }
 
-  const totalPaidYears = dividends.filter((d) => d.paid).length;
+  let streakUpToPrevYear = 0;
+  for (let year = lastYear - 1; year >= startYear; year--) {
+    const dividend = dividends.find((d) => d.year === year);
+    if (!dividend || !dividend.paid) break;
+    streakUpToPrevYear++;
+  }
+
+  const lastYearDiv = dividends.find((d) => d.year === lastYear);
+  const prevYearDiv = dividends.find((d) => d.year === lastYear - 1);
+
   let dividendStatus: DividendStatus = "aucun";
   if (consecutiveYears > 0) {
     dividendStatus = "a_jour";
-  } else if (totalPaidYears > 0) {
+  } else if ((!lastYearDiv || !lastYearDiv.paid) && streakUpToPrevYear > 0) {
+    dividendStatus = "en_attente";
+    consecutiveYears = streakUpToPrevYear;
+  } else if (dividends.some((d) => d.paid)) {
     dividendStatus = "interrompu";
   } else {
     dividendStatus = "aucun";
   }
 
-  const lastYearDiv = dividends.find((d) => d.year === lastYear);
-  const latestDividend = lastYearDiv && lastYearDiv.paid ? lastYearDiv.amount : 0;
+  const latestDividend =
+    lastYearDiv && lastYearDiv.paid
+      ? lastYearDiv.amount
+      : prevYearDiv && prevYearDiv.paid
+      ? prevYearDiv.amount
+      : 0;
+
   const sector =
     stock.sector ||
     sectorMap[stock.symbol] ||

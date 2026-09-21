@@ -1,3 +1,5 @@
+import composition from "../../data/brvm30-composition.json" with { type: "json" };
+
 export interface SectorDetail {
   id: number;
   url: string;
@@ -68,35 +70,6 @@ export const COUNTRIES_MAP: Record<string, { name: string; flag: string }> = {
   ne: { name: "Niger", flag: "🇳🇪" }
 };
 
-export const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = {
-  SNTS: "Télécommunications",
-  SGBC: "Services Financiers",
-  CBIBF: "Services Financiers",
-  ETIT: "Services Financiers",
-  BOAB: "Services Financiers",
-  BOABF: "Services Financiers",
-  BOAC: "Services Financiers",
-  BOAN: "Services Financiers",
-  BOAS: "Services Financiers",
-  BOAM: "Services Financiers",
-  ONTBF: "Télécommunications",
-  SIBC: "Services Financiers",
-  ECOC: "Services Financiers",
-  NSBC: "Services Financiers",
-  PALC: "Consommation de Base",
-  TTLC: "Énergie",
-  TTLS: "Énergie",
-  CIEC: "Services Publics",
-  SDCC: "Services Publics",
-  SOGC: "Consommation de Base",
-  SPHC: "Consommation de Base",
-  NTLC: "Consommation de Base",
-  BICC: "Services Financiers",
-  CFAC: "Consommation Discrétionnaire",
-  BNBC: "Consommation Discrétionnaire",
-  SDSC: "Industriels",
-  SHEC: "Énergie",
-  SLBC: "Consommation de Base",
-  FTSC: "Industriels",
-  ORGT: "Services Financiers"
-};
+export const DEFAULT_SYMBOL_SECTOR_FALLBACK: Record<string, string> = Object.fromEntries(
+  composition.stocks.map((s) => [s.symbol, s.sector])
+);

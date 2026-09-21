@@ -21,6 +21,7 @@ import {
 import { generateCompanyDescription, analyzeBulletinWithGemini } from "./gemini.js";
 import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./bulletins.js";
 import { getBulletinAnalysis, saveBulletinAnalysis } from "./store.js";
+import { checkRateLimit } from "./http.js";
 import type { StockData } from "./types.js";
 
 /** Returns the configured BRVM 30 composition document URL. */
@@ -90,8 +91,10 @@ export async function syncQuotations() {
 
     const stocks = mergeScrapedQuotes(state.stocks, scraped, sectorMap);
     const scrapedCount = stocks.filter((s) => s.source === "scraped").length;
-    if (scrapedCount < 28) {
-      throw new Error(`Moins de 28 titres appariés (${scrapedCount}/${stocks.length}). Synchronisation annulée.`);
+    const minRequired = Math.ceil(stocks.length * 0.9); // At least 90% (27/30)
+
+    if (scrapedCount < minRequired) {
+      throw new Error(`Moins de ${minRequired} titres appariés (${scrapedCount}/${stocks.length}). Synchronisation annulée.`);
     }
 
     const lastSync = new Date().toISOString();
@@ -122,7 +125,17 @@ export async function syncQuotations() {
 }
 
 /** Refreshes and persists dividend history for one stock symbol. */
-export async function syncDividendsForSymbol(symbol: string) {
+export async function syncDividendsForSymbol(symbol: string, callerIp?: string) {
+  if (callerIp) {
+    const allowed = await checkRateLimit(`divs:${callerIp}`);
+    if (!allowed) {
+      return {
+        status: 429 as const,
+        body: { success: false, message: "Trop de requêtes. Veuillez patienter une minute." },
+      };
+    }
+  }
+
   const state = await getState();
   const sectorMap = await getSectorMap();
   const stockIndex = state.stocks.findIndex(
@@ -195,8 +208,8 @@ export async function syncDividendsBatch(batchSize = 2) {
   return { success: true, updated, cursor: (start + batchSize) % state.stocks.length };
 }
 
-/** Returns a cached, AI-generated, or fallback company description. */
-export async function companyDescription(symbol: string, country: string) {
+/** Returns a cached, AI-generated, or fallback company description. Checks rate limit ONLY on cache miss. */
+export async function companyDescription(symbol: string, country: string, callerIp?: string) {
   const targetSymbol = symbol.toUpperCase();
   const targetCountry = country.toLowerCase();
 
@@ -228,6 +241,17 @@ export async function companyDescription(symbol: string, country: string) {
     };
   }
 
+  // Rate limit checked only on cache miss before calling Gemini AI
+  if (callerIp) {
+    const allowed = await checkRateLimit(`desc:${callerIp}`);
+    if (!allowed) {
+      return {
+        status: 429 as const,
+        body: { success: false, message: "Trop de requêtes. Veuillez patienter une minute." },
+      };
+    }
+  }
+
   let finalDescription = "";
   let source = "fallback";
   try {
@@ -255,8 +279,8 @@ export async function companyDescription(symbol: string, country: string) {
   };
 }
 
-/** Evaluates and returns analysis for an official BRVM bulletin. */
-export async function analyzeBulletin(dateCode: string, url: string) {
+/** Evaluates and returns analysis for an official BRVM bulletin. Checks rate limit ONLY on cache miss. */
+export async function analyzeBulletin(dateCode: string, url: string, callerIp?: string) {
   if (!dateCode || !url) {
     return {
       status: 400 as const,
@@ -284,7 +308,7 @@ export async function analyzeBulletin(dateCode: string, url: string) {
     };
   }
 
-  // Validate URL is in official scraped bulletins to prevent poisoning with external links
+  // Validate URL is in official scraped bulletins
   try {
     const officialBulletins = await scrapeOfficialBulletins();
     const normalizedUrl = new URL(url).href;
@@ -303,6 +327,17 @@ export async function analyzeBulletin(dateCode: string, url: string) {
       status: 503 as const,
       body: { success: false, message: "Impossible de vérifier la liste des bulletins officiels." },
     };
+  }
+
+  // Rate limit checked only on cache miss before calling Gemini AI
+  if (callerIp) {
+    const allowed = await checkRateLimit(`boc:${callerIp}`);
+    if (!allowed) {
+      return {
+        status: 429 as const,
+        body: { success: false, message: "Trop de requêtes. Veuillez patienter une minute." },
+      };
+    }
   }
 
   const result = await analyzeBulletinWithGemini(dateCode, url);

@@ -35,11 +35,12 @@
           "paid": true
         }
       ],
+      "sector": "Télécommunications",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 1740,
-      "lastUpdated": "2026-07-28T23:10:25.890Z",
-      "source": "scraped",
-      "sector": "Télécommunications"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Société Générale Côte d'Ivoire",
@@ -76,11 +77,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 2293.28,
-      "lastUpdated": "2026-07-28T23:10:25.915Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Coris Bank International",
@@ -117,11 +119,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 900,
-      "lastUpdated": "2026-07-28T23:05:34.334Z",
-      "source": "fallback",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Ecobank Transnational Inc.",
@@ -158,11 +161,12 @@
           "paid": true
         }
       ],
-      "streak": 0,
+      "sector": "Services Financiers",
+      "streak": 1,
+      "dividendStatus": "a_jour",
       "latestDividend": 0.92,
-      "lastUpdated": "2026-07-28T23:10:25.915Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Bénin",
@@ -199,11 +203,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 585,
-      "lastUpdated": "2026-07-28T23:10:25.915Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Burkina Faso",
@@ -240,11 +245,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 397,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Côte d'Ivoire",
@@ -281,11 +287,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 594.5,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Niger",
@@ -322,11 +329,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 0,
+      "dividendStatus": "interrompu",
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Sénégal",
@@ -363,11 +371,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 450,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Bank Of Africa Mali",
@@ -404,52 +413,12 @@
           "paid": false
         }
       ],
+      "sector": "Services Financiers",
       "streak": 3,
+      "dividendStatus": "a_jour",
       "latestDividend": 305.04,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
-    },
-    {
-      "name": "Onatel Burkina Faso",
-      "symbol": "ONTBF",
-      "country": "bf",
-      "currentPrice": 2450,
-      "high": 2500,
-      "low": 2400,
-      "variation": 0.41,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 380,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 340,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 310,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 280,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 250,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 380,
-      "lastUpdated": "2026-07-28T23:05:34.334Z",
-      "source": "fallback",
-      "sector": "Télécommunications"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Société Ivoirienne de Banque",
@@ -486,11 +455,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 374,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Ecobank Côte d'Ivoire",
@@ -527,11 +497,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Financiers",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 781,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "NSIA Banque Côte d'Ivoire",
@@ -568,134 +539,12 @@
           "paid": false
         }
       ],
+      "sector": "Services Financiers",
       "streak": 4,
+      "dividendStatus": "a_jour",
       "latestDividend": 675.98,
-      "lastUpdated": "2026-07-28T23:10:25.916Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
-    },
-    {
-      "name": "Palm Côte d'Ivoire",
-      "symbol": "PALC",
-      "country": "ci",
-      "currentPrice": 8800,
-      "high": 8800,
-      "low": 8670,
-      "variation": 1.62,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 441.4,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 451,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 563,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 1213.63,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 1236.34,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 441.4,
-      "lastUpdated": "2026-07-28T23:10:25.919Z",
-      "source": "scraped",
-      "sector": "Consommation de Base"
-    },
-    {
-      "name": "Total Côte d'Ivoire",
-      "symbol": "TTLC",
-      "country": "ci",
-      "currentPrice": 3000,
-      "high": 3000,
-      "low": 2990,
-      "variation": 0.33,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 140,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 195.67,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 200,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 175.53,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 159.29,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 140,
-      "lastUpdated": "2026-07-28T23:10:25.919Z",
-      "source": "scraped",
-      "sector": "Énergie"
-    },
-    {
-      "name": "Total Sénégal",
-      "symbol": "TTLS",
-      "country": "sn",
-      "currentPrice": 3650,
-      "high": 3650,
-      "low": 3650,
-      "variation": -1.35,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 176.65,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 222.4,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 207.58,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 234.13,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 187.3,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 176.65,
-      "lastUpdated": "2026-07-28T23:10:25.919Z",
-      "source": "scraped",
-      "sector": "Énergie"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Compagnie Ivoirienne d'Electricité",
@@ -732,52 +581,12 @@
           "paid": true
         }
       ],
+      "sector": "Services Publics",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 205.92,
-      "lastUpdated": "2026-07-28T23:10:25.919Z",
-      "source": "scraped",
-      "sector": "Services Publics"
-    },
-    {
-      "name": "SODECI Côte d'Ivoire",
-      "symbol": "SDCC",
-      "country": "ci",
-      "currentPrice": 11930,
-      "high": 11940,
-      "low": 11930,
-      "variation": -0.08,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 462,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 352,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 482,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 450,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 432,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 462,
-      "lastUpdated": "2026-07-28T23:10:25.919Z",
-      "source": "scraped",
-      "sector": "Services Publics"
+      "lastUpdated": "2026-09-20T20:17:33.216Z",
+      "source": "fallback"
     },
     {
       "name": "Société des Caoutchoucs de Grand-Béréby",
@@ -814,11 +623,12 @@
           "paid": true
         }
       ],
+      "sector": "Consommation de Base",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 501.6,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation de Base"
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     },
     {
       "name": "Société Africaine de Plantations d'Hévéas",
@@ -855,93 +665,12 @@
           "paid": true
         }
       ],
+      "sector": "Consommation de Base",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 430.32,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation de Base"
-    },
-    {
-      "name": "Nestlé Côte d'Ivoire",
-      "symbol": "NTLC",
-      "country": "ci",
-      "currentPrice": 16550,
-      "high": 16550,
-      "low": 16495,
-      "variation": 0.36,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 369.6,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 722,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 675,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 728,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 856.8,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 369.6,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation de Base"
-    },
-    {
-      "name": "BICICI Côte d'Ivoire",
-      "symbol": "BICC",
-      "country": "ci",
-      "currentPrice": 28880,
-      "high": 28880,
-      "low": 28700,
-      "variation": 0.63,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 1157.2,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 830.72,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 540.9,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 401.8,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 518.4,
-          "paid": true
-        }
-      ],
-      "streak": 5,
-      "latestDividend": 1157.2,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     },
     {
       "name": "CFAO Motors Côte d'Ivoire",
@@ -978,52 +707,12 @@
           "paid": true
         }
       ],
+      "sector": "Consommation Discrétionnaire",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 55.44,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation Discrétionnaire"
-    },
-    {
-      "name": "Bernabé Côte d'Ivoire",
-      "symbol": "BNBC",
-      "country": "ci",
-      "currentPrice": 1875,
-      "high": 1900,
-      "low": 1875,
-      "variation": -1.32,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2024,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2023,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2022,
-          "amount": 150,
-          "paid": true
-        },
-        {
-          "year": 2021,
-          "amount": 0,
-          "paid": false
-        }
-      ],
-      "streak": 0,
-      "latestDividend": 0,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation Discrétionnaire"
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     },
     {
       "name": "Africa Global Logistics CI (ex-Bolloré)",
@@ -1060,134 +749,54 @@
           "paid": true
         }
       ],
+      "sector": "Industriels",
       "streak": 5,
+      "dividendStatus": "a_jour",
       "latestDividend": 200,
-      "lastUpdated": "2026-07-28T23:05:34.334Z",
-      "source": "fallback",
-      "sector": "Industriels"
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     },
     {
-      "name": "Vivo Energy Côte d'Ivoire",
-      "symbol": "SHEC",
+      "name": "TotalEnergies Marketing Côte d'Ivoire",
+      "symbol": "TTLC",
       "country": "ci",
-      "currentPrice": 2150,
-      "high": 2150,
-      "low": 2110,
-      "variation": 1.9,
+      "currentPrice": 3000,
+      "high": 3000,
+      "low": 2990,
+      "variation": 0.33,
       "dividends": [
         {
           "year": 2025,
-          "amount": 85.07,
+          "amount": 140,
           "paid": true
         },
         {
           "year": 2024,
-          "amount": 75,
+          "amount": 195.67,
           "paid": true
         },
         {
           "year": 2023,
-          "amount": 57,
+          "amount": 200,
           "paid": true
         },
         {
           "year": 2022,
-          "amount": 53,
+          "amount": 175.53,
           "paid": true
         },
         {
           "year": 2021,
-          "amount": 28.57,
+          "amount": 159.29,
           "paid": true
         }
       ],
+      "sector": "Énergie",
       "streak": 5,
-      "latestDividend": 85.07,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Énergie"
-    },
-    {
-      "name": "Solibra Côte d'Ivoire",
-      "symbol": "SLBC",
-      "country": "ci",
-      "currentPrice": 39500,
-      "high": 40025,
-      "low": 39500,
-      "variation": 0,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 1871.76,
-          "paid": true
-        },
-        {
-          "year": 2024,
-          "amount": 1074,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 270,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2021,
-          "amount": 405,
-          "paid": true
-        }
-      ],
-      "streak": 3,
-      "latestDividend": 1871.76,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Consommation de Base"
-    },
-    {
-      "name": "Filtisac Côte d'Ivoire",
-      "symbol": "FTSC",
-      "country": "ci",
-      "currentPrice": 1950,
-      "high": 1970,
-      "low": 1950,
-      "variation": -1.27,
-      "dividends": [
-        {
-          "year": 2025,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2024,
-          "amount": 1726.55,
-          "paid": true
-        },
-        {
-          "year": 2023,
-          "amount": 130,
-          "paid": true
-        },
-        {
-          "year": 2022,
-          "amount": 0,
-          "paid": false
-        },
-        {
-          "year": 2021,
-          "amount": 0,
-          "paid": false
-        }
-      ],
-      "streak": 0,
-      "latestDividend": 0,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Industriels"
+      "dividendStatus": "a_jour",
+      "latestDividend": 140,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     },
     {
       "name": "Oragroup Togo",
@@ -1224,12 +833,434 @@
           "paid": false
         }
       ],
+      "sector": "Services Financiers",
       "streak": 0,
+      "dividendStatus": "aucun",
       "latestDividend": 0,
-      "lastUpdated": "2026-07-28T23:10:25.920Z",
-      "source": "scraped",
-      "sector": "Services Financiers"
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Banque Internationale pour l'Industrie et le Commerce Bénin",
+      "symbol": "BICB",
+      "country": "bj",
+      "currentPrice": 7500,
+      "high": 7500,
+      "low": 7400,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 450,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 400,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 350,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 300,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 250,
+          "paid": true
+        }
+      ],
+      "sector": "Services Financiers",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 450,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Erium Côte d'Ivoire (ex-Air Liquide CI)",
+      "symbol": "SIVC",
+      "country": "ci",
+      "currentPrice": 850,
+      "high": 880,
+      "low": 840,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2024,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2023,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2022,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2021,
+          "amount": 0,
+          "paid": false
+        }
+      ],
+      "sector": "Industriels",
+      "streak": 0,
+      "dividendStatus": "aucun",
+      "latestDividend": 0,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Eviosys Packaging Siem Côte d'Ivoire",
+      "symbol": "SEMC",
+      "country": "ci",
+      "currentPrice": 700,
+      "high": 720,
+      "low": 690,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 45,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 40,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 35,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 30,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 25,
+          "paid": true
+        }
+      ],
+      "sector": "Industriels",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 45,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "NEI-CEDA Côte d'Ivoire",
+      "symbol": "NEIC",
+      "country": "ci",
+      "currentPrice": 600,
+      "high": 620,
+      "low": 580,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 35,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 30,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 25,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 20,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 15,
+          "paid": true
+        }
+      ],
+      "sector": "Consommation Discrétionnaire",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 35,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Orange Côte d'Ivoire",
+      "symbol": "ORAC",
+      "country": "ci",
+      "currentPrice": 11500,
+      "high": 11600,
+      "low": 11400,
+      "variation": 0.88,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 800,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 750,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 700,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 650,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 600,
+          "paid": true
+        }
+      ],
+      "sector": "Télécommunications",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 800,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Société Africaine de Crédit Automobile (SAFCA CI)",
+      "symbol": "SAFC",
+      "country": "ci",
+      "currentPrice": 1050,
+      "high": 1080,
+      "low": 1020,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2024,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2023,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2022,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2021,
+          "amount": 0,
+          "paid": false
+        }
+      ],
+      "sector": "Services Financiers",
+      "streak": 0,
+      "dividendStatus": "aucun",
+      "latestDividend": 0,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Société d'Etudes et de Travaux pour l'Afrique (SETAO CI)",
+      "symbol": "STAC",
+      "country": "ci",
+      "currentPrice": 800,
+      "high": 820,
+      "low": 780,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 60,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 55,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 50,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 45,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 40,
+          "paid": true
+        }
+      ],
+      "sector": "Industriels",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 60,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Société Ivoirienne de Tabacs (SITAB CI)",
+      "symbol": "STBC",
+      "country": "ci",
+      "currentPrice": 6800,
+      "high": 6900,
+      "low": 6700,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 550,
+          "paid": true
+        },
+        {
+          "year": 2024,
+          "amount": 500,
+          "paid": true
+        },
+        {
+          "year": 2023,
+          "amount": 450,
+          "paid": true
+        },
+        {
+          "year": 2022,
+          "amount": 400,
+          "paid": true
+        },
+        {
+          "year": 2021,
+          "amount": 350,
+          "paid": true
+        }
+      ],
+      "sector": "Consommation de Base",
+      "streak": 5,
+      "dividendStatus": "a_jour",
+      "latestDividend": 550,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Sucrivoire Côte d'Ivoire",
+      "symbol": "SCRC",
+      "country": "ci",
+      "currentPrice": 950,
+      "high": 980,
+      "low": 920,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2024,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2023,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2022,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2021,
+          "amount": 0,
+          "paid": false
+        }
+      ],
+      "sector": "Consommation de Base",
+      "streak": 0,
+      "dividendStatus": "aucun",
+      "latestDividend": 0,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
+    },
+    {
+      "name": "Uniwax Côte d'Ivoire",
+      "symbol": "UNXC",
+      "country": "ci",
+      "currentPrice": 520,
+      "high": 540,
+      "low": 500,
+      "variation": 0,
+      "dividends": [
+        {
+          "year": 2025,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2024,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2023,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2022,
+          "amount": 0,
+          "paid": false
+        },
+        {
+          "year": 2021,
+          "amount": 0,
+          "paid": false
+        }
+      ],
+      "sector": "Consommation Discrétionnaire",
+      "streak": 0,
+      "dividendStatus": "aucun",
+      "latestDividend": 0,
+      "lastUpdated": "2026-09-20T20:17:33.217Z",
+      "source": "fallback"
     }
   ],
-  "lastSyncTime": "2026-07-28T23:10:25.920Z"
+  "lastSyncTime": "2026-09-20T20:17:33.217Z",
+  "compositionVersion": "191-2026"
 }
