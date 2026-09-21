@@ -8,6 +8,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ success: false, message: "Méthode non autorisée." });
   }
 
+  const platformIp = req.headers["x-vercel-forwarded-for"];
+  const callerIp = (Array.isArray(platformIp) ? platformIp[0] : platformIp) || req.socket.remoteAddress;
+
   const symbol = queryParam(req.query.symbol);
   const country = queryParam(req.query.country);
   if (!symbol || !country) {
@@ -15,8 +18,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const body = await companyDescription(symbol, country);
-    return res.status(200).json(body);
+    const result = await companyDescription(symbol, country, callerIp);
+    return res.status(result.status).json(result.body);
   } catch (error) {
     console.error(error);
     return res.status(500).json({

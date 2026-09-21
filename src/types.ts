@@ -2,6 +2,8 @@
  * Shared types for the BRVM Tracking Application
  */
 
+export type DividendStatus = "a_jour" | "en_attente" | "interrompu" | "aucun";
+
 export interface DividendHistory {
   year: number;
   amount: number;
@@ -18,7 +20,8 @@ export interface StockData {
   low: number;
   variation: number;
   dividends: DividendHistory[];
-  streak: number; // consecutive years of dividends paid starting from lastYear (currentYear - 1) backwards
+  streak: number; // actual count of consecutive years of dividends paid starting from lastYear (currentYear - 1) backwards
+  dividendStatus?: DividendStatus;
   latestDividend: number; // dividend for lastYear (currentYear - 1)
   lastUpdated: string;
   source: "scraped" | "fallback";

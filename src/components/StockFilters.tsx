@@ -1,7 +1,29 @@
 import React from "react";
-import { Search, X, SlidersHorizontal, Layers } from "lucide-react";
+import { Search, X, SlidersHorizontal, Layers, RotateCcw } from "lucide-react";
 import { SECTOR_CONFIG, COUNTRIES_MAP } from "../constants/brvmData";
 import { StockData } from "../types";
+
+export interface FilterChipProps {
+  label: string;
+  onRemove: () => void;
+  ariaLabel: string;
+}
+
+export const FilterChip: React.FC<FilterChipProps> = ({ label, onRemove, ariaLabel }) => {
+  return (
+    <span className="inline-flex items-center gap-1.5 bg-[#141414] text-[#E4E3E0] border border-[#141414] px-2.5 py-1 text-xs font-mono font-bold">
+      <span>{label}</span>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={ariaLabel}
+        className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-[#E4E3E0]/70 hover:text-white focus:outline-none focus:ring-1 focus:ring-white"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
+    </span>
+  );
+};
 
 interface StockFiltersProps {
   searchTerm: string;
@@ -19,6 +41,7 @@ interface StockFiltersProps {
   selectedCountry: string;
   setSelectedCountry: (country: string) => void;
   stocksFilteredByOthers: StockData[];
+  stocksForCountryCounts?: StockData[];
   applyPricePreset: (preset: string) => void;
 }
 
@@ -38,296 +61,206 @@ export const StockFilters: React.FC<StockFiltersProps> = ({
   selectedCountry,
   setSelectedCountry,
   stocksFilteredByOthers,
+  stocksForCountryCounts = stocksFilteredByOthers,
   applyPricePreset
 }) => {
+  const isMinGreaterThanMax =
+    minPrice !== "" && maxPrice !== "" && Number(minPrice) > Number(maxPrice);
+
+  const hasActiveFilters =
+    searchTerm !== "" ||
+    dividendFilter !== "ALL" ||
+    selectedSector !== "ALL" ||
+    selectedCountry !== "ALL" ||
+    minPrice !== "" ||
+    maxPrice !== "" ||
+    pricePreset !== "ALL";
+
+  const clearAllFilters = () => {
+    setSearchTerm("");
+    setDividendFilter("ALL");
+    setSelectedSector("ALL");
+    setSelectedCountry("ALL");
+    setMinPrice("");
+    setMaxPrice("");
+    setPricePreset("ALL");
+  };
+
+  const handlePriceSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    applyPricePreset(val);
+  };
+
   return (
-    <section className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-6 shadow-[4px_4px_0px_#141414] mb-8 space-y-5">
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <section className="bg-white border-2 border-[#141414] rounded-none p-3 sm:p-4 shadow-[3px_3px_0px_#141414] mb-6 space-y-3 font-mono text-xs">
+      {/* Top Filter Controls Bar */}
+      <div className="flex flex-wrap items-center gap-2.5">
         {/* Search Input */}
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 min-w-[200px] max-w-sm h-11">
           <label htmlFor="search-input" className="sr-only">Rechercher par symbole, nom ou secteur</label>
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#141414]" aria-hidden="true" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#141414]/70" aria-hidden="true" />
           <input
             id="search-input"
             type="text"
-            placeholder="Rechercher par symbole, nom ou secteur…"
+            placeholder="Rechercher symbole, nom…"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             autoComplete="off"
-            className="w-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-0 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-none py-2.5 pl-11 pr-4 text-xs font-mono text-[#141414] placeholder-[#141414]/50 outline-none transition-all duration-200"
+            className="w-full h-full bg-[#E4E3E0]/30 border-2 border-[#141414] focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-none pl-9 pr-12 text-xs font-mono text-[#141414] placeholder-[#141414]/60 outline-none"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
               aria-label="Effacer la recherche"
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#141414]/50 hover:text-[#141414] focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-none"
+              className="absolute right-0 top-1/2 inline-flex min-h-[44px] min-w-[44px] -translate-y-1/2 items-center justify-center text-[#141414]/60 hover:text-[#141414]"
             >
               <X className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        {/* Dividend Filters */}
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono">
-            Dividendes :
-          </span>
-          <button
-            onClick={() => setDividendFilter("ALL")}
-            aria-label="Filtrer: tous les dividendes"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-              dividendFilter === "ALL"
-                ? "bg-[#141414] border-[#141414] text-[#E4E3E0]"
-                : "bg-white border-[#141414] text-[#141414] hover:bg-slate-50"
-            }`}
+        {/* Dropdown: Secteur */}
+        <div className="h-11">
+          <label htmlFor="sector-select" className="sr-only">Filtrer par secteur BRVM</label>
+          <select
+            id="sector-select"
+            value={selectedSector}
+            onChange={(e) => setSelectedSector(e.target.value)}
+            className="h-full bg-white border-2 border-[#141414] text-xs font-bold font-mono text-[#141414] px-3 pr-7 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
           >
-            Tous
-          </button>
-          <button
-            onClick={() => setDividendFilter("ELIGIBLE")}
-            aria-label="Filtrer: dividendes réguliers (3 ans ou plus)"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 ${
-              dividendFilter === "ELIGIBLE"
-                ? "bg-emerald-600 border-[#141414] text-white"
-                : "bg-white border-[#141414] text-emerald-800 hover:bg-emerald-50/50"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 bg-emerald-400 border border-[#141414]/30 rounded-full" aria-hidden="true" />
-            <span>Régulier (D ≥ 3 ans)</span>
-          </button>
-          <button
-            onClick={() => setDividendFilter("INELIGIBLE")}
-            aria-label="Filtrer: dividendes irréguliers (moins de 3 ans)"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 ${
-              dividendFilter === "INELIGIBLE"
-                ? "bg-amber-600 border-[#141414] text-white"
-                : "bg-white border-[#141414] text-amber-900 hover:bg-amber-50/50"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 bg-amber-400 border border-[#141414]/30 rounded-full" aria-hidden="true" />
-            <span>Irrégulier (D &lt; 3 ans)</span>
-          </button>
+            <option value="ALL">Secteur: Tous ({stocksFilteredByOthers.length})</option>
+            {Object.entries(SECTOR_CONFIG).map(([sName, cfg]) => {
+              const count = stocksFilteredByOthers.filter((s) => s.sector === sName).length;
+              return (
+                <option key={sName} value={sName}>
+                  {cfg.icon} {sName} ({count})
+                </option>
+              );
+            })}
+          </select>
         </div>
+
+        {/* Dropdown: Pays */}
+        <div className="h-11">
+          <label htmlFor="country-select" className="sr-only">Filtrer par pays</label>
+          <select
+            id="country-select"
+            value={selectedCountry}
+            onChange={(e) => setSelectedCountry(e.target.value)}
+            className="h-full bg-white border-2 border-[#141414] text-xs font-bold font-mono text-[#141414] px-3 pr-7 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+          >
+            <option value="ALL">Pays: Tous ({stocksFilteredByOthers.length})</option>
+            {Object.entries(COUNTRIES_MAP).map(([code, data]) => {
+              const count = stocksForCountryCounts.filter((s) => s.country === code).length;
+              return (
+                <option key={code} value={code.toUpperCase()}>
+                  {data.name} ({count})
+                </option>
+              );
+            })}
+          </select>
+        </div>
+
+        {/* Dropdown: Prix */}
+        <div className="h-11">
+          <label htmlFor="price-select" className="sr-only">Filtrer par plage de prix</label>
+          <select
+            id="price-select"
+            value={pricePreset}
+            onChange={handlePriceSelect}
+            className="h-full bg-white border-2 border-[#141414] text-xs font-bold font-mono text-[#141414] px-3 pr-7 focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+          >
+            <option value="ALL">Prix: Tous</option>
+            <option value="UNDER_2500">&lt; 2 500 FCFA</option>
+            <option value="2500_10000">2 500 – 10 000 FCFA</option>
+            <option value="OVER_10000">&gt; 10 000 FCFA</option>
+            {pricePreset === "CUSTOM" && <option value="CUSTOM">Personnalisé</option>}
+          </select>
+        </div>
+
+        {/* Toggle: Dividendes Réguliers */}
+        <button
+          type="button"
+          onClick={() => setDividendFilter(dividendFilter === "ELIGIBLE" ? "ALL" : "ELIGIBLE")}
+          aria-pressed={dividendFilter === "ELIGIBLE"}
+          className={`h-11 px-3.5 border-2 border-[#141414] font-bold text-xs uppercase tracking-wider flex items-center space-x-2 transition-all cursor-pointer ${
+            dividendFilter === "ELIGIBLE"
+              ? "bg-emerald-600 text-white border-[#141414]"
+              : "bg-white text-emerald-900 hover:bg-emerald-50"
+          }`}
+        >
+          <span className="w-2 h-2 bg-emerald-400 border border-[#141414] rounded-full" aria-hidden="true" />
+          <span>Réguliers (D ≥ 3 ans)</span>
+        </button>
+
+        {isMinGreaterThanMax && (
+          <span className="h-11 flex items-center text-xs text-rose-800 font-bold bg-rose-50 border-2 border-rose-400 px-3">
+            ⚠️ Min &gt; Max
+          </span>
+        )}
       </div>
 
-      {/* Price Range Filter */}
-      <div className="pt-4 border-t border-[#141414] flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono flex items-center space-x-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-[#141414]" />
-            <span>Plage de Prix (FCFA) :</span>
-          </span>
-
-          <button
-            onClick={() => applyPricePreset("ALL")}
-            aria-label="Filtrer: tous les prix"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-              pricePreset === "ALL" && !minPrice && !maxPrice
-                ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-                : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-            }`}
-          >
-            Tous les prix
-          </button>
-          <button
-            onClick={() => applyPricePreset("UNDER_2500")}
-            aria-label="Filtrer: prix inférieurs à 2 500 F"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-              pricePreset === "UNDER_2500"
-                ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-                : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-            }`}
-          >
-            &lt; 2 500 F
-          </button>
-          <button
-            onClick={() => applyPricePreset("2500_10000")}
-            aria-label="Filtrer: prix entre 2 500 F et 10 000 F"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-              pricePreset === "2500_10000"
-                ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-                : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-            }`}
-          >
-            2 500 F – 10 000 F
-          </button>
-          <button
-            onClick={() => applyPricePreset("OVER_10000")}
-            aria-label="Filtrer: prix supérieurs à 10 000 F"
-            className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-              pricePreset === "OVER_10000"
-                ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-                : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-            }`}
-          >
-            &gt; 10 000 F
-          </button>
-        </div>
-
-        {/* Custom Min / Max Inputs */}
-        <div className="flex items-center space-x-2 text-xs font-mono">
-          <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
-            <label htmlFor="min-price" className="text-[10px] text-[#141414]/50 uppercase font-bold">Min:</label>
-            <input
-              id="min-price"
-              type="number"
-              placeholder="0"
-              value={minPrice}
-              onChange={(e) => {
-                setMinPrice(e.target.value);
-                setPricePreset("CUSTOM");
-              }}
-              autoComplete="off"
-              className="w-20 bg-transparent text-xs font-bold text-[#141414] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 font-mono"
+      {/* Active Filter Chips Bar */}
+      {hasActiveFilters && (
+        <div className="pt-2 border-t border-[#141414]/20 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-[#141414]/70 font-bold uppercase mr-1">Filtres actifs :</span>
+          {searchTerm && (
+            <FilterChip
+              label={`"${searchTerm}"`}
+              onRemove={() => setSearchTerm("")}
+              ariaLabel="Effacer la recherche"
             />
-            <span className="text-[10px] text-[#141414]/50">F</span>
-          </div>
-
-          <span className="text-[#141414]/60 font-bold">-</span>
-
-          <div className="flex items-center space-x-1 bg-[#E4E3E0]/30 border-2 border-[#141414] px-2 py-1">
-            <label htmlFor="max-price" className="text-[10px] text-[#141414]/50 uppercase font-bold">Max:</label>
-            <input
-              id="max-price"
-              type="number"
-              placeholder="Max"
-              value={maxPrice}
-              onChange={(e) => {
-                setMaxPrice(e.target.value);
-                setPricePreset("CUSTOM");
-              }}
-              autoComplete="off"
-              className="w-24 bg-transparent text-xs font-bold text-[#141414] outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 font-mono"
+          )}
+          {dividendFilter !== "ALL" && (
+            <FilterChip
+              label={dividendFilter === "ELIGIBLE" ? "Régulier (D ≥ 3 ans)" : "Irrégulier (D < 3 ans)"}
+              onRemove={() => setDividendFilter("ALL")}
+              ariaLabel="Effacer le filtre dividendes"
             />
-            <span className="text-[10px] text-[#141414]/50">F</span>
-          </div>
-
-          {(minPrice || maxPrice) && (
-            <button
-              onClick={() => {
+          )}
+          {selectedSector !== "ALL" && (
+            <FilterChip
+              label={selectedSector}
+              onRemove={() => setSelectedSector("ALL")}
+              ariaLabel="Effacer le filtre secteur"
+            />
+          )}
+          {selectedCountry !== "ALL" && (
+            <FilterChip
+              label={COUNTRIES_MAP[selectedCountry.toLowerCase()]?.name || selectedCountry}
+              onRemove={() => setSelectedCountry("ALL")}
+              ariaLabel="Effacer le filtre pays"
+            />
+          )}
+          {(minPrice || maxPrice || pricePreset !== "ALL") && (
+            <FilterChip
+              label={
+                pricePreset === "UNDER_2500"
+                  ? "< 2 500 F"
+                  : pricePreset === "2500_10000"
+                  ? "2 500–10 000 F"
+                  : pricePreset === "OVER_10000"
+                  ? "> 10 000 F"
+                  : `${minPrice || 0}–${maxPrice || "∞"} F`
+              }
+              onRemove={() => {
                 setMinPrice("");
                 setMaxPrice("");
                 setPricePreset("ALL");
               }}
-              aria-label="Réinitialiser la plage de prix"
-              className="p-1 text-rose-600 hover:text-rose-800 focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 rounded-none"
-              title="Réinitialiser la plage de prix"
-            >
-              <X className="w-4 h-4" />
-            </button>
+              ariaLabel="Effacer le filtre prix"
+            />
           )}
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            className="h-11 px-2.5 text-xs text-rose-700 font-bold uppercase underline hover:text-rose-900 ml-auto flex items-center space-x-1"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Réinitialiser tout</span>
+          </button>
         </div>
-      </div>
-
-      {/* Sector Filters */}
-      <div className="pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
-        <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono flex items-center space-x-1">
-          <Layers className="w-3.5 h-3.5 text-[#141414]" />
-          <span>Secteurs BRVM :</span>
-        </span>
-
-        <button
-          onClick={() => setSelectedSector("ALL")}
-          aria-label="Filtrer: tous les secteurs"
-          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-            selectedSector === "ALL"
-              ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-              : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-          }`}
-        >
-          <span>🏬 Tous les secteurs</span>
-          <span
-            className={`text-[9px] font-mono border rounded-none px-1.5 py-0.5 ml-1 ${
-              selectedSector === "ALL"
-                ? "bg-emerald-500/20 text-[#E4E3E0] border-[#E4E3E0]/30"
-                : "bg-[#141414]/10 text-[#141414] border-[#141414]/20"
-            }`}
-          >
-            {stocksFilteredByOthers.length}
-          </span>
-        </button>
-
-        {Object.entries(SECTOR_CONFIG).map(([sectorName, cfg]) => {
-          const countOfSector = stocksFilteredByOthers.filter(
-            (s) => s.sector === sectorName
-          ).length;
-          const isSelected = selectedSector === sectorName;
-          return (
-            <button
-              key={sectorName}
-              onClick={() => setSelectedSector(sectorName)}
-              aria-label={`Filtrer: secteur ${sectorName}`}
-              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1.5 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                isSelected
-                  ? "bg-[#141414] text-[#E4E3E0] border-[#141414] shadow-[2px_2px_0px_rgba(0,0,0,0.15)]"
-                  : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-              }`}
-            >
-              <span>{cfg.icon}</span>
-              <span>{sectorName}</span>
-              <span
-                className={`text-[9px] font-mono border rounded-none px-1.5 py-0.5 ml-0.5 ${
-                  isSelected
-                    ? "bg-white/20 text-white border-white/30"
-                    : "bg-[#141414]/10 text-[#141414] border-[#141414]/20"
-                }`}
-              >
-                {countOfSector}
-              </span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Country Badges Filters */}
-      <div className="pt-4 border-t border-[#141414] flex flex-wrap items-center gap-2">
-        <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider mr-2 font-mono">
-          Pays :
-        </span>
-        <button
-          onClick={() => setSelectedCountry("ALL")}
-          aria-label="Filtrer: tous les marchés"
-          className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-            selectedCountry === "ALL"
-              ? "bg-[#141414] text-[#E4E3E0] border-[#141414]"
-              : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-          }`}
-        >
-          <span>🌍 Tous les marchés</span>
-          <span
-            className={`text-[9px] font-mono border rounded-none px-1.5 py-0.5 ml-1 ${
-              selectedCountry === "ALL"
-                ? "bg-emerald-500/20 text-[#E4E3E0] border-[#E4E3E0]/30"
-                : "bg-[#141414]/10 text-[#141414] border-[#141414]/20"
-            }`}
-          >
-            {stocksFilteredByOthers.length}
-          </span>
-        </button>
-        {Object.entries(COUNTRIES_MAP).map(([code, data]) => {
-          const countOfCountry = stocksFilteredByOthers.filter(
-            (s) => s.country === code
-          ).length;
-          return (
-            <button
-              key={code}
-              onClick={() => setSelectedCountry(code.toUpperCase())}
-              aria-label={`Filtrer: pays ${data.name}`}
-              className={`text-[10px] px-3 py-1.5 rounded-none border-2 font-bold uppercase tracking-wider transition-all duration-200 flex items-center space-x-1 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                selectedCountry === code.toUpperCase()
-                  ? "bg-emerald-100 text-[#141414] border-[#141414]"
-                  : "bg-white text-[#141414] border-[#141414] hover:bg-[#E4E3E0]/40"
-              }`}
-            >
-              <span>{data.flag}</span>
-              <span>{data.name}</span>
-              <span className="text-[9px] bg-[#141414]/10 text-[#141414] font-mono border border-[#141414]/20 rounded-none px-1.5 py-0.5 ml-1">
-                {countOfCountry}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+      )}
     </section>
   );
 };

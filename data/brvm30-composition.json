@@ -1,0 +1,187 @@
+{
+  "avis": "191-2026",
+  "date": "2026-07-01",
+  "title": "Nouvelle composition de l'indice BRVM 30",
+  "stocks": [
+    {
+      "symbol": "SNTS",
+      "name": "Sonatel Sénégal",
+      "country": "sn",
+      "sector": "Télécommunications"
+    },
+    {
+      "symbol": "SGBC",
+      "name": "Société Générale Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "CBIBF",
+      "name": "Coris Bank International",
+      "country": "bf",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "ETIT",
+      "name": "Ecobank Transnational Inc.",
+      "country": "tg",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOAB",
+      "name": "Bank Of Africa Bénin",
+      "country": "bj",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOABF",
+      "name": "Bank Of Africa Burkina Faso",
+      "country": "bf",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOAC",
+      "name": "Bank Of Africa Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOAN",
+      "name": "Bank Of Africa Niger",
+      "country": "ne",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOAS",
+      "name": "Bank Of Africa Sénégal",
+      "country": "sn",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BOAM",
+      "name": "Bank Of Africa Mali",
+      "country": "ml",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "SIBC",
+      "name": "Société Ivoirienne de Banque",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "ECOC",
+      "name": "Ecobank Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "NSBC",
+      "name": "NSIA Banque Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "CIEC",
+      "name": "Compagnie Ivoirienne d'Electricité",
+      "country": "ci",
+      "sector": "Services Publics"
+    },
+    {
+      "symbol": "SOGC",
+      "name": "Société des Caoutchoucs de Grand-Béréby",
+      "country": "ci",
+      "sector": "Consommation de Base"
+    },
+    {
+      "symbol": "SPHC",
+      "name": "Société Africaine de Plantations d'Hévéas",
+      "country": "ci",
+      "sector": "Consommation de Base"
+    },
+    {
+      "symbol": "CFAC",
+      "name": "CFAO Motors Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Consommation Discrétionnaire"
+    },
+    {
+      "symbol": "SDSC",
+      "name": "Africa Global Logistics CI (ex-Bolloré)",
+      "country": "ci",
+      "sector": "Industriels"
+    },
+    {
+      "symbol": "TTLC",
+      "name": "TotalEnergies Marketing Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Énergie"
+    },
+    {
+      "symbol": "ORGT",
+      "name": "Oragroup Togo",
+      "country": "tg",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "BICB",
+      "name": "Banque Internationale pour l'Industrie et le Commerce Bénin",
+      "country": "bj",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "SIVC",
+      "name": "Erium Côte d'Ivoire (ex-Air Liquide CI)",
+      "country": "ci",
+      "sector": "Industriels"
+    },
+    {
+      "symbol": "SEMC",
+      "name": "Eviosys Packaging Siem Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Industriels"
+    },
+    {
+      "symbol": "NEIC",
+      "name": "NEI-CEDA Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Consommation Discrétionnaire"
+    },
+    {
+      "symbol": "ORAC",
+      "name": "Orange Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Télécommunications"
+    },
+    {
+      "symbol": "SAFC",
+      "name": "Société Africaine de Crédit Automobile (SAFCA CI)",
+      "country": "ci",
+      "sector": "Services Financiers"
+    },
+    {
+      "symbol": "STAC",
+      "name": "Société d'Etudes et de Travaux pour l'Afrique (SETAO CI)",
+      "country": "ci",
+      "sector": "Industriels"
+    },
+    {
+      "symbol": "STBC",
+      "name": "Société Ivoirienne de Tabacs (SITAB CI)",
+      "country": "ci",
+      "sector": "Consommation de Base"
+    },
+    {
+      "symbol": "SCRC",
+      "name": "Sucrivoire Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Consommation de Base"
+    },
+    {
+      "symbol": "UNXC",
+      "name": "Uniwax Côte d'Ivoire",
+      "country": "ci",
+      "sector": "Consommation Discrétionnaire"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Building2, TrendingUp, TrendingDown, Award } from "lucide-react";
+import { TrendingUp, TrendingDown, FileText } from "lucide-react";
 
 interface BentoMetricsProps {
   stats: {
@@ -7,79 +7,73 @@ interface BentoMetricsProps {
     averageVariation: number;
     dividendEligibleCount: number;
   };
+  brvm30Url?: string;
 }
 
-export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats }) => {
+export const BentoMetrics: React.FC<BentoMetricsProps> = ({ stats, brvm30Url }) => {
   return (
-    <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <section className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-6 mb-6">
       {/* Card 1: Stocks count */}
-      <div className="bg-white border-2 border-[#141414] rounded-none p-6 shadow-[4px_4px_0px_#141414] flex items-center justify-between">
-        <div>
-          <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider font-mono">
-            Actions Suivies
-          </span>
-          <h3 className="text-3xl font-black font-mono text-[#141414] mt-1">
-            {stats.count} / 30
-          </h3>
-          <p className="text-xs text-[#141414]/50 mt-1 font-mono">
-            Composition officielle BRVM 30
-          </p>
-        </div>
-        <div className="p-3 bg-slate-50 border-2 border-[#141414] rounded-none text-[#141414] shadow-[2px_2px_0px_#141414]" aria-hidden="true">
-          <Building2 className="w-6 h-6" />
-        </div>
-      </div>
-
-      {/* Card 2: Average variation (High contrast dark bento block) */}
-      <div className="bg-[#141414] text-[#E4E3E0] border-2 border-[#141414] rounded-none p-6 shadow-[4px_4px_0px_rgba(0,0,0,0.15)] flex items-center justify-between">
-        <div>
-          <span className="text-[10px] text-[#E4E3E0]/60 font-bold uppercase tracking-wider font-mono">
-            Variation Moyenne
-          </span>
-          <div className="flex items-center mt-1 space-x-2">
-            <span
-              className={`text-3xl font-black font-mono ${
-                stats.averageVariation >= 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
+      <div className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-5 shadow-[3px_3px_0px_#141414]">
+        <span className="text-xs text-[#141414]/80 font-bold uppercase tracking-wider font-mono block">
+          Actions Suivies
+        </span>
+        <h3 className="text-2xl sm:text-3xl font-black font-mono text-[#141414] mt-0.5">
+          {stats.count} / 30
+        </h3>
+        <div className="flex items-center space-x-1 mt-1 text-xs text-[#141414]/80 font-mono">
+          <span>Composition officielle (Avis 191-2026)</span>
+          {brvm30Url && (
+            <a
+              href={brvm30Url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Voir le PDF officiel BRVM 30"
+              className="inline-flex min-h-[44px] min-w-[44px] items-center justify-center text-rose-700 hover:text-rose-900 ml-1 font-bold"
+              title="Voir l'Avis BRVM n°191-2026"
             >
-              {stats.averageVariation >= 0 ? "+" : ""}
-              {stats.averageVariation.toFixed(2)}%
-            </span>
-            {stats.averageVariation >= 0 ? (
-              <TrendingUp className="w-5 h-5 text-emerald-400" />
-            ) : (
-              <TrendingDown className="w-5 h-5 text-rose-400" />
-            )}
-          </div>
-          <p className="text-xs text-[#E4E3E0]/50 mt-1 font-mono">
-            Séance consolidée de l'indice
-          </p>
-        </div>
-        <div className="p-3 bg-[#E4E3E0]/15 border border-[#E4E3E0]/30 rounded-none text-[#E4E3E0]" aria-hidden="true">
-          {stats.averageVariation >= 0 ? (
-            <TrendingUp className="w-6 h-6" />
-          ) : (
-            <TrendingDown className="w-6 h-6" />
+              <FileText className="w-3.5 h-3.5" />
+            </a>
           )}
         </div>
       </div>
 
-      {/* Card 3: Dividends streak counts */}
-      <div className="bg-white border-2 border-[#141414] rounded-none p-6 shadow-[4px_4px_0px_#141414] flex items-center justify-between">
-        <div>
-          <span className="text-[10px] text-[#141414]/60 font-bold uppercase tracking-wider font-mono">
-            Aristocrates Dividendes
+      {/* Card 2: Average variation */}
+      <div className="bg-[#141414] text-[#E4E3E0] border-2 border-[#141414] rounded-none p-4 sm:p-5 shadow-[3px_3px_0px_rgba(0,0,0,0.15)]">
+        <span className="text-xs text-[#E4E3E0]/80 font-bold uppercase tracking-wider font-mono block">
+          Variation Moyenne
+        </span>
+        <div className="flex items-center mt-0.5 space-x-1.5">
+          <span
+            className={`text-2xl sm:text-3xl font-black font-mono ${
+              stats.averageVariation >= 0 ? "text-emerald-400" : "text-rose-400"
+            }`}
+          >
+            {stats.averageVariation >= 0 ? "+" : ""}
+            {stats.averageVariation.toFixed(2)}%
           </span>
-          <h3 className="text-3xl font-black font-mono text-emerald-700 mt-1">
-            {stats.dividendEligibleCount}
-          </h3>
-          <p className="text-xs text-[#141414]/50 mt-1 font-mono">
-            Versements continus depuis ≥ 3 ans
-          </p>
+          {stats.averageVariation >= 0 ? (
+            <TrendingUp className="w-4 h-4 text-emerald-400" aria-hidden="true" />
+          ) : (
+            <TrendingDown className="w-4 h-4 text-rose-400" aria-hidden="true" />
+          )}
         </div>
-        <div className="p-3 bg-emerald-50 border-2 border-[#141414] rounded-none text-emerald-700 shadow-[2px_2px_0px_#141414]" aria-hidden="true">
-          <Award className="w-6 h-6" />
-        </div>
+        <p className="text-xs text-[#E4E3E0]/80 mt-1 font-mono">
+          Moyenne des 30 titres de l'indice
+        </p>
+      </div>
+
+      {/* Card 3: Dividends streak counts */}
+      <div className="bg-white border-2 border-[#141414] rounded-none p-4 sm:p-5 shadow-[3px_3px_0px_#141414]">
+        <span className="text-xs text-[#141414]/80 font-bold uppercase tracking-wider font-mono block">
+          Payeurs Réguliers
+        </span>
+        <h3 className="text-2xl sm:text-3xl font-black font-mono text-emerald-700 mt-0.5">
+          {stats.dividendEligibleCount}
+        </h3>
+        <p className="text-xs text-[#141414]/80 mt-1 font-mono">
+          Versements continus (≥ 3 ans)
+        </p>
       </div>
     </section>
   );
