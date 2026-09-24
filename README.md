@@ -79,11 +79,17 @@ Créez un fichier `.env` :
 ```env
 PORT=3000
 GEMINI_API_KEY=votre_cle_api_gemini_ici
+GEMINI_MODEL=gemini-3.6-flash
 BRVM_30_URL=https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf
+BRVM_30_AVIS_URL=https://www.brvm.org/sites/default/files/avis-191-2026.pdf
 KV_REST_API_URL=
 KV_REST_API_TOKEN=
 CRON_SECRET=
+HOST=0.0.0.0
+TRUST_PROXY=1
 ```
+
+> La composition BRVM 30 doit être mise à jour manuellement dans le dépôt après une révision trimestrielle officielle, puis les données de référence (`data/brvm30-composition.json`, `data/stocks_cache.json`) doivent être validées avant mise en production.
 
 ### 3. Lancer en développement
 ```bash

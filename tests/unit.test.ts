@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { normalizeCountryCode, processStockDividends } from "../lib/brvm/process";
 import { parseDividendsFromHtml, mergeScrapedQuotes } from "../lib/brvm/scrape";
 import { validateBulletinUrlForDateCode } from "../lib/brvm/bulletins";
@@ -25,9 +25,18 @@ describe("BRVM Unit Tests", () => {
     }
   });
 
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("processStockDividends handles all status categories: a_jour, en_attente, interrompu, aucun", () => {
+    vi.setSystemTime(new Date("2025-05-15T00:00:00.000Z"));
     const currentYear = new Date().getFullYear();
-    const lastYear = currentYear - 1; // e.g. 2025
+    const lastYear = currentYear - 1; // e.g. 2024
 
     // Case 1: a_jour
     const stockAJour = processStockDividends({
@@ -101,6 +110,42 @@ describe("BRVM Unit Tests", () => {
     });
     expect(stockAucun.dividendStatus).toBe("aucun");
     expect(stockAucun.streak).toBe(0);
+  });
+
+  it("processStockDividends expires en_attente after the following year cutoff and falls back to Non classé", () => {
+    vi.setSystemTime(new Date("2026-07-01T00:00:00.000Z"));
+
+    const expired = processStockDividends({
+      name: "Stock E",
+      symbol: "STKE",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1050,
+      low: 950,
+      variation: 0,
+      dividends: [
+        { year: 2025, amount: 0, paid: false },
+        { year: 2024, amount: 90, paid: true },
+        { year: 2023, amount: 80, paid: true },
+        { year: 2022, amount: 70, paid: true },
+      ],
+    });
+
+    expect(expired.dividendStatus).toBe("interrompu");
+    expect(expired.sector).toBe("Non classé");
+
+    const unknownSector = processStockDividends({
+      name: "Stock F",
+      symbol: "STKF",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1050,
+      low: 950,
+      variation: 0,
+      dividends: [],
+      sector: undefined,
+    });
+    expect(unknownSector.sector).toBe("Non classé");
   });
 
   it("reconcileState converts legacy Redis state and symbols seamlessly", () => {
