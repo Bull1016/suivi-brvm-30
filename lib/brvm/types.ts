@@ -20,7 +20,7 @@ export interface StockData {
   dividendStatus?: DividendStatus;
   latestDividend: number;
   lastUpdated: string;
-  source: "scraped" | "fallback";
+  source: "scraped" | "fallback" | "pending";
 }
 
 export interface BrvmState {

@@ -20,3 +20,5 @@ Effort : `S` < 2 h · `M` ½–1 jour · `L` > 1 jour.
 | FEAT-09 | PWA hors-ligne | dernier état en cache, installable ; utile en connexion instable | P2 | M |
 | FEAT-10 | Questions en français sur les BOC | « quels titres ont détaché cette semaine ? » en réutilisant les analyses en cache | P3 | M |
 | FEAT-11 | Petits plus | pastille « Marché ouvert / fermé », comparateur 2–3 titres, export CSV, mode sombre, infobulles de glossaire (rendement, détachement) | P3 | S chacun |
+
+automatiser la récupération des BOC, extraire les données de chaque séance, calculer les variations/volumes/liquidités et générer un **rapport quotidien BRVM**

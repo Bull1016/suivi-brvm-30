@@ -41,11 +41,19 @@ export function processStockDividends(
   const prevYearDiv = dividends.find((d) => d.year === lastYear - 1);
 
   let dividendStatus: DividendStatus = "aucun";
+  const cutoffDate = new Date(`${lastYear + 1}-06-30T00:00:00.000Z`);
+  const now = new Date();
+
   if (consecutiveYears > 0) {
     dividendStatus = "a_jour";
   } else if ((!lastYearDiv || !lastYearDiv.paid) && streakUpToPrevYear > 0) {
-    dividendStatus = "en_attente";
-    consecutiveYears = streakUpToPrevYear;
+    if (now > cutoffDate) {
+      dividendStatus = "interrompu";
+      consecutiveYears = 0;
+    } else {
+      dividendStatus = "en_attente";
+      consecutiveYears = streakUpToPrevYear;
+    }
   } else if (dividends.some((d) => d.paid)) {
     dividendStatus = "interrompu";
   } else {
@@ -63,7 +71,7 @@ export function processStockDividends(
     stock.sector ||
     sectorMap[stock.symbol] ||
     DEFAULT_SYMBOL_SECTOR_MAP[stock.symbol] ||
-    "Services Financiers";
+    "Non classé";
 
   return {
     name: stock.name,
@@ -79,6 +87,6 @@ export function processStockDividends(
     dividendStatus,
     latestDividend,
     lastUpdated: new Date().toISOString(),
-    source: stock.source || "fallback",
+    source: stock.source === "pending" ? "pending" : stock.source || "fallback",
   };
 }
