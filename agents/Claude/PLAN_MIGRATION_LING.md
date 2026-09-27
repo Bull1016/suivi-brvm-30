@@ -45,7 +45,7 @@ AI_GATEWAY_API_KEY="..."          # clé créée depuis le dashboard Vercel > AI
 DESCRIPTION_MODEL="inclusionai/ling-3.0-flash-vl-free"   # override possible, comme GEMINI_MODEL aujourd'hui
 ```
 
-Sur un déploiement Vercel, `AI_GATEWAY_API_KEY` peut aussi être résolue automatiquement sans clé explicite (authentification via le projet Vercel) — à vérifier dans la documentation Gateway au moment de l'implémentation ; documenter les deux cas dans `.env.example`.
+Le plan prévoit aussi l'authentification Vercel OIDC sans clé explicite : laisser le SDK résoudre l'authentification, sans pré-vérification de `AI_GATEWAY_API_KEY`. Vérifier la configuration OIDC dans la documentation Gateway au moment de l'implémentation et documenter les deux cas dans `.env.example`.
 
 ### 3.3 · Nouveau module `lib/brvm/ai-description.ts`
 
@@ -65,8 +65,6 @@ export async function generateCompanyDescription(
   symbol: string,
   country: string
 ): Promise<string | null> {
-  if (!process.env.AI_GATEWAY_API_KEY) return null;
-
   try {
     const { object } = await generateObject({
       model: DESCRIPTION_MODEL,
@@ -92,11 +90,11 @@ export async function generateCompanyDescription(
 Comme il n'y a qu'un seul fournisseur (Novita) et aucune garantie de disponibilité annoncée :
 - Garder le repli textuel déjà existant dans `service.ts` (`finalDescription` générique si l'appel échoue) — il couvre déjà ce cas.
 - Ajouter un compteur de succès/échec en log pendant les deux premières semaines pour juger de la fiabilité réelle avant de considérer la bascule comme définitive.
-- Ne pas supprimer le code Gemini pour cette fonction tout de suite : garder un bascule par variable d'environnement (`DESCRIPTION_MODEL` vide ou pointant vers un modèle Gemini → réutiliser l'ancien chemin) le temps de valider en production.
+- Conserver le helper Gemini pendant la validation en production. Pour revenir à Gemini, restaurer l'import et l'appel de ce helper dans `service.ts`, puis redéployer avec sa configuration `GEMINI_API_KEY`/`GEMINI_MODEL`. Dans le code proposé, `DESCRIPTION_MODEL` vide sélectionne Ling ; toute valeur non vide est passée à `generateObject` via la Gateway et ne sélectionne jamais l'ancien helper Gemini.
 
 ### 3.6 · Tests à adapter
 
-`tests/unit.test.ts` ne teste actuellement pas `generateCompanyDescription` (appel réseau non testé). Ajouter un test qui mocke `ai`'s `generateObject` (via `vi.mock("ai")`) pour vérifier : schéma respecté, repli si `AI_GATEWAY_API_KEY` absente, troncature/validation du texte retourné.
+`tests/unit.test.ts` ne teste actuellement pas `generateCompanyDescription` (appel réseau non testé). Ajouter un test qui mocke `ai`'s `generateObject` (via `vi.mock("ai")`) pour vérifier : schéma respecté, appel à `generateObject` même sans `AI_GATEWAY_API_KEY` (chemin OIDC prévu), repli sur une véritable erreur de génération, validation du texte retourné, modèle Ling par défaut si `DESCRIPTION_MODEL` est vide.
 
 ## 4. Pourquoi l'analyse des bulletins ne migre pas telle quelle
 
@@ -123,7 +121,7 @@ Ling 3.0 Flash VL (Free), via la Gateway, n'expose ni équivalent à `urlContext
 
 ### Phase 1 — Description d'entreprise vers Ling (faible risque)
 1. `npm install ai zod`.
-2. Créer une clé `AI_GATEWAY_API_KEY` (dashboard Vercel > AI Gateway), l'ajouter à `.env.example` et aux variables d'environnement Vercel (Preview + Production).
+2. Configurer l'authentification Gateway : OIDC Vercel prévu ou clé explicite `AI_GATEWAY_API_KEY` ; documenter les deux modes dans `.env.example` et vérifier celui utilisé en Preview et Production.
 3. Écrire `lib/brvm/ai-description.ts` (section 3.3), brancher dans `service.ts`.
 4. Ajouter le test unitaire mocké (section 3.6).
 5. Déployer sur une branche de preview, comparer manuellement 5 à 10 descriptions générées par Ling à celles déjà en cache (issues de Gemini) pour juger de la qualité en français avant bascule en production.

@@ -27,11 +27,11 @@
 
 ### [ ] R-02 · Desktop : cliquer sur une ligne n'ouvre plus le tiroir · `P0` `S`
 **Constat vérifié en navigateur** : un clic sur le centre d'une ligne ou sur le nom d'une entreprise ne fait plus rien ; seul un clic précis sur le bouton « Détails » ouvre le tiroir. Ce bouton dépasse en plus du conteneur (tableau de 1 256 px dans une zone de 1 212 px, `overflow-x: auto`), donc partiellement caché sans faire défiler.
-**Correctif** : remettre `onClick`/`onKeyDown` (Entrée) sur `<tr>` avec `role="button"` et `tabIndex=0`, le bouton « Détails » devenant une action secondaire redondante (utile en lecteur d'écran). Revoir les largeurs de colonnes pour que le tableau tienne dans son conteneur sur un écran de 1440 px sans scroll horizontal.
+**Correctif** : remettre le clic sur `<tr>` en ignorant les contrôles interactifs imbriqués ; conserver sa sémantique native sans `role="button"`, `tabIndex` ni gestion clavier de ligne. Utiliser le bouton « Détails » pour la sélection au clavier et laisser Entrée activer le lien secteur. Revoir les largeurs de colonnes pour que le tableau tienne dans son conteneur sur un écran de 1440 px sans scroll horizontal.
 
 ### [ ] R-03 · `server.ts` : IP forgeable et écoute restreinte à localhost · `P1` `S`
 **Constat** : `getCallerIp` lit `x-forwarded-for` avant `req.ip`, alors que `express` avec `trust proxy` calcule déjà `req.ip` correctement à partir de cet en-tête. Résultat : un client peut envoyer son propre `X-Forwarded-For` et changer arbitrairement la clé de quota. `app.listen(PORT, "127.0.0.1", ...)` rend aussi le serveur inaccessible depuis l'extérieur d'un conteneur (utile seulement si un reverse-proxy tourne sur la même machine).
-**Correctif** : `getCallerIp = (req) => req.ip` (laisser Express résoudre via `trust proxy`), et rendre l'hôte configurable (`HOST = process.env.HOST || "0.0.0.0"`) pour l'usage en conteneur/VM, avec un avertissement si `trust proxy` est actif sans reverse-proxy réel devant.
+**Correctif** : `getCallerIp = (req) => req.ip` ; désactiver `TRUST_PROXY` par défaut (`0`). Ne l’activer qu’avec le nombre exact de sauts derrière un proxy de confiance qui nettoie `X-Forwarded-For`, avec accès direct à Express bloqué et confirmation explicite `REVERSE_PROXY=true`. Sans cette confirmation, conserver `trust proxy` désactivé : un avertissement seul ne protège pas les quotas. Garder `HOST = process.env.HOST || "127.0.0.1"`, avec `HOST=0.0.0.0` comme option explicite pour les conteneurs/VM.
 
 ### [ ] R-04 · Secteurs des 10 entrants non vérifiés contre la source officielle · `P1` `S`
 Les secteurs de `BICB`, `SIVC`, `SEMC`, `NEIC`, `ORAC`, `SAFC`, `STAC`, `STBC`, `SCRC`, `UNXC` dans `brvm30-composition.json` ont été déduits, pas confirmés ligne à ligne sur brvm.org. Une fois posés, `processStockDividends` privilégie `stock.sector` avant tout secteur scrapé (`stock.sector || sectorMap[...] || ...`) : une erreur ne se corrigera jamais toute seule.
@@ -62,13 +62,14 @@ Une variable d'environnement contient le lien vers l'avis de composition en vigu
 ### Contrainte à connaître avant de concevoir la solution
 Les avis BRVM sont des **PDF scannés (image), sans texte extractible** — vérifié sur `docs/avis-191-2026.pdf` (`pdftotext` renvoie une page vide). Lire un nouvel avis suppose donc soit de l'OCR, soit un appel à un modèle avec vision (déjà utilisé côté Gemini pour les bulletins). Ce n'est pas une simple comparaison de chaînes de caractères.
 
-Deuxième contrainte, plus bloquante : **une fonction serverless Vercel ne peut pas écrire dans le dépôt Git**. `docs/` et `data/brvm30-composition.json` sont des fichiers du dépôt ; les modifier « en production, au clic d'un bouton » n'est possible qu'en passant par l'API GitHub (créer une branche, un commit, une pull request), pas par une écriture disque classique — le système de fichiers d'une fonction Vercel est éphémère et en lecture seule hors `/tmp`. Le plan ci-dessous sépare donc **détection + mise à jour immédiate des données servies** (faisable au clic) de **mise à jour du dépôt** (nécessite une étape distincte, automatisable mais avec un vrai arbitrage de sécurité).
+Deuxième contrainte, plus bloquante : **une fonction serverless Vercel ne peut pas écrire dans le dépôt Git**. `docs/` et `data/brvm30-composition.json` sont des fichiers du dépôt ; les modifier « en production, au clic d'un bouton » n'est possible qu'en passant par l'API GitHub (créer une branche, un commit, une pull request), pas par une écriture disque classique — le système de fichiers d'une fonction Vercel est éphémère et en lecture seule hors `/tmp`. Le plan ci-dessous sépare donc **détection + préparation d’une candidate, puis activation des données servies après confirmation** de **mise à jour du dépôt** (nécessite une étape distincte, automatisable mais avec un vrai arbitrage de sécurité).
 
 ### 3.1 · Variable d'environnement
 
 ```bash
 # .env / .env.example
 BRVM_30_AVIS_URL="https://www.brvm.org/sites/default/files/avis-191-2026.pdf"
+COMPOSITION_RETRY_DELAY_SECONDS=3600  # délai entre tentatives échouées pour la même URL
 ```
 
 Distincte de `BRVM_30_URL` (qui reste le lien affiché par le bouton « Composition PDF » dans l'en-tête, à visée informative). `BRVM_30_AVIS_URL` est la source que l'application surveille et interprète.
@@ -78,17 +79,28 @@ Distincte de `BRVM_30_URL` (qui reste le lien affiché par le bouton « Composit
 Ajouter à l'état persistant (`BrvmState` dans `lib/brvm/types.ts`, à côté de `compositionVersion`) :
 
 ```ts
-lastAnalyzedAvisUrl?: string;   // valeur de BRVM_30_AVIS_URL au moment de la dernière analyse réussie
-lastCompositionCheckAt?: string; // pour éviter de re-vérifier à chaque clic
+lastAnalyzedAvisUrl?: string;    // URL de la composition confirmée et activée
+lastCompositionCheckUrl?: string; // URL associée à la dernière tentative
+lastCompositionCheckAt?: string;  // horodatage persistant, y compris en cas d'échec
+pendingComposition?: {           // candidate isolée des stocks servis
+  id: string;
+  url: string;
+  avis: string;
+  date: string;
+  archivedPdfUrl: string;
+  stocks: { symbol: string; name: string; country: string; sector: string }[];
+};
 ```
 
 **Détection = comparaison de chaîne, pas de re-téléchargement systématique.** À chaque clic sur « Actualiser » :
 
 1. Comparer `process.env.BRVM_30_AVIS_URL` à `state.lastAnalyzedAvisUrl` stocké.
 2. Si identiques → rien à faire, la synchro des cours continue normalement (aucun coût OCR ajouté à l'usage courant).
-3. Si différents (ou `lastAnalyzedAvisUrl` absent) → déclencher le pipeline d'analyse (3.3), **une seule fois**, protégé par le verrou `isSyncing` déjà existant pour ne pas le lancer deux fois en parallèle.
+3. Si une candidate existe déjà pour cette URL → la retourner pour confirmation sans relancer l'analyse ; continuer la synchro des cours sur la composition active.
+4. Sinon, si l'URL correspond à `lastCompositionCheckUrl` et que le délai depuis `lastCompositionCheckAt` n'est pas écoulé → ignorer uniquement l'analyse ; poursuivre normalement la synchro des cours. Utiliser `COMPOSITION_RETRY_DELAY_SECONDS` (entier strictement positif, défaut 3 600 s si absent/invalide).
+5. Si l'URL est nouvelle ou le délai écoulé → lancer le pipeline (3.3) sous le verrou `isSyncing` pour empêcher les exécutions concurrentes. Persister l'URL et l'heure de tentative avant le téléchargement. En cas d'échec du téléchargement, du modèle ou de la validation, actualiser et persister `lastCompositionCheckAt` avec l'URL échouée, journaliser l'erreur et continuer la synchro des cours. Le verrou évite les appels simultanés ; le délai évite les tentatives répétées après son relâchement. Les sauvegardes de cours doivent préserver ces métadonnées et la candidate.
 
-Cela répond directement à la demande : la vérification se fait par comparaison au lien enregistré, et `COMPOSITION_VERSION` sert de deuxième garde (si l'analyse aboutit à un avis dont le numéro est déjà celui en mémoire, ne rien changer même si l'URL a changé — utile si le fichier a été renommé sans changer de contenu).
+Cela répond directement à la demande : la vérification se fait par comparaison au lien enregistré, et `COMPOSITION_VERSION` sert de deuxième garde (si l'analyse aboutit à un avis dont le numéro est déjà celui en mémoire, ne pas créer de candidate ni modifier les marqueurs actifs ; conserver l'heure de contrôle pour espacer les nouvelles tentatives même si l'URL a changé — utile si le fichier a été renommé sans changer de contenu).
 
 ### 3.3 · Pipeline d'analyse (nouveau, quand un changement est détecté)
 
@@ -110,21 +122,27 @@ checkCompositionUpdate()
       - sector ∈ aux 7 secteurs BRVM_SECTORS existants
       - avis différent de COMPOSITION_VERSION actuel
     → si la validation échoue, ne rien appliquer, logger l'échec, laisser
-      l'ancienne composition active (fail-safe : ne jamais casser l'app en
-      production sur une lecture IA incertaine).
+      l'ancienne composition active et enregistrer l'heure et l'URL de l'échec
+      pour respecter le délai de nouvelle tentative (3.2).
  4. Archiver le PDF (voir 3.4).
- 5. Appliquer immédiatement aux données SERVIES (pas au dépôt Git) :
-      - fusionner avec reconcileState() (déjà écrit pour ça)
+ 5. Stocker uniquement pendingComposition avec son identifiant, l'URL source,
+    le PDF archivé et les données extraites. Ne pas appeler reconcileState(),
+    modifier les stocks servis, compositionVersion ou lastAnalyzedAvisUrl.
+ 6. Exposer la candidate dans l'UI :
+    « Nouvelle composition détectée (avis n°192-2026) — 3 titres entrants,
+    3 sortants. À confirmer. » avec le lien PDF et une action de confirmation.
+ 7. Seulement après confirmation explicite par un utilisateur autorisé :
+      - vérifier l'identifiant de la candidate et revalider ses données
+      - sous verrou, fusionner avec l'état actif le plus récent via une version
+        de reconcileState() adaptée à la composition confirmée
       - marquer les nouveaux symboles avec source: "pending" (voir R-01),
         jamais de prix ou dividende inventé
-      - stocker compositionVersion = avis extrait, lastAnalyzedAvisUrl = URL
- 6. Exposer un état "à valider" dans l'UI : bannière discrète
-    « Nouvelle composition détectée (avis n°192-2026) — 3 titres entrants,
-    3 sortants. À confirmer. » avec un lien vers le PDF archivé. On n'écrase
-    jamais silencieusement une composition sans qu'un humain la voie passer.
+      - persister atomiquement les stocks, compositionVersion = avis confirmé,
+        lastAnalyzedAvisUrl = URL confirmée et supprimer pendingComposition.
+    Si la confirmation échoue ou la candidate est obsolète, garder l'état actif.
 ```
 
-**Pourquoi une étape de validation « à confirmer » plutôt qu'une bascule automatique et invisible** : la lecture d'un PDF scanné par un modèle reste faillible (confusion d'un chiffre, d'un secteur). Une composition d'indice fausse a plus de conséquences qu'un cours de bourse ponctuellement périmé. Le compromis proposé applique quand même les nouvelles données tout de suite (l'app reste à jour), mais affiche qu'elles proviennent d'une lecture automatique tant que le dépôt Git n'a pas été mis à jour « officiellement » (3.4).
+**Pourquoi une étape de validation « à confirmer » plutôt qu'une bascule automatique et invisible** : la lecture d'un PDF scanné par un modèle reste faillible (confusion d'un chiffre, d'un secteur). Une composition d'indice fausse a plus de conséquences qu'un cours de bourse ponctuellement périmé. L'ancienne composition reste servie pendant la revue humaine ; seule la confirmation active la candidate. L'archivage Git (3.4) est une étape distincte. Adapter aussi `getState()` et `saveState()` : leurs versions actuelles imposent la constante du dépôt et ne doivent pas annuler une composition confirmée ni perdre les métadonnées de contrôle ou la candidate.
 
 ### 3.4 · Archivage : deux niveaux, pas un seul
 
@@ -133,11 +151,11 @@ checkCompositionUpdate()
 | Archivage durable immédiat | **Vercel Blob** (`@vercel/blob`), clé `avis/avis-192-2026.pdf` | ✅ oui — une fonction serverless peut écrire dans Blob |
 | Archivage dans le dépôt (`docs/avis-192-2026.pdf`, `data/brvm30-composition.json`, bump de version) | **Git**, sur `dev` | ⚠️ seulement via l'API GitHub (voir ci-dessous) |
 
-**Option recommandée pour démarrer (sans risque)** : le pipeline écrit dans Vercel Blob et met à jour Redis (l'app est correcte immédiatement), puis affiche la bannière « à valider » avec un lien de téléchargement du PDF archivé. Le mainteneur télécharge ce PDF, l'ajoute manuellement à `docs/`, régénère `data/brvm30-composition.json` (script `scripts/update-composition.ts`, à écrire — il peut réutiliser la même extraction structurée que l'étape 2, en local cette fois), et committe. Geste manuel, mais sûr, et qui ne demande pas de donner à une fonction publique un accès en écriture au dépôt.
+**Option recommandée pour démarrer (sans risque)** : le pipeline écrit dans Vercel Blob, conserve une candidate séparée dans Redis et affiche la bannière « à valider » avec un lien de téléchargement du PDF archivé. Les données servies ne changent qu'après confirmation explicite de cette candidate. Le mainteneur télécharge ce PDF, l'ajoute manuellement à `docs/`, régénère `data/brvm30-composition.json` (script `scripts/update-composition.ts`, à écrire — il peut réutiliser la même extraction structurée que l'étape 2, en local cette fois), et committe. Geste manuel, mais sûr, et qui ne demande pas de donner à une fonction publique un accès en écriture au dépôt.
 
 **Option avancée (répond littéralement à « archiver dans docs et actualiser le projet »)** : donner au pipeline un token GitHub à portée réduite (`contents:write` sur ce seul dépôt) en variable d'environnement (`GITHUB_PAT`), et lui faire ouvrir automatiquement une **pull request** (pas un push direct sur `dev`) via l'API Contents/Git de GitHub : nouvelle branche `auto/avis-192-2026`, ajout de `docs/avis-192-2026.pdf` et mise à jour de `data/brvm30-composition.json`, description de PR listant les entrants/sortants détectés. Le mainteneur relit et merge. C'est faisable, mais c'est un vrai choix de sécurité (un secret avec droit d'écriture sur le dépôt, accessible depuis une fonction déclenchée par un clic utilisateur) — à réserver à une route interne protégée par `CRON_SECRET`, jamais à l'endpoint public `/api/brvm30/sync`.
 
-**Recommandation** : démarrer avec l'option Blob + bannière (3.4, ligne 1), qui couvre l'essentiel (détection automatique, données à jour tout de suite, rien de cassé), et ne passer à l'auto-PR que si la mise à jour manuelle trimestrielle devient réellement une charge.
+**Recommandation** : démarrer avec l'option Blob + bannière (3.4, ligne 1), qui couvre l'essentiel (détection automatique, composition active préservée jusqu’à confirmation), et ne passer à l'auto-PR que si la mise à jour manuelle trimestrielle devient réellement une charge.
 
 ### 3.5 · Ce qui change dans `syncQuotations()`
 
@@ -145,29 +163,30 @@ checkCompositionUpdate()
 export async function syncQuotations() {
   // ... verrous existants inchangés ...
 
-  const compositionChanged = await checkCompositionUpdate(); // 3.2 + 3.3, no-op si rien n'a changé
-  // ... suite de la synchro des cours, inchangée, sur la composition
-  //     éventuellement mise à jour par checkCompositionUpdate() ci-dessus ...
+  const candidate = await checkCompositionUpdate(); // candidate persistée ou null
+  // Cette fonction gère les échecs et le délai (3.2) sans bloquer les cours.
+  // ... suite de la synchro des cours sur la composition active inchangée ;
+  //     préserver les métadonnées de contrôle et la candidate à la sauvegarde ...
 
   return {
     status: 200,
-    body: { success: true, /* ... */, compositionUpdate: compositionChanged ? { avis, entrants, sortants } : null },
+    body: { success: true, /* ... */, compositionUpdate: candidate },
   };
 }
 ```
 
-Le front affiche `compositionUpdate` dans la bannière mentionnée en 3.3 si présent.
+Le front affiche `compositionUpdate` dans la bannière mentionnée en 3.3 si présent. La confirmation utilise une action distincte et authentifiée avec l'identifiant de candidate ; le clic « Actualiser » ne vaut jamais confirmation.
 
 ### 3.6 · Ordre de mise en œuvre
 
-1. `lib/brvm/composition-watch.ts` : comparaison d'URL + verrou (aucune dépendance IA, testable seule).
+1. `lib/brvm/composition-watch.ts` : comparaison d'URL + verrou + délai persistant après échec (aucune dépendance IA, testable seule). Tester les échecs de téléchargement, modèle et validation, la même URL avant/après le délai, une nouvelle URL et la poursuite des cours pendant le délai.
 2. Extraction structurée du PDF (dépend du choix de modèle — voir `PLAN_MIGRATION_LING.md`, section « lecture de documents » : Gemini sait déjà le faire via `urlContext`, ce qui rend cette étape immédiate à écrire avec le modèle actuel).
 3. Validation mécanique (30 entrées, symboles uniques, secteurs connus) + tests unitaires avec un faux JSON d'avis.
-4. Intégration Vercel Blob + bannière UI « à valider ».
+4. Intégration Vercel Blob + stockage de candidate + bannière UI « à valider » + confirmation authentifiée. Tester que l'extraction seule ne modifie aucun stock ni marqueur actif et que seule la confirmation de la candidate courante les active atomiquement ; adapter la persistance/reconciliation en conséquence.
 5. `scripts/update-composition.ts` pour le geste manuel de mise à jour du dépôt.
 6. (Optionnel, plus tard) Auto-PR via API GitHub.
 
 ### 3.7 · Ce que ça ne doit pas faire
-- Ne jamais appliquer une composition extraite qui échoue à la validation mécanique.
+- Ne jamais appliquer une composition extraite qui échoue à la validation mécanique ou attend encore une confirmation humaine.
 - Ne jamais écraser `data/brvm30-composition.json` sans passage humain, tant que l'auto-PR (3.4, option avancée) n'est pas en place.
 - Ne jamais lancer l'extraction PDF à chaque clic sur « Actualiser » si l'URL n'a pas changé (coût et latence inutiles).

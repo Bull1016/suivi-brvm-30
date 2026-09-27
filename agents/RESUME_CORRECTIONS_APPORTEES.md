@@ -16,12 +16,12 @@ Corrections des écarts restants identifiés dans le projet BRVM 30, avec mainti
 
 ### 2. Sécurité et configuration serveur
 - Correction de `getCallerIp()` pour s’appuyer sur `req.ip` avec le proxy configuré de manière explicite.
-- Rendu de l’hôte configurable via `HOST` et ajout d’un paramètre `TRUST_PROXY` avec avertissement si le proxy n’est pas explicitement protégé.
-- Le serveur écoute désormais sur l’hôte configuré au lieu d’être figé en localhost uniquement.
+- `HOST` vaut `127.0.0.1` par défaut ; `HOST=0.0.0.0` reste une option explicite pour les conteneurs/VM.
+- `TRUST_PROXY` est désactivé par défaut. L'activer uniquement avec le nombre exact de sauts derrière un proxy de confiance qui nettoie `X-Forwarded-For`, avec accès direct à Express bloqué et confirmation `REVERSE_PROXY=true`. Sinon, la confiance proxy reste désactivée ; un avertissement seul est insuffisant.
 
 ### 3. Accessibilité et interaction du tableau
 - Restauration du clic sur les lignes du tableau desktop pour ouvrir le tiroir de détail.
-- Ajout du support clavier (`Entrée`, espace) avec `role="button"` et `tabIndex={0}`.
+- Conservation de la sémantique native des lignes ; sélection au clavier via le bouton `Détails`. Le clic de ligne ignore les contrôles interactifs imbriqués et laisse le lien secteur fonctionner normalement.
 - Le comportement est désormais cohérent entre le clic sur la ligne et le bouton `Détails`.
 
 ### 4. État de données et affichage

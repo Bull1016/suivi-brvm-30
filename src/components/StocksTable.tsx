@@ -199,19 +199,15 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                 return (
                   <tr
                     key={stock.symbol}
-                    className={`hover:bg-[#141414]/5 transition-colors duration-150 h-14 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 ${
+                    className={`hover:bg-[#141414]/5 transition-colors duration-150 h-14 cursor-pointer ${
                       selectedStock?.symbol === stock.symbol ? "bg-[#141414]/10 font-bold" : ""
                     }`}
                     id={`row-${stock.symbol}`}
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Voir les détails de ${stock.name} (${stock.symbol})`}
-                    onClick={() => onSelectStock(stock)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onSelectStock(stock);
-                      }
+                    onClick={(event) => {
+                      if (event.target instanceof Element && event.target.closest(
+                        'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], [contenteditable="true"], [tabindex]'
+                      )) return;
+                      onSelectStock(stock);
                     }}
                   >
                     {/* Symbol Column */}

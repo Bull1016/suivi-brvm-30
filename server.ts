@@ -14,13 +14,16 @@ import { checkRateLimit } from "./lib/brvm/http.js";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
-const HOST = process.env.HOST || "0.0.0.0";
-const TRUST_PROXY = Number(process.env.TRUST_PROXY ?? "1");
+const HOST = process.env.HOST || "127.0.0.1";
+const TRUST_PROXY = Number(process.env.TRUST_PROXY ?? "0");
 
-if (TRUST_PROXY && !process.env.REVERSE_PROXY) {
-  console.warn("WARN: trust proxy is enabled without an explicit reverse-proxy flag; ensure Express sits behind a trusted proxy layer.");
-}
-app.set("trust proxy", TRUST_PROXY || 0);
+// Opt in only behind a trusted proxy that sanitizes X-Forwarded-For.
+// REVERSE_PROXY=true confirms that deployment requirement; otherwise fail closed.
+app.set("trust proxy",
+  process.env.REVERSE_PROXY === "true" && Number.isSafeInteger(TRUST_PROXY) && TRUST_PROXY > 0
+    ? TRUST_PROXY
+    : false,
+);
 
 const getCallerIp = (req: express.Request) => req.ip || req.socket.remoteAddress || "127.0.0.1";
 

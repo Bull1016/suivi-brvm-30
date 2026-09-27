@@ -148,6 +148,27 @@ describe("BRVM Unit Tests", () => {
     expect(unknownSector.sector).toBe("Non classé");
   });
 
+  it.each([
+    ["2026-06-30T00:00:00.000Z", "en_attente", 1],
+    ["2026-06-30T23:59:59.999Z", "en_attente", 1],
+    ["2026-07-01T00:00:00.000Z", "interrompu", 0],
+    ["2026-07-01T00:00:00.001Z", "interrompu", 0],
+  ])("uses the July 1 UTC cutoff at %s", (time, status, streak) => {
+    vi.setSystemTime(new Date(time));
+    const stock = processStockDividends({
+      name: "Pending dividend",
+      symbol: "TEST",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1000,
+      low: 1000,
+      variation: 0,
+      dividends: [{ year: 2024, amount: 90, paid: true }],
+    });
+    expect(stock.dividendStatus).toBe(status);
+    expect(stock.streak).toBe(streak);
+  });
+
   it("reconcileState converts legacy Redis state and symbols seamlessly", () => {
     const legacyState = {
       stocks: [

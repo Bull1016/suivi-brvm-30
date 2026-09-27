@@ -41,13 +41,13 @@ export function processStockDividends(
   const prevYearDiv = dividends.find((d) => d.year === lastYear - 1);
 
   let dividendStatus: DividendStatus = "aucun";
-  const cutoffDate = new Date(`${lastYear + 1}-06-30T00:00:00.000Z`);
+  const cutoffDate = new Date(`${lastYear + 1}-07-01T00:00:00.000Z`);
   const now = new Date();
 
   if (consecutiveYears > 0) {
     dividendStatus = "a_jour";
   } else if ((!lastYearDiv || !lastYearDiv.paid) && streakUpToPrevYear > 0) {
-    if (now > cutoffDate) {
+    if (now >= cutoffDate) {
       dividendStatus = "interrompu";
       consecutiveYears = 0;
     } else {
