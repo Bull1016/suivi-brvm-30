@@ -24,7 +24,7 @@ export interface StockData {
   dividendStatus?: DividendStatus;
   latestDividend: number; // dividend for lastYear (currentYear - 1)
   lastUpdated: string;
-  source: "scraped" | "fallback";
+  source: "scraped" | "fallback" | "pending";
 }
 
 export interface BRVMResponse {

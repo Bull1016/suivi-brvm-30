@@ -137,7 +137,11 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                     <span className="text-xs bg-[#141414] text-[#E4E3E0] px-2 py-0.5 rounded-none font-mono font-bold">
                       {selectedStock.symbol}
                     </span>
-                    {selectedStock.source === "fallback" && (
+                    {selectedStock.source === "pending" ? (
+                      <span className="text-xs bg-sky-100 text-sky-900 border border-sky-600 px-1.5 py-0.5 font-bold uppercase">
+                        Données en attente
+                      </span>
+                    ) : selectedStock.source === "fallback" && (
                       <span className="text-xs bg-amber-100 text-amber-900 border border-amber-600 px-1.5 py-0.5 font-bold uppercase">
                         Non actualisé
                       </span>

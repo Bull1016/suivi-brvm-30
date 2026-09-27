@@ -199,10 +199,16 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                 return (
                   <tr
                     key={stock.symbol}
-                    className={`hover:bg-[#141414]/5 transition-colors duration-150 h-14 ${
+                    className={`hover:bg-[#141414]/5 transition-colors duration-150 h-14 cursor-pointer ${
                       selectedStock?.symbol === stock.symbol ? "bg-[#141414]/10 font-bold" : ""
                     }`}
                     id={`row-${stock.symbol}`}
+                    onClick={(event) => {
+                      if (event.target instanceof Element && event.target.closest(
+                        'a, button, input, select, textarea, label, summary, [role="button"], [role="link"], [contenteditable="true"], [tabindex]'
+                      )) return;
+                      onSelectStock(stock);
+                    }}
                   >
                     {/* Symbol Column */}
                     <td className="py-3 px-4 font-mono font-bold text-slate-900">
@@ -210,7 +216,11 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                         <span className="bg-[#141414]/5 text-[#141414] px-2 py-1 border border-[#141414]/20 rounded-none text-xs font-bold">
                           {stock.symbol}
                         </span>
-                        {stock.source === "fallback" && (
+                        {stock.source === "pending" ? (
+                          <span className="text-[10px] bg-sky-100 text-sky-900 border border-sky-600/60 px-1 py-0.5 rounded-none font-bold uppercase whitespace-nowrap" title="Données en attente de synchronisation">
+                            Données en attente
+                          </span>
+                        ) : stock.source === "fallback" && (
                           <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-600/60 px-1 py-0.5 rounded-none font-bold uppercase whitespace-nowrap" title="Cours non actualisé (donnée de repli)">
                             Non actualisé
                           </span>

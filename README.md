@@ -79,11 +79,20 @@ Créez un fichier `.env` :
 ```env
 PORT=3000
 GEMINI_API_KEY=votre_cle_api_gemini_ici
+GEMINI_MODEL=gemini-3.6-flash
 BRVM_30_URL=https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf
+BRVM_30_AVIS_URL=https://www.brvm.org/sites/default/files/avis-191-2026.pdf
 KV_REST_API_URL=
 KV_REST_API_TOKEN=
 CRON_SECRET=
+HOST=127.0.0.1
+TRUST_PROXY=0
+REVERSE_PROXY=false
 ```
+
+Le serveur écoute sur `127.0.0.1` par défaut ; définir explicitement `HOST=0.0.0.0` pour un accès conteneur/VM. `TRUST_PROXY` est désactivé par défaut. Ne le régler sur le nombre exact de sauts de proxy de confiance (par exemple `1`) avec `REVERSE_PROXY=true` que derrière un proxy qui nettoie `X-Forwarded-For`, avec accès direct à Express bloqué. Sans cette confirmation, la confiance proxy reste désactivée ; un simple avertissement ne suffit pas.
+
+> La composition BRVM 30 doit être mise à jour manuellement dans le dépôt après une révision trimestrielle officielle, puis les données de référence (`data/brvm30-composition.json`, `data/stocks_cache.json`) doivent être validées avant mise en production.
 
 ### 3. Lancer en développement
 ```bash

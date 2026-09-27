@@ -14,15 +14,18 @@ import { checkRateLimit } from "./lib/brvm/http.js";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+const HOST = process.env.HOST || "127.0.0.1";
+const TRUST_PROXY = Number(process.env.TRUST_PROXY ?? "0");
 
-app.set("trust proxy", 1);
+// Opt in only behind a trusted proxy that sanitizes X-Forwarded-For.
+// REVERSE_PROXY=true confirms that deployment requirement; otherwise fail closed.
+app.set("trust proxy",
+  process.env.REVERSE_PROXY === "true" && Number.isSafeInteger(TRUST_PROXY) && TRUST_PROXY > 0
+    ? TRUST_PROXY
+    : false,
+);
 
-const getCallerIp = (req: express.Request) => {
-  const forwarded = req.headers["x-forwarded-for"];
-  if (typeof forwarded === "string") return forwarded.split(",")[0].trim();
-  if (Array.isArray(forwarded) && forwarded.length > 0) return forwarded[0].trim();
-  return req.ip || req.socket.remoteAddress || "127.0.0.1";
-};
+const getCallerIp = (req: express.Request) => req.ip || req.socket.remoteAddress || "127.0.0.1";
 
 app.use(express.json());
 
@@ -121,7 +124,7 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "127.0.0.1", () => {
+  app.listen(PORT, HOST, () => {
     console.log(`Server running on http://localhost:${PORT}`);
   });
 }

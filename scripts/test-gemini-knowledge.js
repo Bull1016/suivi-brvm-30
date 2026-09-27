@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 dotenv.config();
 
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
 async function test() {
   const ai = process.env.GEMINI_API_KEY ? new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY }) : null;
   if (!ai) {
@@ -17,7 +19,7 @@ async function test() {
   try {
     const prompt = `Provide a professional, detailed, and informative company description in French of 2 to 3 paragraphs for the BRVM-listed company "${name}" (symbol: ${symbol}, country: ${country.toUpperCase()}). Describe its primary business sector (e.g. banking, telecommunications, agriculture), its history, its products/services, and its significance in the WAEMU (UEMOA) regional market. Return ONLY a JSON object with a single 'description' string property.`;
     const response = await ai.models.generateContent({
-      model: "gemini-3.5-flash",
+      model: GEMINI_MODEL,
       contents: prompt,
       config: {
         responseMimeType: "application/json",
