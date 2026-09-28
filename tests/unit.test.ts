@@ -148,6 +148,25 @@ describe("BRVM Unit Tests", () => {
     expect(unknownSector.sector).toBe("Non classé");
   });
 
+  it("processStockDividends prioritizes scraped sectorMap over hardcoded stock.sector", () => {
+    const stockWithHardcodedSector = processStockDividends(
+      {
+        name: "Test Stock",
+        symbol: "TEST",
+        country: "ci",
+        currentPrice: 1000,
+        high: 1050,
+        low: 950,
+        variation: 0,
+        sector: "Hardcoded Sector",
+        dividends: [],
+      },
+      { TEST: "Scraped Official Sector" }
+    );
+    expect(stockWithHardcodedSector.sector).toBe("Scraped Official Sector");
+  });
+
+
   it.each([
     ["2026-06-30T00:00:00.000Z", "en_attente", 1],
     ["2026-06-30T23:59:59.999Z", "en_attente", 1],
@@ -218,6 +237,37 @@ describe("BRVM Unit Tests", () => {
     // ABJC removed from state
     const abjc = reconciled.stocks.find((s) => s.symbol === "ABJC");
     expect(abjc).toBeUndefined();
+  });
+
+  it("keeps a confirmed composition and its control metadata through reconciliation", () => {
+    const pending = {
+      id: "2026-10-01-www-brvm-org-avis-193-2026-pdf",
+      url: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      avis: "193-2026",
+      date: "2027-01-04",
+      archivedPdfUrl: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      stocks: [{ symbol: "NEWC", name: "Nouvelle Cote", country: "bf", sector: "Industriels" }],
+    };
+
+    const reconciled = reconcileState({
+      stocks: [],
+      lastSync: "2026-10-01T00:00:00.000Z",
+      compositionVersion: "192-2026",
+      lastAnalyzedAvisUrl: "https://www.brvm.org/sites/default/files/avis-192-2026.pdf",
+      lastCompositionCheckUrl: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      lastCompositionCheckAt: "2026-10-01T10:00:00.000Z",
+      lastUnchangedAvisUrl: "https://www.brvm.org/sites/default/files/avis-191-2026.pdf",
+      pendingComposition: pending,
+    });
+
+    // A composition confirmed from an official avis is authoritative: it is never reset
+    // to the repository version, and its control metadata survives the rewrite.
+    expect(reconciled.compositionVersion).toBe("192-2026");
+    expect(reconciled.lastAnalyzedAvisUrl).toBe("https://www.brvm.org/sites/default/files/avis-192-2026.pdf");
+    expect(reconciled.lastCompositionCheckUrl).toBe("https://www.brvm.org/sites/default/files/avis-193-2026.pdf");
+    expect(reconciled.lastCompositionCheckAt).toBe("2026-10-01T10:00:00.000Z");
+    expect(reconciled.lastUnchangedAvisUrl).toBe("https://www.brvm.org/sites/default/files/avis-191-2026.pdf");
+    expect(reconciled.pendingComposition).toEqual(pending);
   });
 
   it("normalizes invalid country values to the globe fallback code", () => {

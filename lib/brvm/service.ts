@@ -19,6 +19,10 @@ import {
   setSyncing,
 } from "./store.js";
 import { generateCompanyDescription, analyzeBulletinWithGemini } from "./gemini.js";
+import {
+  checkCompositionUpdate,
+  confirmCompositionUpdate,
+} from "./composition-watch.js";
 import { scrapeOfficialBulletins, validateBulletinUrlForDateCode } from "./bulletins.js";
 import { getBulletinAnalysis, saveBulletinAnalysis } from "./store.js";
 import { checkRateLimit } from "./http.js";
@@ -38,7 +42,15 @@ export async function listStocks() {
     lastSync: state.lastSync,
     isSyncing: syncing,
     brvm30Url: brvm30Url(),
+    compositionVersion: state.compositionVersion,
+    compositionUpdate: state.pendingComposition ?? null,
   };
+}
+
+/** Activates a pending composition candidate after an explicit human confirmation. */
+export async function confirmComposition(id: string) {
+  const result = await confirmCompositionUpdate(id);
+  return result;
 }
 
 /** Scrapes current quotations and persists the refreshed stock state. */
@@ -98,7 +110,14 @@ export async function syncQuotations() {
     }
 
     const lastSync = new Date().toISOString();
-    await saveState({ stocks, lastSync });
+    await saveState({ ...state, stocks, lastSync });
+
+    // Composition watch runs under the same lock but never blocks quotations:
+    // a download, model or validation failure only extends the retry delay.
+    const compositionUpdate = await checkCompositionUpdate().catch((error) => {
+      console.error("Composition watch failed:", error);
+      return null;
+    });
 
     return {
       status: 200 as const,
@@ -109,6 +128,7 @@ export async function syncQuotations() {
         lastSync,
         isSyncing: false,
         brvm30Url: brvm30Url(),
+        compositionUpdate: compositionUpdate ?? null,
       },
     };
   } catch (error) {
@@ -157,7 +177,7 @@ export async function syncDividendsForSymbol(symbol: string, callerIp?: string) 
     );
     const stocks = [...state.stocks];
     stocks[stockIndex] = updatedStock;
-    await saveState({ stocks, lastSync: state.lastSync });
+    await saveState({ ...state, stocks, lastSync: state.lastSync });
     return {
       status: 200 as const,
       body: {
@@ -203,7 +223,7 @@ export async function syncDividendsBatch(batchSize = 2) {
     }
   }
 
-  await saveState({ stocks, lastSync: state.lastSync });
+  await saveState({ ...state, stocks, lastSync: state.lastSync });
   await setDivCursor((start + batchSize) % state.stocks.length);
   return { success: true, updated, cursor: (start + batchSize) % state.stocks.length };
 }

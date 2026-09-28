@@ -27,10 +27,31 @@ export interface StockData {
   source: "scraped" | "fallback" | "pending";
 }
 
+export interface CompositionEntry {
+  symbol: string;
+  name: string;
+  country: string;
+  sector: string;
+}
+
+/** Composition extracted from an official avis, awaiting human confirmation. */
+export interface PendingComposition {
+  id: string;
+  url: string;
+  avis: string;
+  date: string;
+  archivedPdfUrl: string;
+  stocks: CompositionEntry[];
+}
+
 export interface BRVMResponse {
   success: boolean;
   stocks: StockData[];
   lastSync: string;
   isSyncing: boolean;
   message?: string;
+  brvm30Url?: string;
+  compositionVersion?: string;
+  /** Similar to `brvm30Url`, but here it's the pending composition awaiting confirmation. */
+  compositionUpdate?: PendingComposition | null;
 }

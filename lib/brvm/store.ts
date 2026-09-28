@@ -1,9 +1,15 @@
 import fs from "fs";
 import path from "path";
 import { Redis } from "@upstash/redis";
-import { DEFAULT_BRVM_30_STOCKS, DEFAULT_SYMBOL_SECTOR_MAP } from "./constants.js";
+import {
+  BRVM_30_SIZE,
+  DEFAULT_BRVM_30_STOCKS,
+  DEFAULT_SYMBOL_SECTOR_MAP,
+  REPOSITORY_COMPOSITION_VERSION,
+  SYMBOL_ALIASES,
+} from "./constants.js";
 import { normalizeCountryCode, processStockDividends } from "./process.js";
-import type { BrvmState, StockData } from "./types.js";
+import type { BrvmState, PendingComposition, StockData } from "./types.js";
 
 const KEY_STATE = "brvm:state";
 const KEY_SYNCING = "brvm:syncing";
@@ -14,7 +20,19 @@ const KEY_DIV_CURSOR = "brvm:div-cursor";
 const KEY_BULLETIN = (dateCode: string) => `brvm:bulletin:${dateCode}`;
 
 const SYNCING_TTL_SECONDS = 90;
-const COMPOSITION_VERSION = "191-2026";
+
+/** Composition shipped with the repository, used as the default active version. */
+export const COMPOSITION_VERSION = REPOSITORY_COMPOSITION_VERSION;
+
+/** Composition control metadata that must never be lost by a stocks write or reconciliation. */
+const COMPOSITION_CONTROL_FIELDS = [
+  "lastAnalyzedAvisUrl",
+  "lastCompositionCheckUrl",
+  "lastCompositionCheckAt",
+  "lastUnchangedAvisUrl",
+  "pendingComposition",
+] as const satisfies readonly (keyof BrvmState)[];
+
 
 let memoryState: BrvmState | null = null;
 let memoryDescriptions: Record<string, string> = {};
@@ -34,6 +52,23 @@ function normalizeStateCountries(state: BrvmState): BrvmState {
     return { ...stock, country };
   });
   return changed ? { ...state, stocks } : state;
+}
+
+/** Copies composition control metadata so a state rewrite never loses it. */
+function copyCompositionControl<T extends BrvmState>(state: T, source?: BrvmState): T {
+  if (!source) return state;
+  for (const field of COMPOSITION_CONTROL_FIELDS) {
+    const value = source[field];
+    if (value !== undefined) {
+      (state as unknown as Record<string, unknown>)[field] = value;
+    }
+  }
+  return state;
+}
+
+/** Reports whether a persisted state holds a composition confirmed from an official avis. */
+export function isConfirmedComposition(state: BrvmState): boolean {
+  return Boolean(state.lastAnalyzedAvisUrl) && state.compositionVersion !== COMPOSITION_VERSION;
 }
 
 /** Returns the cached Redis client when persistence credentials are configured. */
@@ -77,17 +112,27 @@ function readJsonFile<T>(relativePath: string): T | null {
 
 /** Loads the initial stock state from cache data or repository defaults. */
 function loadSeedState(): BrvmState {
-  const cached = readJsonFile<{ stocks?: StockData[]; lastSyncTime?: string; lastSync?: string; compositionVersion?: string }>(
-    "data/stocks_cache.json"
-  );
+  const cached = readJsonFile<{
+    stocks?: StockData[];
+    lastSyncTime?: string;
+    lastSync?: string;
+    compositionVersion?: string;
+    lastAnalyzedAvisUrl?: string;
+    lastCompositionCheckUrl?: string;
+    lastCompositionCheckAt?: string;
+    pendingComposition?: BrvmState["pendingComposition"];
+  }>("data/stocks_cache.json");
   if (cached?.stocks && Array.isArray(cached.stocks) && cached.stocks.length > 0) {
     const lastSyncTime = typeof cached.lastSyncTime === "string" ? cached.lastSyncTime.trim() : "";
     const legacyLastSync = typeof cached.lastSync === "string" ? cached.lastSync.trim() : "";
-    return {
-      stocks: cached.stocks.map((s) => processStockDividends(s)),
-      lastSync: lastSyncTime || legacyLastSync,
-      compositionVersion: cached.compositionVersion || COMPOSITION_VERSION,
-    };
+    return copyCompositionControl(
+      {
+        stocks: cached.stocks.map((s) => processStockDividends(s)),
+        lastSync: lastSyncTime || legacyLastSync,
+        compositionVersion: cached.compositionVersion || COMPOSITION_VERSION,
+      },
+      cached as BrvmState
+    );
   }
   return {
     stocks: seedStocksFromDefaults(),
@@ -101,16 +146,10 @@ export function reconcileState(stored: BrvmState): BrvmState {
   const seedStocks = seedStocksFromDefaults();
   const seedMap = new Map(seedStocks.map((s) => [s.symbol, s]));
 
-  const ALIASES: Record<string, string> = {
-    CBIB: "CBIBF",
-    ONTB: "ONTBF",
-    SDVC: "SDSC",
-  };
-
   const existingMap = new Map<string, StockData>();
   for (const stock of stored?.stocks || []) {
     let sym = (stock.symbol || "").toUpperCase();
-    if (ALIASES[sym]) sym = ALIASES[sym];
+    if (SYMBOL_ALIASES[sym]) sym = SYMBOL_ALIASES[sym];
     if (seedMap.has(sym)) {
       existingMap.set(sym, stock);
     }
@@ -132,11 +171,16 @@ export function reconcileState(stored: BrvmState): BrvmState {
     return processStockDividends(merged);
   });
 
-  return {
-    stocks: reconciledStocks,
-    lastSync: stored?.lastSync || "",
-    compositionVersion: COMPOSITION_VERSION,
-  };
+  return copyCompositionControl(
+    {
+      stocks: reconciledStocks,
+      lastSync: stored?.lastSync || "",
+      // A composition confirmed from an official avis must never be reset to the repository one.
+      compositionVersion: isConfirmedComposition(stored) ? stored.compositionVersion : COMPOSITION_VERSION,
+      lastAnalyzedAvisUrl: isConfirmedComposition(stored) ? stored.lastAnalyzedAvisUrl : undefined,
+    },
+    stored
+  );
 }
 
 /** Loads repository-provided company descriptions for the in-memory cache. */
@@ -150,7 +194,7 @@ export async function getState(): Promise<BrvmState> {
   if (redis) {
     const stored = await redis.get<BrvmState>(KEY_STATE);
     if (stored?.stocks?.length) {
-      if (stored.compositionVersion !== COMPOSITION_VERSION || stored.stocks.length !== 30) {
+      if (needsRepositoryReconciliation(stored)) {
         const reconciled = reconcileState(stored);
         await redis.set(KEY_STATE, reconciled);
         memoryState = reconciled;
@@ -170,23 +214,66 @@ export async function getState(): Promise<BrvmState> {
   if (!memoryState) {
     memoryState = loadSeedState();
   }
-  if (memoryState.compositionVersion !== COMPOSITION_VERSION || memoryState.stocks.length !== 30) {
+  if (needsRepositoryReconciliation(memoryState)) {
     memoryState = reconcileState(memoryState);
   }
   return memoryState;
+}
+
+/**
+ * Reports whether a persisted state must be aligned on the repository composition.
+ * A composition confirmed from an official avis is authoritative and left untouched.
+ */
+function needsRepositoryReconciliation(state: BrvmState): boolean {
+  if (isConfirmedComposition(state)) return false;
+  return state.compositionVersion !== COMPOSITION_VERSION || state.stocks.length !== BRVM_30_SIZE;
 }
 
 /** Saves stock state to memory and the configured Redis store. */
 export async function saveState(state: BrvmState): Promise<void> {
   const normalized = normalizeStateCountries({
     ...state,
-    compositionVersion: COMPOSITION_VERSION,
+    compositionVersion: state.compositionVersion || COMPOSITION_VERSION,
   });
   memoryState = normalized;
   const redis = getRedis();
   if (redis) {
     await redis.set(KEY_STATE, normalized);
   }
+}
+
+/** Composition control metadata that can be updated without touching the served stocks. */
+export type CompositionControlUpdate = {
+  lastAnalyzedAvisUrl?: string;
+  lastCompositionCheckUrl?: string;
+  lastCompositionCheckAt?: string;
+  lastUnchangedAvisUrl?: string;
+  /** `null` clears the pending candidate. */
+  pendingComposition?: PendingComposition | null;
+};
+
+/**
+ * Persists composition control metadata while leaving the active stocks and
+ * composition version untouched (a candidate never activates itself).
+ */
+export async function updateCompositionControl(update: CompositionControlUpdate): Promise<BrvmState> {
+  const current = await getState();
+  const next: BrvmState = { ...current };
+
+  if (update.lastAnalyzedAvisUrl !== undefined) next.lastAnalyzedAvisUrl = update.lastAnalyzedAvisUrl;
+  if (update.lastCompositionCheckUrl !== undefined) next.lastCompositionCheckUrl = update.lastCompositionCheckUrl;
+  if (update.lastCompositionCheckAt !== undefined) next.lastCompositionCheckAt = update.lastCompositionCheckAt;
+  if (update.lastUnchangedAvisUrl !== undefined) next.lastUnchangedAvisUrl = update.lastUnchangedAvisUrl;
+  if (update.pendingComposition !== undefined) {
+    if (update.pendingComposition === null) {
+      delete next.pendingComposition;
+    } else {
+      next.pendingComposition = update.pendingComposition;
+    }
+  }
+
+  await saveState(next);
+  return next;
 }
 
 /** Reports whether a quotation synchronization lock is active. */

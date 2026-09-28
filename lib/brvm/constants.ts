@@ -23,6 +23,25 @@ export const BRVM_SECTORS: Record<number, string> = {
   200: "Télécommunications"
 };
 
+/** Version of the BRVM 30 composition shipped with the repository (avis n°191-2026). */
+export const REPOSITORY_COMPOSITION_VERSION = "191-2026";
+
+/** Sectors accepted when validating a composition extracted from an official avis. */
+export const BRVM_30_SECTOR_NAMES: string[] = Object.values(BRVM_SECTORS);
+
+/** Country codes accepted when validating a composition extracted from an official avis. */
+export const BRVM_COUNTRY_CODES: string[] = ["ci", "sn", "bf", "tg", "bj", "ml", "ne"];
+
+/** Expected number of constituents of the BRVM 30 index. */
+export const BRVM_30_SIZE = 30;
+
+/** Legacy Sika symbols mapped to their current BRVM tickers. */
+export const SYMBOL_ALIASES: Record<string, string> = {
+  CBIB: "CBIBF",
+  ONTB: "ONTBF",
+  SDVC: "SDSC",
+};
+
 export const BRVM_30_COMPOSITION = composition;
 
 export const DEFAULT_SYMBOL_SECTOR_MAP: Record<string, string> = Object.fromEntries(
@@ -375,26 +394,26 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     name: "Banque Internationale pour l'Industrie et le Commerce Bénin",
     symbol: "BICB",
     country: "bj",
-    currentPrice: 7500,
-    high: 7500,
-    low: 7400,
-    variation: 0.0,
+    currentPrice: 8555,
+    high: 8555,
+    low: 8550,
+    variation: 0.53,
     sector: "Services Financiers",
     dividends: [
-      { year: 2025, amount: 450, paid: true },
-      { year: 2024, amount: 400, paid: true },
-      { year: 2023, amount: 350, paid: true },
-      { year: 2022, amount: 300, paid: true },
-      { year: 2021, amount: 250, paid: true }
+      { year: 2025, amount: 254.6, paid: true },
+      { year: 2024, amount: 254.5, paid: true },
+      { year: 2023, amount: 0, paid: false },
+      { year: 2022, amount: 0, paid: false },
+      { year: 2021, amount: 0, paid: false }
     ]
   },
   {
     name: "Erium Côte d'Ivoire (ex-Air Liquide CI)",
     symbol: "SIVC",
     country: "ci",
-    currentPrice: 850,
-    high: 880,
-    low: 840,
+    currentPrice: 2000,
+    high: 2000,
+    low: 2000,
     variation: 0.0,
     sector: "Industriels",
     dividends: [
@@ -409,62 +428,11 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     name: "Eviosys Packaging Siem Côte d'Ivoire",
     symbol: "SEMC",
     country: "ci",
-    currentPrice: 700,
-    high: 720,
-    low: 690,
-    variation: 0.0,
+    currentPrice: 1495,
+    high: 1515,
+    low: 1495,
+    variation: -1.64,
     sector: "Industriels",
-    dividends: [
-      { year: 2025, amount: 45, paid: true },
-      { year: 2024, amount: 40, paid: true },
-      { year: 2023, amount: 35, paid: true },
-      { year: 2022, amount: 30, paid: true },
-      { year: 2021, amount: 25, paid: true }
-    ]
-  },
-  {
-    name: "NEI-CEDA Côte d'Ivoire",
-    symbol: "NEIC",
-    country: "ci",
-    currentPrice: 600,
-    high: 620,
-    low: 580,
-    variation: 0.0,
-    sector: "Consommation Discrétionnaire",
-    dividends: [
-      { year: 2025, amount: 35, paid: true },
-      { year: 2024, amount: 30, paid: true },
-      { year: 2023, amount: 25, paid: true },
-      { year: 2022, amount: 20, paid: true },
-      { year: 2021, amount: 15, paid: true }
-    ]
-  },
-  {
-    name: "Orange Côte d'Ivoire",
-    symbol: "ORAC",
-    country: "ci",
-    currentPrice: 11500,
-    high: 11600,
-    low: 11400,
-    variation: 0.88,
-    sector: "Télécommunications",
-    dividends: [
-      { year: 2025, amount: 800, paid: true },
-      { year: 2024, amount: 750, paid: true },
-      { year: 2023, amount: 700, paid: true },
-      { year: 2022, amount: 650, paid: true },
-      { year: 2021, amount: 600, paid: true }
-    ]
-  },
-  {
-    name: "Société Africaine de Crédit Automobile (SAFCA CI)",
-    symbol: "SAFC",
-    country: "ci",
-    currentPrice: 1050,
-    high: 1080,
-    low: 1020,
-    variation: 0.0,
-    sector: "Services Financiers",
     dividends: [
       { year: 2025, amount: 0, paid: false },
       { year: 2024, amount: 0, paid: false },
@@ -474,46 +442,91 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     ]
   },
   {
+    name: "NEI-CEDA Côte d'Ivoire",
+    symbol: "NEIC",
+    country: "ci",
+    currentPrice: 2400,
+    high: 2400,
+    low: 2400,
+    variation: 0.42,
+    sector: "Consommation Discrétionnaire",
+    dividends: [
+      { year: 2025, amount: 140.39, paid: true },
+      { year: 2024, amount: 0, paid: false },
+      { year: 2023, amount: 81.78, paid: true },
+      { year: 2022, amount: 35.25, paid: true },
+      { year: 2021, amount: 0, paid: false }
+    ]
+  },
+  {
+    name: "Orange Côte d'Ivoire",
+    symbol: "ORAC",
+    country: "ci",
+    currentPrice: 21500,
+    high: 21500,
+    low: 21300,
+    variation: 0.96,
+    sector: "Télécommunications",
+    dividends: [
+      { year: 2025, amount: 704, paid: true },
+      { year: 2024, amount: 660, paid: true },
+      { year: 2023, amount: 780, paid: true },
+      { year: 2022, amount: 752.76, paid: true },
+      { year: 2021, amount: 717, paid: true }
+    ]
+  },
+  {
+    name: "Société Africaine de Crédit Automobile (SAFCA CI)",
+    symbol: "SAFC",
+    country: "ci",
+    currentPrice: 4620,
+    high: 4620,
+    low: 4620,
+    variation: 7.44,
+    sector: "Services Financiers",
+    dividends: []
+  },
+  {
     name: "Société d'Etudes et de Travaux pour l'Afrique (SETAO CI)",
     symbol: "STAC",
     country: "ci",
-    currentPrice: 800,
-    high: 820,
-    low: 780,
-    variation: 0.0,
+    currentPrice: 2000,
+    high: 2000,
+    low: 2000,
+    variation: -4.08,
     sector: "Industriels",
     dividends: [
-      { year: 2025, amount: 60, paid: true },
-      { year: 2024, amount: 55, paid: true },
-      { year: 2023, amount: 50, paid: true },
-      { year: 2022, amount: 45, paid: true },
-      { year: 2021, amount: 40, paid: true }
+      { year: 2025, amount: 0, paid: false },
+      { year: 2024, amount: 0, paid: false },
+      { year: 2023, amount: 0, paid: false },
+      { year: 2022, amount: 0, paid: false },
+      { year: 2021, amount: 66.15, paid: true }
     ]
   },
   {
     name: "Société Ivoirienne de Tabacs (SITAB CI)",
     symbol: "STBC",
     country: "ci",
-    currentPrice: 6800,
-    high: 6900,
-    low: 6700,
-    variation: 0.0,
+    currentPrice: 21500,
+    high: 21500,
+    low: 21500,
+    variation: 0.47,
     sector: "Consommation de Base",
     dividends: [
-      { year: 2025, amount: 550, paid: true },
-      { year: 2024, amount: 500, paid: true },
-      { year: 2023, amount: 450, paid: true },
-      { year: 2022, amount: 400, paid: true },
-      { year: 2021, amount: 350, paid: true }
+      { year: 2025, amount: 1707.2, paid: true },
+      { year: 2024, amount: 2090, paid: true },
+      { year: 2023, amount: 675, paid: true },
+      { year: 2022, amount: 540, paid: true },
+      { year: 2021, amount: 445, paid: true }
     ]
   },
   {
     name: "Sucrivoire Côte d'Ivoire",
     symbol: "SCRC",
     country: "ci",
-    currentPrice: 950,
-    high: 980,
-    low: 920,
+    currentPrice: 3100,
+    high: 3100,
+    low: 3100,
     variation: 0.0,
     sector: "Consommation de Base",
     dividends: [
@@ -528,17 +541,17 @@ export const DEFAULT_BRVM_30_STOCKS: SeedStock[] = [
     name: "Uniwax Côte d'Ivoire",
     symbol: "UNXC",
     country: "ci",
-    currentPrice: 520,
-    high: 540,
-    low: 500,
-    variation: 0.0,
+    currentPrice: 2355,
+    high: 2365,
+    low: 2355,
+    variation: 0.21,
     sector: "Consommation Discrétionnaire",
     dividends: [
       { year: 2025, amount: 0, paid: false },
       { year: 2024, amount: 0, paid: false },
       { year: 2023, amount: 0, paid: false },
       { year: 2022, amount: 0, paid: false },
-      { year: 2021, amount: 0, paid: false }
+      { year: 2021, amount: 60.75, paid: true }
     ]
   }
 ];

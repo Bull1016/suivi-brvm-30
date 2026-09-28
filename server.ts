@@ -4,13 +4,14 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import {
   companyDescription,
+  confirmComposition,
   listStocks,
   syncDividendsForSymbol,
   syncQuotations,
   analyzeBulletin,
 } from "./lib/brvm/service.js";
 import { scrapeOfficialBulletins } from "./lib/brvm/bulletins.js";
-import { checkRateLimit } from "./lib/brvm/http.js";
+import { checkRateLimit, isCronAuthorized } from "./lib/brvm/http.js";
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
@@ -63,6 +64,22 @@ app.post("/api/brvm30/sync-dividends/:symbol", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Erreur lors de la synchronisation des dividendes." });
+  }
+});
+
+// Composition confirmation is an operator action: it requires the CRON_SECRET token
+// and is never reachable from the public "Actualiser" flow.
+app.post("/api/brvm30/confirm-composition", async (req, res) => {
+  try {
+    if (!isCronAuthorized(req)) {
+      return res.status(401).json({ success: false, message: "Non autorisé. Jeton CRON_SECRET invalide." });
+    }
+    const rawId = req.body?.id;
+    const result = await confirmComposition(typeof rawId === "string" ? rawId.trim() : "");
+    res.status(result.status).json(result.body);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Erreur lors de la confirmation de la composition." });
   }
 });
 

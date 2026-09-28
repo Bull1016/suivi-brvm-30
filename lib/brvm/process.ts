@@ -68,8 +68,8 @@ export function processStockDividends(
       : 0;
 
   const sector =
-    stock.sector ||
     sectorMap[stock.symbol] ||
+    stock.sector ||
     DEFAULT_SYMBOL_SECTOR_MAP[stock.symbol] ||
     "Non classé";
 

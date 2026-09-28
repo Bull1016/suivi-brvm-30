@@ -50,6 +50,64 @@ export async function generateCompanyDescription(
   return null;
 }
 
+/**
+ * Extracts the BRVM 30 composition from an official avis PDF.
+ * The result is intentionally untyped: it is always validated mechanically
+ * before being turned into a candidate (see `validateCompositionPayload`).
+ */
+export async function extractCompositionFromAvis(pdfUrl: string): Promise<unknown> {
+  const client = getGemini();
+  if (!client) {
+    throw new Error("GEMINI_API_KEY n'est pas configurée.");
+  }
+
+  const prompt = `Tu lis un avis officiel de la BRVM (Bourse Régionale des Valeurs Mobilières) disponible ici : ${pdfUrl}.
+Extrait la nouvelle composition de l'indice BRVM 30 annoncée par cet avis.
+Règles strictes :
+- Retourne exactement 30 titres, sans invention : si le document ne contient pas la liste complète, retourne seulement ce que tu lis réellement.
+- Le symbole est le code BRVM du titre (ex. SNTS, SGBC), en majuscules, sans espace.
+- Le pays est le code ISO à deux lettres en minuscules (ci, sn, bf, tg, bj, ml, ne).
+- Le secteur doit être exactement l'un de : "Consommation de Base", "Consommation Discrétionnaire", "Énergie", "Industriels", "Services Financiers", "Services Publics", "Télécommunications".
+- "avis" est le numéro d'avis tel qu'imprimé (ex. "191-2026") et "date" sa date au format AAAA-MM-JJ.`;
+
+  const response = await client.models.generateContent({
+    model: GEMINI_MODEL,
+    contents: prompt,
+    config: {
+      tools: [{ urlContext: { url: pdfUrl } }],
+      responseMimeType: "application/json",
+      responseSchema: {
+        type: Type.OBJECT,
+        properties: {
+          avis: { type: Type.STRING },
+          date: { type: Type.STRING },
+          stocks: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                symbol: { type: Type.STRING },
+                name: { type: Type.STRING },
+                country: { type: Type.STRING },
+                sector: { type: Type.STRING },
+              },
+              required: ["symbol", "name", "country", "sector"],
+            },
+          },
+        },
+        required: ["avis", "date", "stocks"],
+      },
+    },
+  });
+
+  const text = response.text?.trim() || "";
+  if (!text) {
+    throw new Error("Gemini n'a extrait aucune composition de l'avis.");
+  }
+
+  return JSON.parse(text) as unknown;
+}
+
 /** Generates a sourced Markdown analysis for a BRVM bulletin. */
 export async function analyzeBulletinWithGemini(dateCode: string, pdfUrl: string) {
   const client = getGemini();

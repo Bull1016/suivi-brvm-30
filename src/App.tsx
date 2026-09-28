@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import { StockData, BRVMResponse } from "./types";
+import { StockData, BRVMResponse, PendingComposition } from "./types";
 import {
   DEFAULT_SYMBOL_SECTOR_FALLBACK
 } from "./constants/brvmData";
 
 // Components
 import { StatusBanner } from "./components/StatusBanner";
+import { CompositionUpdateBanner } from "./components/CompositionUpdateBanner";
 import { Header } from "./components/Header";
 import { NavigationTabs, TabType } from "./components/NavigationTabs";
 import { BentoMetrics } from "./components/BentoMetrics";
@@ -32,6 +33,7 @@ export default function App() {
   const [lastSync, setLastSync] = useState<string>("");
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [brvm30Url, setBrvm30Url] = useState<string>("");
+  const [compositionUpdate, setCompositionUpdate] = useState<PendingComposition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState<{
     text: string;
@@ -176,6 +178,7 @@ export default function App() {
         setLastSync(data.lastSync);
         setIsSyncing(data.isSyncing);
         if (data.brvm30Url) setBrvm30Url(data.brvm30Url);
+        setCompositionUpdate(data.compositionUpdate ?? null);
 
         if (selectedStockRef.current) {
           const updated = data.stocks.find((s) => s.symbol === selectedStockRef.current?.symbol);
@@ -214,6 +217,9 @@ export default function App() {
           }
         }
         if (data.lastSync) setLastSync(data.lastSync);
+        if (data.compositionUpdate !== undefined) {
+          setCompositionUpdate(data.compositionUpdate ?? null);
+        }
         setIsSyncing(false);
         showStatus("Mise à jour des cotations terminée avec succès !", "success");
       } else {
@@ -546,6 +552,13 @@ export default function App() {
           isSyncing={isSyncing}
           lastSync={lastSync}
           onTriggerSync={triggerSync}
+        />
+
+        {/* Pending composition detected from the official avis */}
+        <CompositionUpdateBanner
+          compositionUpdate={compositionUpdate}
+          currentStocks={stocks}
+          onConfirmed={fetchStocks}
         />
 
         {/* Tab navigation */}

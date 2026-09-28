@@ -83,6 +83,8 @@ export const StocksTable: React.FC<StocksTableProps> = ({
             const isUp = stock.variation > 0;
             const isDown = stock.variation < 0;
             const isSelected = selectedStock?.symbol === stock.symbol;
+            // A ticker awaiting its first synchronization has no market data (see R-01).
+            const isPending = stock.source === "pending";
 
             return (
               <div
@@ -97,61 +99,75 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                     onSelectStock(stock);
                   }
                 }}
-                className={`p-4 cursor-pointer hover:bg-[#141414]/5 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[56px] ${
+                className={`p-3 cursor-pointer hover:bg-[#141414]/5 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[48px] ${
                   isSelected ? "bg-[#141414]/10 font-bold" : "bg-white"
                 }`}
               >
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <div className="flex items-center space-x-2 min-w-0">
+                {/* Ligne 1 : Nom/symbole à gauche, Prix + variation à droite */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-1.5 min-w-0 flex-1">
                     <CountryFlag code={stock.country} />
-                    <span className="font-bold text-sm text-[#141414] truncate font-sans">
+                    <span className="font-bold text-xs text-[#141414] truncate font-sans">
                       {stock.name}
                     </span>
-                  </div>
-                  <span className="bg-[#141414] text-[#E4E3E0] px-2 py-0.5 font-mono text-xs font-bold shrink-0">
-                    {stock.symbol}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between mt-2 pt-2 border-t border-[#141414]/15 font-mono">
-                  <div>
-                    <span className="text-base font-black text-[#141414] tabular-nums">
-                      {formatPrice(stock.currentPrice)}
+                    <span className="bg-[#141414] text-[#E4E3E0] px-1.5 py-0.5 font-mono text-[10px] font-bold shrink-0">
+                      {stock.symbol}
                     </span>
-                    {stock.source === "fallback" && (
-                      <span className="ml-2 text-xs bg-amber-100 text-amber-800 border border-amber-600 px-1 py-0.5 font-bold uppercase">
-                        Non actualisé
+                  </div>
+
+                  <div className="flex items-center space-x-2 shrink-0 font-mono">
+                    <span className="text-sm font-black text-[#141414] tabular-nums">
+                      {isPending ? (
+                        <span title="Données en attente de synchronisation">—</span>
+                      ) : (
+                        formatPrice(stock.currentPrice)
+                      )}
+                    </span>
+                    {isPending ? (
+                      <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold border bg-[#E4E3E0]/50 text-[#141414]/70 border-[#141414]/20" aria-hidden="true">
+                        —
                       </span>
+                    ) : (
+                    <span
+                      className={`inline-flex items-center px-1.5 py-0.5 text-[10px] font-bold border ${
+                        isUp
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-600"
+                          : isDown
+                          ? "bg-rose-100 text-rose-800 border-rose-600"
+                          : "bg-[#E4E3E0]/50 text-[#141414]/70 border-[#141414]/20"
+                      }`}
+                    >
+                      {isUp ? "▲ " : isDown ? "▼ " : ""}{isUp && "+"}{stock.variation.toFixed(2)}%
+                    </span>
                     )}
                   </div>
-
-                  <span
-                    className={`inline-flex items-center space-x-0.5 px-2.5 py-1 text-xs font-bold border ${
-                      isUp
-                        ? "bg-emerald-100 text-emerald-800 border-emerald-600"
-                        : isDown
-                        ? "bg-rose-100 text-rose-800 border-rose-600"
-                        : "bg-[#E4E3E0]/50 text-[#141414]/70 border-[#141414]/20"
-                    }`}
-                  >
-                    <span>{isUp ? "▲ " : isDown ? "▼ " : ""}</span>
-                    <span>{isUp && "+"}{stock.variation.toFixed(2)}%</span>
-                  </span>
                 </div>
 
-                <div className="flex items-center justify-between mt-2 text-xs font-mono">
-                  <span className="text-[#141414]/80 font-bold truncate">
+                {/* Ligne 2 : Secteur à gauche, Dividendes / Source à droite */}
+                <div className="flex items-center justify-between mt-1 text-[11px] font-mono">
+                  <span className="text-[#141414]/70 truncate mr-2">
                     {stock.sector}
                   </span>
-                  <span className="bg-[#E4E3E0]/60 text-[#141414] px-2 py-0.5 border border-[#141414]/30 font-bold">
-                    {stock.dividendStatus === "en_attente" ? (
-                      <span className="text-amber-800 font-bold">En attente ({stock.streak}/5)</span>
-                    ) : stock.streak >= 3 ? (
-                      <span className="text-emerald-800 font-bold">D {stock.streak}/5</span>
-                    ) : (
-                      <span className="text-[#141414]/70">{stock.streak}/5</span>
-                    )}
-                  </span>
+                  <div className="flex items-center space-x-1.5 shrink-0">
+                    {isPending ? (
+                      <span className="text-[10px] bg-sky-100 text-sky-900 border border-sky-600/60 px-1 py-0.2 font-bold uppercase">
+                        En attente
+                      </span>
+                    ) : stock.source === "fallback" ? (
+                      <span className="text-[10px] bg-amber-100 text-amber-800 border border-amber-600 px-1 py-0.2 font-bold uppercase">
+                        Non actualisé
+                      </span>
+                    ) : null}
+                    <span className="bg-[#E4E3E0]/60 text-[#141414] px-1.5 py-0.5 border border-[#141414]/30 font-bold text-[10px]">
+                      {stock.dividendStatus === "en_attente" ? (
+                        <span className="text-amber-800 font-bold">En attente ({stock.streak}/5)</span>
+                      ) : stock.streak >= 3 ? (
+                        <span className="text-emerald-800 font-bold">D {stock.streak}/5</span>
+                      ) : (
+                        <span className="text-[#141414]/70">{stock.streak}/5</span>
+                      )}
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -194,6 +210,9 @@ export const StocksTable: React.FC<StocksTableProps> = ({
               stocks.map((stock) => {
                 const isUp = stock.variation > 0;
                 const isDown = stock.variation < 0;
+                // A ticker awaiting its first synchronization has no market data at all:
+                // never display an invented price or variation (see R-01).
+                const isPending = stock.source === "pending";
                 const isEligible = stock.streak >= 3;
 
                 return (
@@ -263,11 +282,18 @@ export const StocksTable: React.FC<StocksTableProps> = ({
 
                     {/* Current Price Column */}
                     <td className="py-3 px-4 text-right font-mono font-black text-sm text-[#141414] tabular-nums">
-                      {formatPrice(stock.currentPrice)}
+                      {isPending ? (
+                        <span title="Données en attente de synchronisation">—</span>
+                      ) : (
+                        formatPrice(stock.currentPrice)
+                      )}
                     </td>
 
                     {/* Variation % Column */}
                     <td className="py-3 px-4 text-right font-mono">
+                      {isPending ? (
+                        <span className="text-[#141414]/50" aria-hidden="true">—</span>
+                      ) : (
                       <span
                         className={`inline-flex items-center space-x-0.5 rounded-none px-2 py-0.5 text-xs font-bold border ${
                           isUp
@@ -280,6 +306,7 @@ export const StocksTable: React.FC<StocksTableProps> = ({
                         <span>{isUp ? "▲ " : isDown ? "▼ " : ""}</span>
                         <span>{isUp && "+"}{stock.variation.toFixed(2)}%</span>
                       </span>
+                      )}
                     </td>
 
                     {/* Dividends Badge Score Column */}

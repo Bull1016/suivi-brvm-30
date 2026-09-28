@@ -53,7 +53,7 @@
 ### Structure
 
 ```
-docs/                                # Documents officiels (brvm30.pdf / avis-191-2026.pdf)
+docs/                                # Documents officiels (avis-191-2026.pdf)
 data/                                # Configuration de référence (brvm30-composition.json, seed)
 lib/brvm/                            # Logique métier (scrape, Redis, Gemini, process)
 src/                                 # Interface React + composants
@@ -82,6 +82,7 @@ GEMINI_API_KEY=votre_cle_api_gemini_ici
 GEMINI_MODEL=gemini-3.6-flash
 BRVM_30_URL=https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf
 BRVM_30_AVIS_URL=https://www.brvm.org/sites/default/files/avis-191-2026.pdf
+COMPOSITION_RETRY_DELAY_SECONDS=3600
 KV_REST_API_URL=
 KV_REST_API_TOKEN=
 CRON_SECRET=
@@ -93,6 +94,30 @@ REVERSE_PROXY=false
 Le serveur écoute sur `127.0.0.1` par défaut ; définir explicitement `HOST=0.0.0.0` pour un accès conteneur/VM. `TRUST_PROXY` est désactivé par défaut. Ne le régler sur le nombre exact de sauts de proxy de confiance (par exemple `1`) avec `REVERSE_PROXY=true` que derrière un proxy qui nettoie `X-Forwarded-For`, avec accès direct à Express bloqué. Sans cette confirmation, la confiance proxy reste désactivée ; un simple avertissement ne suffit pas.
 
 > La composition BRVM 30 doit être mise à jour manuellement dans le dépôt après une révision trimestrielle officielle, puis les données de référence (`data/brvm30-composition.json`, `data/stocks_cache.json`) doivent être validées avant mise en production.
+
+### 2.1 Surveillance de la composition (`BRVM_30_AVIS_URL`)
+
+`BRVM_30_AVIS_URL` pointe vers l'avis officiel de composition suivi par l'application (distinct de `BRVM_30_URL`, qui n'est que le lien informatif du bouton « Composition PDF »).
+
+À chaque synchronisation (`POST /api/brvm30/sync`), l'application :
+
+1. compare `BRVM_30_AVIS_URL` à `lastAnalyzedAvisUrl` : si l'URL est identique, rien n'est analysé (aucun coût OCR) ;
+2. réutilise la candidate déjà extraite pour cette URL si elle attend encore une confirmation ;
+3. respecte sinon `COMPOSITION_RETRY_DELAY_SECONDS` (défaut `3600`) avant de relancer une analyse sur la même URL ;
+4. télécharge l'avis, en extrait la composition via Gemini (`urlContext`), puis la valide mécaniquement : exactement 30 titres, symboles uniques, pays et secteurs connus.
+
+Une extraction valide est stockée comme **candidate** (`pendingComposition`) et exposée dans `GET /api/brvm30/stocks` (`compositionUpdate`). Elle n'est jamais appliquée automatiquement : la composition active continue d'être servie, et une bannière « Nouvelle composition détectée » s'affiche avec les entrants et sortants.
+
+La confirmation est une action d'opérateur authentifiée (jeton `CRON_SECRET`, jamais embarqué dans le bundle) :
+
+```bash
+curl -X POST https://<domaine>/api/brvm30/confirm-composition \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"id":"<identifiant de la candidate>"}'
+```
+
+La confirmation réutilise les cours déjà connus, marque les nouveaux symboles en `source: "pending"` (jamais de prix ou de dividende inventé) et fixe `compositionVersion` sur le numéro d'avis confirmé. L'archivage Git de l'avis et la mise à jour de `data/brvm30-composition.json` restent un geste manuel.
 
 ### 3. Lancer en développement
 ```bash

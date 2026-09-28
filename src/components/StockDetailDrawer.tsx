@@ -188,20 +188,28 @@ export const StockDetailDrawer: React.FC<StockDetailDrawerProps> = ({
                     Dernier Cours
                   </span>
                   <span className="text-3xl font-black text-[#141414] font-mono block mt-0.5 tabular-nums">
-                    {formatPrice(selectedStock.currentPrice)}
+                    {selectedStock.source === "pending" ? "—" : formatPrice(selectedStock.currentPrice)}
                   </span>
                 </div>
                 <span
                   className={`text-sm font-mono font-bold px-3 py-1.5 border border-[#141414]/30 rounded-none ${
-                    selectedStock.variation > 0
+                    selectedStock.source === "pending"
+                      ? "bg-sky-100 text-sky-900"
+                      : selectedStock.variation > 0
                       ? "bg-emerald-100 text-emerald-900"
                       : selectedStock.variation < 0
                       ? "bg-rose-100 text-rose-900"
                       : "bg-[#E4E3E0] text-[#141414]"
                   }`}
                 >
-                  {selectedStock.variation > 0 && "+"}
-                  {selectedStock.variation.toFixed(2)}%
+                  {selectedStock.source === "pending" ? (
+                    <span title="Données en attente de synchronisation">—</span>
+                  ) : (
+                    <>
+                      {selectedStock.variation > 0 && "+"}
+                      {selectedStock.variation.toFixed(2)}%
+                    </>
+                  )}
                 </span>
               </div>
 
