@@ -1,4 +1,3 @@
-import { DEFAULT_BRVM30_PDF } from "./types.js";
 import { processStockDividends } from "./process.js";
 import {
   fetchBRVMSectors,
@@ -30,7 +29,7 @@ import type { StockData } from "./types.js";
 
 /** Returns the configured BRVM 30 composition document URL. */
 function brvm30Url() {
-  return process.env.BRVM_30_URL || DEFAULT_BRVM30_PDF;
+  return process.env.BRVM_30_URL || "";
 }
 
 /** Returns stocks together with their synchronization status and metadata. */

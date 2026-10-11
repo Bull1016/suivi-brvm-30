@@ -79,6 +79,3 @@ export const SCRAPE_HEADERS = {
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36",
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
 };
-
-export const DEFAULT_BRVM30_PDF = process.env.BRVM_30_URL || 
-  "https://www.sikafinance.com/docs/brvm-30-composition-de-l-indice-brvm-30.pdf";
