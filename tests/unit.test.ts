@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { normalizeCountryCode, processStockDividends } from "../lib/brvm/process";
 import { parseDividendsFromHtml, mergeScrapedQuotes } from "../lib/brvm/scrape";
 import { validateBulletinUrlForDateCode } from "../lib/brvm/bulletins";
@@ -25,9 +25,18 @@ describe("BRVM Unit Tests", () => {
     }
   });
 
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("processStockDividends handles all status categories: a_jour, en_attente, interrompu, aucun", () => {
+    vi.setSystemTime(new Date("2025-05-15T00:00:00.000Z"));
     const currentYear = new Date().getFullYear();
-    const lastYear = currentYear - 1; // e.g. 2025
+    const lastYear = currentYear - 1; // e.g. 2024
 
     // Case 1: a_jour
     const stockAJour = processStockDividends({
@@ -103,6 +112,82 @@ describe("BRVM Unit Tests", () => {
     expect(stockAucun.streak).toBe(0);
   });
 
+  it("processStockDividends expires en_attente after the following year cutoff and falls back to Non classé", () => {
+    vi.setSystemTime(new Date("2026-07-01T00:00:00.000Z"));
+
+    const expired = processStockDividends({
+      name: "Stock E",
+      symbol: "STKE",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1050,
+      low: 950,
+      variation: 0,
+      dividends: [
+        { year: 2025, amount: 0, paid: false },
+        { year: 2024, amount: 90, paid: true },
+        { year: 2023, amount: 80, paid: true },
+        { year: 2022, amount: 70, paid: true },
+      ],
+    });
+
+    expect(expired.dividendStatus).toBe("interrompu");
+    expect(expired.sector).toBe("Non classé");
+
+    const unknownSector = processStockDividends({
+      name: "Stock F",
+      symbol: "STKF",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1050,
+      low: 950,
+      variation: 0,
+      dividends: [],
+      sector: undefined,
+    });
+    expect(unknownSector.sector).toBe("Non classé");
+  });
+
+  it("processStockDividends prioritizes scraped sectorMap over hardcoded stock.sector", () => {
+    const stockWithHardcodedSector = processStockDividends(
+      {
+        name: "Test Stock",
+        symbol: "TEST",
+        country: "ci",
+        currentPrice: 1000,
+        high: 1050,
+        low: 950,
+        variation: 0,
+        sector: "Hardcoded Sector",
+        dividends: [],
+      },
+      { TEST: "Scraped Official Sector" }
+    );
+    expect(stockWithHardcodedSector.sector).toBe("Scraped Official Sector");
+  });
+
+
+  it.each([
+    ["2026-06-30T00:00:00.000Z", "en_attente", 1],
+    ["2026-06-30T23:59:59.999Z", "en_attente", 1],
+    ["2026-07-01T00:00:00.000Z", "interrompu", 0],
+    ["2026-07-01T00:00:00.001Z", "interrompu", 0],
+  ])("uses the July 1 UTC cutoff at %s", (time, status, streak) => {
+    vi.setSystemTime(new Date(time));
+    const stock = processStockDividends({
+      name: "Pending dividend",
+      symbol: "TEST",
+      country: "ci",
+      currentPrice: 1000,
+      high: 1000,
+      low: 1000,
+      variation: 0,
+      dividends: [{ year: 2024, amount: 90, paid: true }],
+    });
+    expect(stock.dividendStatus).toBe(status);
+    expect(stock.streak).toBe(streak);
+  });
+
   it("reconcileState converts legacy Redis state and symbols seamlessly", () => {
     const legacyState = {
       stocks: [
@@ -152,6 +237,37 @@ describe("BRVM Unit Tests", () => {
     // ABJC removed from state
     const abjc = reconciled.stocks.find((s) => s.symbol === "ABJC");
     expect(abjc).toBeUndefined();
+  });
+
+  it("keeps a confirmed composition and its control metadata through reconciliation", () => {
+    const pending = {
+      id: "2026-10-01-www-brvm-org-avis-193-2026-pdf",
+      url: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      avis: "193-2026",
+      date: "2027-01-04",
+      archivedPdfUrl: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      stocks: [{ symbol: "NEWC", name: "Nouvelle Cote", country: "bf", sector: "Industriels" }],
+    };
+
+    const reconciled = reconcileState({
+      stocks: [],
+      lastSync: "2026-10-01T00:00:00.000Z",
+      compositionVersion: "192-2026",
+      lastAnalyzedAvisUrl: "https://www.brvm.org/sites/default/files/avis-192-2026.pdf",
+      lastCompositionCheckUrl: "https://www.brvm.org/sites/default/files/avis-193-2026.pdf",
+      lastCompositionCheckAt: "2026-10-01T10:00:00.000Z",
+      lastUnchangedAvisUrl: "https://www.brvm.org/sites/default/files/avis-191-2026.pdf",
+      pendingComposition: pending,
+    });
+
+    // A composition confirmed from an official avis is authoritative: it is never reset
+    // to the repository version, and its control metadata survives the rewrite.
+    expect(reconciled.compositionVersion).toBe("192-2026");
+    expect(reconciled.lastAnalyzedAvisUrl).toBe("https://www.brvm.org/sites/default/files/avis-192-2026.pdf");
+    expect(reconciled.lastCompositionCheckUrl).toBe("https://www.brvm.org/sites/default/files/avis-193-2026.pdf");
+    expect(reconciled.lastCompositionCheckAt).toBe("2026-10-01T10:00:00.000Z");
+    expect(reconciled.lastUnchangedAvisUrl).toBe("https://www.brvm.org/sites/default/files/avis-191-2026.pdf");
+    expect(reconciled.pendingComposition).toEqual(pending);
   });
 
   it("normalizes invalid country values to the globe fallback code", () => {

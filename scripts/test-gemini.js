@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import { GoogleGenAI, Type } from "@google/genai";
 dotenv.config();
 
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
 function cleanHtml(html) {
   return html
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
@@ -37,7 +39,7 @@ async function test() {
 
       console.log("Calling Gemini to extract description...");
       const geminiResponse = await ai.models.generateContent({
-        model: "gemini-3.5-flash",
+        model: GEMINI_MODEL,
         contents: [
           { text: `Extract the descriptive text or summary about the company (such as its core activity, business description, background, presentation) from this Sika Finance HTML in French. Synthesize it into 1 to 3 elegant, informative, and professional paragraphs of company summary. Avoid system noise, advertisements, or menu labels. Respond with a simple JSON object containing a single 'description' string property.` },
           { text: cleaned }

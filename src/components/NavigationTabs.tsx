@@ -65,7 +65,8 @@ export const NavigationTabs: React.FC<NavigationTabsProps> = ({
             : "bg-[#E4E3E0]/40 text-[#141414]/60 hover:text-[#141414] hover:bg-[#E4E3E0]/70"
         }`}
       >
-        <span>📰 Bulletins Officiels (BOC)</span>
+        <span className="hidden sm:inline">📰 Bulletins Officiels (BOC)</span>
+        <span className="sm:hidden">📰 BOC</span>
         <span className="bg-rose-500 text-white font-sans text-[9px] font-bold px-1.5 py-0.5" aria-hidden="true">
           IA
         </span>
