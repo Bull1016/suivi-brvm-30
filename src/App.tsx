@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, lazy, Suspense } from "react";
 import { Analytics } from "@vercel/analytics/react";
-import { StockData, BRVMResponse, PendingComposition } from "./types";
+import { SpeedInsights } from "@vercel/speed-insights/react";
+import { StockData, BRVMResponse } from "./types";
 import {
   DEFAULT_SYMBOL_SECTOR_FALLBACK
 } from "./constants/brvmData";
@@ -659,6 +660,7 @@ export default function App() {
       
       {/* Vercel Web Analytics */}
       <Analytics />
+      <SpeedInsights />
     </div>
   );
 }
